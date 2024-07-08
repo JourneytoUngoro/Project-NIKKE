@@ -49,7 +49,7 @@ public class PlayerGroundedState : PlayerState
     {
         base.LogicUpdate();
 
-        if (allowStateTransition)
+        /*if (allowStateTransition)
         {
             if (escapeInput && player.escapeState.isEscapeAvail())
             {
@@ -79,14 +79,14 @@ public class PlayerGroundedState : PlayerState
             {
                 stateMachine.ChangeState(player.dodgeState);
             }
-        }
+        }*/
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
 
-        /*#region State Transition Logic
+        #region State Transition Logic
         if (allowStateTransition)
         {
             if (escapeInput && player.escapeState.isEscapeAvail())
@@ -118,7 +118,7 @@ public class PlayerGroundedState : PlayerState
                 stateMachine.ChangeState(player.dodgeState);
             }
         }
-        #endregion*/
+        #endregion
 
         #region Physics Logic
         player.movement.CheckIfShouldFlip(inputX);

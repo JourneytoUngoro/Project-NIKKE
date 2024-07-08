@@ -64,7 +64,7 @@ public class PlayerInAirState : PlayerState
         coyoteTimer.Tick(coyoteTimeAvail);
         landingStateTimer.Tick();
 
-        player.animator.SetFloat("yVelocity", currentVelocity.y);
+        /*player.animator.SetFloat("yVelocity", currentVelocity.y);
 
         VariableJumpHeight();
 
@@ -119,14 +119,14 @@ public class PlayerInAirState : PlayerState
         else if (isGrounded && inputX != 0 && currentVelocity.y < Mathf.Max(epsilon, Mathf.Abs(player.detection.slopePerpNormal.y * currentVelocity.magnitude)) * 1.1f)
         {
             stateMachine.ChangeState(player.moveState);
-        }
+        }*/
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
 
-        /*#region State Transition Logic
+        #region State Transition Logic
         player.animator.SetFloat("yVelocity", currentVelocity.y);
 
         VariableJumpHeight();
@@ -180,7 +180,7 @@ public class PlayerInAirState : PlayerState
                 }
             }
         }
-        #endregion*/
+        #endregion
 
         #region Physics Logic
         player.movement.CheckIfShouldFlip(inputX);

@@ -39,7 +39,7 @@ public class PlayerIdleState : PlayerGroundedState
 
         dashMaintainTimer.Tick();
 
-        if (!onStateExit)
+        /*if (!onStateExit)
         {
             if (inputY == -1)
             {
@@ -60,7 +60,7 @@ public class PlayerIdleState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.reloadState);
             }
-        }
+        }*/
     }
 
     public override void PhysicsUpdate()
@@ -69,7 +69,7 @@ public class PlayerIdleState : PlayerGroundedState
 
         if (!onStateExit)
         {
-            /*#region State Transition Logic
+            #region State Transition Logic
             if (inputY == -1)
             {
                 if (inputX == 0)
@@ -89,7 +89,7 @@ public class PlayerIdleState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.reloadState);
             }
-            #endregion*/
+            #endregion
 
             #region Physics Logic
             player.movement.SetVelocityX(0.0f);

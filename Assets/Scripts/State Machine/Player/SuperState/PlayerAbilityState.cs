@@ -40,7 +40,7 @@ public class PlayerAbilityState : PlayerState
     {
         base.LogicUpdate();
 
-        if (escapeInput && player.escapeState.isEscapeAvail())
+        /*if (escapeInput && player.escapeState.isEscapeAvail())
         {
             stateMachine.ChangeState(player.escapeState);
         }
@@ -65,14 +65,14 @@ public class PlayerAbilityState : PlayerState
             {
                 stateMachine.ChangeState(player.inAirState);
             }
-        }
+        }*/
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
 
-        /*#region State Transition Logic
+        #region State Transition Logic
         if (escapeInput && player.escapeState.isEscapeAvail())
         {
             stateMachine.ChangeState(player.escapeState);
@@ -99,6 +99,6 @@ public class PlayerAbilityState : PlayerState
                 stateMachine.ChangeState(player.inAirState);
             }
         }
-        #endregion*/
+        #endregion
     }
 }
