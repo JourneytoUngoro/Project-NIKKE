@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2971d78116fce1f4684d731531c7d90c, type: 3}
+  m_Name: PlayerData
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  maxPostureHealth: 100
+  moveSpeed: 50
+  dashSpeed: 75
+  dashInputTime: 0.5
+  dashMaintainTime: 0.1
+  maxJumpCount: 1
+  jumpSpeed: 85
+  jumpInputBufferTime: 0.1
+  coyoteTime: 0.1
+  variableJumpHeightMultiplier: 0.5
+  gotoLandingStateTime: 1.5
+  dodgeSpeed: 100
+  backstepSpeed: 80
+  dodgeCoolDownTime: 1
+  dodgeTime: 0.2
+  dodgeDelay: 0.2
+  meleeAttackDamage: 10
+  meleeAttackRadius: 0.7
+  rangedAttackDamage: 1
+  rangedAttackDetectionSize: {x: 5, y: 1.4}
+  rangedAttackCoolDownTime: 0.1
+  maxAmmo: 40
+  wallSlideSpeed: 10
+  wallJumpAngleVector: {x: 2, y: 5}
+  wallJumpSpeed: 85
+  wallJumpTime: 0.2
+  preventInputXTime: 0.2
+  escapeAngleVector: {x: 2, y: 1}
+  escapeSpeed: 50
+  escapeTime: 0.1
+  escapeCoolDownTime: 1
+  escapeAttackDamage: 5
+  dashAttackTime: 0.5
+  dashAttackCoolDowmTime: 2
+  dashAttackSpeed: 30
+  dashAttackDamage: 15
+  dashAttackRadius: 0.5
+  crouchMoveSpeed: 5
+  standColliderSize: {x: 1, y: 1.5}
+  crouchColliderSize: {x: 1, y: 1.2}
+  defendCoolDownTime: 1
+  parryTime: 0.5
+  landingTime: 0.5
