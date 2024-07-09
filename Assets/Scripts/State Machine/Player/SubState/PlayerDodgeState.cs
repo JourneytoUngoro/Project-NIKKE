@@ -93,9 +93,9 @@ public class PlayerDodgeState : PlayerAbilityState
     {
         base.PhysicsUpdate();
 
+        #region Physics Logic
         if (!onStateExit)
         {
-            #region Physics Logic
             if (!isAnimationActionTriggered)
             {
                 elapsedTime += Time.fixedDeltaTime;
@@ -165,8 +165,8 @@ public class PlayerDodgeState : PlayerAbilityState
             {
                 player.movement.SetVelocityZero();
             }
-            #endregion
         }
+        #endregion
     }
 
     public bool IsDodgeAvail() => dodgeAvail;

@@ -56,9 +56,9 @@ public class PlayerWallSlideState : PlayerTouchingWallState
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            #region State Transition Logic
             if (attackInput)
             {
                 wasAttackInputted = true;
@@ -73,11 +73,14 @@ public class PlayerWallSlideState : PlayerTouchingWallState
             {
                 stateMachine.ChangeState(player.wallAttackState);
             }
-            #endregion
-
-            #region Physics Logic
-            player.movement.SetVelocityY(-playerData.wallSlideSpeed);
-            #endregion
         }
+        #endregion
+
+        #region Physics Logic
+        if (!onStateExit)
+        {
+            player.movement.SetVelocityY(-playerData.wallSlideSpeed);
+        }
+        #endregion
     }
 }

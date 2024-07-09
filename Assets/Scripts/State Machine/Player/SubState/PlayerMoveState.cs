@@ -72,9 +72,9 @@ public class PlayerMoveState : PlayerGroundedState
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            #region State Transition Logic
             if (inputY == -1)
             {
                 stateMachine.ChangeState(player.crouchMoveState);
@@ -83,11 +83,12 @@ public class PlayerMoveState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.idleState);
             }
-            #endregion
+        }
+        #endregion
 
-            #region Physics Logic
-            player.rigidBody.gravityScale = 9.5f;
-
+        #region Physics Logic
+        if (!onStateExit)
+        {
             if (isOnSlope)
             {
                 if (player.detection.slopePerpNormal.y * inputX > 0)
@@ -124,8 +125,8 @@ public class PlayerMoveState : PlayerGroundedState
                 }
                 player.movement.SetVelocityLimitY(0.0f); // 비탈면의 반동으로 캐릭터가 위로 튀어오르는 현상 방지
             }
-            #endregion
         }
+        #endregion
     }
 
     public bool IsDashing() => isDashing;

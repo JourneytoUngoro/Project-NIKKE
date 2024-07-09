@@ -139,16 +139,13 @@ public class PlayerInAirState : PlayerState
         {
             stateMachine.ChangeState(player.normalAttackState);
         }
-        else if (jumpInputActive)
+        else if (jumpInputActive && stateMachine.prevState is PlayerTouchingWallState && isTouchingWallBehind)
         {
-            if (stateMachine.prevState is PlayerTouchingWallState && isTouchingWallBehind)
-            {
-                stateMachine.ChangeState(player.wallJumpState);
-            }
-            else if (player.jumpState.IsJumpAvail())
-            {
-                stateMachine.ChangeState(player.jumpState);
-            }
+            stateMachine.ChangeState(player.wallJumpState);
+        }
+        else if (jumpInputActive && player.jumpState.IsJumpAvail())
+        {
+            stateMachine.ChangeState(player.jumpState);
         }
         else if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
         {

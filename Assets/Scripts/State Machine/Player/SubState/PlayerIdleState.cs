@@ -38,7 +38,7 @@ public class PlayerIdleState : PlayerGroundedState
         base.LogicUpdate();
 
         dashMaintainTimer.Tick();
-
+        
         /*if (!onStateExit)
         {
             if (inputY == -1)
@@ -67,9 +67,9 @@ public class PlayerIdleState : PlayerGroundedState
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            #region State Transition Logic
             if (inputY == -1)
             {
                 if (inputX == 0)
@@ -89,9 +89,12 @@ public class PlayerIdleState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.reloadState);
             }
-            #endregion
+        }
+        #endregion
 
-            #region Physics Logic
+        #region Physics Logic
+        if (!onStateExit)
+        {
             player.movement.SetVelocityX(0.0f);
 
             if (isOnSlope)
@@ -103,7 +106,7 @@ public class PlayerIdleState : PlayerGroundedState
             {
                 player.rigidBody.gravityScale = 9.5f;
             }
-            #endregion
         }
+        #endregion
     }
 }

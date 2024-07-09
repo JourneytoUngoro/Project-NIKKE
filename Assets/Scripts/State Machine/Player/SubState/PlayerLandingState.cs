@@ -45,9 +45,9 @@ public class PlayerLandingState : PlayerGroundedState
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            #region State Transition Logic
             if (allowStateTransition)
             {
                 if (inputX == 0)
@@ -59,9 +59,12 @@ public class PlayerLandingState : PlayerGroundedState
                     stateMachine.ChangeState(player.moveState);
                 }
             }
-            #endregion
+        }
+        #endregion
 
-            #region Physics Logic
+        #region Physics Logic
+        if (!onStateExit)
+        {
             player.movement.SetVelocityX(0.0f);
 
             if (isOnSlope)
@@ -73,7 +76,7 @@ public class PlayerLandingState : PlayerGroundedState
             {
                 player.rigidBody.gravityScale = 9.5f;
             }
-            #endregion
         }
+        #endregion
     }
 }

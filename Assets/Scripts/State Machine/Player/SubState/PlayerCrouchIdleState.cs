@@ -31,7 +31,13 @@ public class PlayerCrouchIdleState : PlayerGroundedState
     public override void LogicUpdate()
     {
         base.LogicUpdate();
+    }
 
+    public override void PhysicsUpdate()
+    {
+        base.PhysicsUpdate();
+
+        #region State Transition Logic
         if (!onStateExit)
         {
             if (inputX != 0 && (inputY == -1 || isTouchingCeiling))
@@ -47,10 +53,6 @@ public class PlayerCrouchIdleState : PlayerGroundedState
                 stateMachine.ChangeState(player.crouchReloadState);
             }*/
         }
-    }
-
-    public override void PhysicsUpdate()
-    {
-        base.PhysicsUpdate();
+        #endregion
     }
 }

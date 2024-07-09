@@ -65,9 +65,9 @@ public class PlayerWallJumpState : PlayerAbilityState
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            #region State Transition Logic
             player.animator.SetFloat("yVelocity", currentVelocity.y);
 
             VariableJumpHeight();
@@ -76,8 +76,8 @@ public class PlayerWallJumpState : PlayerAbilityState
             {
                 isAbilityDone = true;
             }
-            #endregion
         }
+        #endregion
     }
 
     private void VariableJumpHeight()

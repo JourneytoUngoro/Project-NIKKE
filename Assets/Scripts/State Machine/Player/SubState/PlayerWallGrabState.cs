@@ -45,19 +45,22 @@ public class PlayerWallGrabState : PlayerTouchingWallState
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            #region State Transition Logic
             if (!attackInput)
             {
                 stateMachine.ChangeState(player.wallSlideState);
             }
-            #endregion
+        }
+        #endregion
 
-            #region Physics Logic
+        #region Physics Logic
+        if (!onStateExit)
+        {
             player.movement.SetVelocityY(0.0f);
             player.rigidBody.gravityScale = 0.0f;
-            #endregion
         }
+        #endregion
     }
 }
