@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerWallJumpState : PlayerAbilityState
 {
     public Timer preventInputXTimer;
 
+    private int jumpDirection;
     private bool variableJumpHeightAvail;
 
     public PlayerWallJumpState(Player player, string animBoolName) : base(player, animBoolName)
@@ -23,18 +25,24 @@ public class PlayerWallJumpState : PlayerAbilityState
     {
         base.Enter();
 
+        variableJumpHeightAvail = true;
+        player.wallSlideState.InavailWallJump();
         player.inputHandler.InactiveJumpInput();
+        player.inputHandler.PreventInputX(jumpDirection);
         preventInputXTimer.StartSingleUseTimer();
-        player.jumpState.IncreaseJumpCount();
-        player.movement.Flip();
-        workSpace.Set(playerData.wallJumpAngleVector.x * facingDirection, playerData.wallJumpAngleVector.y);
+        // player.jumpState.IncreaseJumpCount();
+        if (facingDirection != jumpDirection)
+        {
+            player.movement.Flip();
+        }
+        workSpace.Set(playerData.wallJumpAngleVector.x * jumpDirection, playerData.wallJumpAngleVector.y);
         player.movement.SetVelocity(workSpace.normalized * playerData.wallJumpSpeed);
     }
 
     public override void Exit()
     {
         base.Exit();
-
+        
         if (stateMachine.nextState == player.inAirState)
         {
             player.inAirState.landingStateTimer.AdjustTimeFlow(Time.time - startTime);
@@ -44,7 +52,7 @@ public class PlayerWallJumpState : PlayerAbilityState
     public override void LogicUpdate()
     {
         base.LogicUpdate();
-
+        
         /*if (!onStateExit)
         {
             player.animator.SetFloat("yVelocity", currentVelocity.y);
@@ -95,4 +103,6 @@ public class PlayerWallJumpState : PlayerAbilityState
             }
         }
     }
+
+    public void SetJumpDirection(int direction) => jumpDirection = direction;
 }

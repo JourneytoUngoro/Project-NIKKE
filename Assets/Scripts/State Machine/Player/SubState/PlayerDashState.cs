@@ -53,7 +53,7 @@ public class PlayerDashState : PlayerGroundedState
             if (isOnSlope)
             {
                 workSpace.Set(player.detection.slopePerpNormal.x, player.detection.slopePerpNormal.y * inputX);
-                player.movement.SetVelocity(workSpace, playerData.dashSpeed);
+                // player.movement.SetVelocity(workSpace, playerData.dashSpeed);
             }
             else
             {

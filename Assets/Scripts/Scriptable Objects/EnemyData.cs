@@ -1,19 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class EnemyData : ScriptableObject
 {
+
     [Header("Enemy Data")]
     public float maxHealth;
     public float maxPostureHealth;
     public float postureRecoveryRate;
-    public bool haveMeleeAttack;
+    public bool canSleep;
+    public bool canAlert;
+    public bool canFall;
+    public bool canJump;
+    public bool canSmartPathFind;
+    public bool canSmartFollow;
+    public bool canMeleeAttack;
+    public bool canMidRAttack;
+    public bool canRangedAttack;
 
     [Header("Idle State")]
+    public float minWaitTime = 3.0f;
+    public float maxWaitTime = 5.0f;
+
+    [Header("Move State")]
     public float moveSpeed = 6.0f;
-    public float turnBackMinTime = 3.0f;
-    public float turnBackMaxTime = .0f;
 
     [Header("Enemy Pathfinding")]
     public float nextWaypointDistance = 3.0f;
@@ -34,4 +46,12 @@ public class EnemyData : ScriptableObject
 
     [Header("Stunned State")]
     public float stunnedTime = 4.0f;
+
+    [Header("Attack Information")]
+    public EnemyAttackInfo meleeAttackInfo;
+    public float meleeAttackCoolDown;
+    public EnemyAttackInfo midrAttackInfo;
+    public float midrAttackCoolDown;
+    public EnemyAttackInfo rangedAttackInfo;
+    public float rangedAttackCoolDown;
 }

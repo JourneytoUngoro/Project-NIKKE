@@ -79,7 +79,11 @@ public class PlayerAbilityState : PlayerState
         }
         else if (isAbilityDone)
         {
-            if (isGrounded && currentVelocity.y < epsilon)
+            if (attackInputActive)
+            {
+                stateMachine.ChangeState(player.meleeAttackState);
+            }
+            else if (isGrounded && currentVelocity.y < epsilon)
             {
                 if (inputX != 0)
                 {

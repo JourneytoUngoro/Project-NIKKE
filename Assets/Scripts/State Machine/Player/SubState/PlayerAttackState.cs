@@ -4,32 +4,29 @@ using UnityEngine;
 
 public class PlayerAttackState : PlayerAbilityState
 {
-    private Transform attackTransform;
+    protected bool isOnSlope;
 
     public PlayerAttackState(Player player, string animBoolName) : base(player, animBoolName)
     {
     }
 
-    public PlayerAttackState(Player player, Transform attackTransform, string animBoolName) : base(player, animBoolName)
-    {
-        this.attackTransform = attackTransform;
-    }
-
     public override void AnimationActionTrigger()
     {
         base.AnimationActionTrigger();
-
-        player.combat.DoMeleeAttack(playerData.meleeAttackDamage, attackTransform.position, playerData.meleeAttackRadius);
     }
 
     public override void AnimationFinishTrigger()
     {
         base.AnimationFinishTrigger();
+
+        isAbilityDone = true;
     }
 
     public override void DoChecks()
     {
         base.DoChecks();
+
+        isOnSlope = player.detection.isOnSlope();
     }
 
     public override void Enter()
@@ -37,6 +34,7 @@ public class PlayerAttackState : PlayerAbilityState
         base.Enter();
 
         player.stateMachineToAnimator.state = this;
+        player.inputHandler.InactiveAttackInput();
     }
 
     public override void Exit()
@@ -54,5 +52,10 @@ public class PlayerAttackState : PlayerAbilityState
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+
+        if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
+        {
+            stateMachine.ChangeState(player.dodgeState);
+        }
     }
 }

@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : Entity
 {
     #region State Variables
     public EnemyStateMachine enemyStateMachine { get; private set; }
 
     public EnemyIdleState idleState { get; private set; }
+    public EnemyMoveState moveState { get; private set; }
+    public EnemySleepState sleepState { get; private set; }
     public EnemyPlayerInDetectionRangeState playerInDetectionRangeState { get; private set; }
     public EnemyPlayerInAggroRangeState playerInAggroRangeState { get; private set; }
     public EnemyLookForPlayerState lookForPlayerState { get; private set; }
@@ -19,45 +21,60 @@ public class Enemy : MonoBehaviour
     #endregion
 
     #region Enemy Components
-    public Animator animator { get; private set; }
-    public Rigidbody2D rigidBody { get; private set; }
-    public Core enemyCore { get; private set; }
-    public Movement movement { get; private set; }
-    public EnemyDetection detection { get; private set; }
-    public EnemyCombat combat { get; private set; }
-    
+    public EnemyMovement movement { get; protected set; }
+    public EnemyDetection detection { get; protected set; }
+    public EnemyCombat combat { get; protected set; }
+    public Stats stats { get; protected set; }
     [field: SerializeField] public Seeker seeker { get; private set; }
     #endregion
 
-    protected virtual void Awake()
+    #region Other Variables
+    protected bool isDead;
+    #endregion
+
+    protected override void Awake()
     {
-        animator = GetComponent<Animator>();
-        rigidBody = GetComponent<Rigidbody2D>();
-        enemyCore = GetComponentInChildren<Core>();
+        base.Awake();
     }
 
     protected virtual void Start()
     {
-        movement = enemyCore.GetCoreComponent<Movement>();
-        detection = enemyCore.GetCoreComponent<EnemyDetection>();
-        combat = enemyCore.GetCoreComponent<EnemyCombat>();
+        movement = core.GetCoreComponent<EnemyMovement>();
+        detection = core.GetCoreComponent<EnemyDetection>();
+        combat = core.GetCoreComponent<EnemyCombat>();
 
         enemyStateMachine = new EnemyStateMachine();
 
         idleState = new EnemyIdleState(this, "idle");
-        playerInDetectionRangeState = new EnemyPlayerInDetectionRangeState(this, "playerDetected");
-        playerInAggroRangeState = new EnemyPlayerInAggroRangeState(this, "inAgroRange");
-        lookForPlayerState = new EnemyLookForPlayerState(this, "lookForPlayer");
+        sleepState = new EnemySleepState(this, "sleep");
+        moveState = new EnemyMoveState(this, "move");
+        playerInDetectionRangeState = new EnemyPlayerInDetectionRangeState(this, "alert");
+        playerInAggroRangeState = new EnemyPlayerInAggroRangeState(this, "move");
+        lookForPlayerState = new EnemyLookForPlayerState(this, "idle");
         meleeAttackState = new EnemyMeleeAttackState(this, "meleeAttack");
         rangedAttackState = new EnemyRangedAttackState(this, "rangedAttack");
         teleportState = new EnemyTeleportState(this, "teleport");
 
-        enemyStateMachine.Initialize(idleState);
+        if (enemyData.canSleep)
+        {
+            enemyStateMachine.Initialize(sleepState);
+        }
+        else
+        {
+            enemyStateMachine.Initialize(idleState);
+        }
+        // enemyStateMachine.Initialize(idleState);
+        // State initializing is done in specific enemy script
     }
 
     protected virtual void Update()
     {
         enemyStateMachine.currentState.LogicUpdate();
+    }
+
+    protected virtual void LateUpdate()
+    {
+        enemyStateMachine.currentState.LateLogicUpdate();
     }
 
     protected virtual void FixedUpdate()

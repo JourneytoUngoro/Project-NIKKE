@@ -7,8 +7,8 @@ public class EnemyLookForPlayerState : EnemyState
 {
     protected Timer turnTimer;
 
-    protected bool isPlayerInAggroRange;
     protected int currentTurnCount;
+    protected bool isPlayerInDetectionRange;
 
     public EnemyLookForPlayerState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
@@ -20,14 +20,14 @@ public class EnemyLookForPlayerState : EnemyState
     {
         base.DoChecks();
 
-        isPlayerInAggroRange = enemy.detection.isPlayerInAggroRange();
+        isPlayerInDetectionRange = enemy.detection.isPlayerInDetectionRange();
     }
 
     public override void Enter()
     {
         base.Enter();
 
-        if (enemy.detection.target != null && enemy.detection.target.transform.rotation.y != enemy.transform.rotation.y)
+        if ((enemy.detection.target != null && enemy.detection.target.transform.rotation.y != enemy.transform.rotation.y) || enemy.detection.target == null)
         {
             enemy.movement.Flip();
         }
@@ -45,21 +45,29 @@ public class EnemyLookForPlayerState : EnemyState
     {
         base.LogicUpdate();
 
-        turnTimer.Tick();
+        if (!onStateExit)
+        {
+            turnTimer.Tick();
 
-        if (isPlayerInAggroRange)
-        {
-            stateMachine.ChangeState(enemy.playerInDetectionRangeState);
-        }
-        else if (currentTurnCount >= enemyData.totalTurnAmount)
-        {
-            stateMachine.ChangeState(enemy.idleState);
+            if (isPlayerInDetectionRange)
+            {
+                stateMachine.ChangeState(enemy.playerInDetectionRangeState);
+            }
+            else if (currentTurnCount >= enemyData.totalTurnAmount)
+            {
+                stateMachine.ChangeState(enemy.idleState);
+            }
         }
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+
+        if (!onStateExit)
+        {
+            enemy.movement.SetVelocityZero();
+        }
     }
 
     public void TurnBack()

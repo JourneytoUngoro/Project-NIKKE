@@ -51,7 +51,7 @@ public class PlayerReloadState : PlayerGroundedState
             }
             else if (isReloadDone)
             {
-                player.normalAttackState.ReloadAmmo();
+                player.meleeAttackState.ReloadAmmo();
                 stateMachine.ChangeState(player.idleState);
             }
         }

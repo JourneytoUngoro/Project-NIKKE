@@ -127,68 +127,74 @@ public class PlayerInAirState : PlayerState
         base.PhysicsUpdate();
 
         #region State Transition Logic
-        player.animator.SetFloat("yVelocity", currentVelocity.y);
-
-        VariableJumpHeight();
-
-        if (escapeInput && player.escapeState.isEscapeAvail())
+        if (!onStateExit)
         {
-            stateMachine.ChangeState(player.escapeState);
-        }
-        else if (attackInput)
-        {
-            stateMachine.ChangeState(player.normalAttackState);
-        }
-        else if (jumpInputActive && stateMachine.prevState is PlayerTouchingWallState && isTouchingWallBehind)
-        {
-            stateMachine.ChangeState(player.wallJumpState);
-        }
-        else if (jumpInputActive && player.jumpState.IsJumpAvail())
-        {
-            stateMachine.ChangeState(player.jumpState);
-        }
-        else if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
-        {
-            stateMachine.ChangeState(player.dodgeState);
-        }
-        else if (dashAttackInput && player.dashAttackState.IsDashAttackAvail())
-        {
-            stateMachine.ChangeState(player.dashAttackState);
-        }
-        else if (isTouchingWall && inputX == facingDirection && currentVelocity.y < -playerData.wallSlideSpeed)
-        {
-            stateMachine.ChangeState(player.wallSlideState);
-        }
-        else if (isGrounded)
-        {
-            if (gotoLandingState)
+            if (escapeInput && player.escapeState.isEscapeAvail())
             {
-                stateMachine.ChangeState(player.landingState);
+                stateMachine.ChangeState(player.escapeState);
             }
-            else if (currentVelocity.y < Mathf.Max(epsilon, Mathf.Abs(player.detection.slopePerpNormal.y * currentVelocity.magnitude)) * 1.1f)
+            else if (attackInputActive)
             {
-                if (inputX == 0)
+                stateMachine.ChangeState(player.meleeAttackState);
+            }
+            else if (jumpInputActive && player.wallSlideState.IsWallJumpAvail())
+            {
+                stateMachine.ChangeState(player.wallJumpState);
+            }
+            else if (jumpInputActive && player.jumpState.IsJumpAvail())
+            {
+                stateMachine.ChangeState(player.jumpState);
+            }
+            else if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
+            {
+                stateMachine.ChangeState(player.dodgeState);
+            }
+            else if (dashAttackInput && player.dashAttackState.IsDashAttackAvail())
+            {
+                stateMachine.ChangeState(player.dashAttackState);
+            }
+            else if (isTouchingWall && inputX == facingDirection && currentVelocity.y < -playerData.wallSlideSpeed)
+            {
+                stateMachine.ChangeState(player.wallSlideState);
+            }
+            else if (isGrounded)
+            {
+                if (gotoLandingState)
                 {
-                    stateMachine.ChangeState(player.idleState);
+                    stateMachine.ChangeState(player.landingState);
                 }
-                else
+                else if (currentVelocity.y < Mathf.Max(epsilon, Mathf.Abs(player.detection.slopePerpNormal.y * currentVelocity.magnitude)) * 1.1f)
                 {
-                    stateMachine.ChangeState(player.moveState);
+                    if (inputX == 0)
+                    {
+                        stateMachine.ChangeState(player.idleState);
+                    }
+                    else
+                    {
+                        stateMachine.ChangeState(player.moveState);
+                    }
                 }
             }
         }
         #endregion
 
         #region Physics Logic
-        player.movement.CheckIfShouldFlip(inputX);
+        if (!onStateExit)
+        {
+            player.movement.CheckIfShouldFlip(inputX);
 
-        if (player.moveState.IsDashing())
-        {
-            player.movement.SetVelocityX(inputX * playerData.dashSpeed);
-        }
-        else
-        {
-            player.movement.SetVelocityX(inputX * playerData.moveSpeed);
+            player.animator.SetFloat("yVelocity", currentVelocity.y);
+
+            VariableJumpHeight();
+
+            if (player.moveState.IsDashing())
+            {
+                player.movement.SetVelocityX(inputX * playerData.dashSpeed);
+            }
+            else
+            {
+                player.movement.SetVelocityX(inputX * playerData.moveSpeed);
+            }
         }
         #endregion
     }

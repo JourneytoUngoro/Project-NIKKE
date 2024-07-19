@@ -1,20 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EnemyDetection : Detection
 {
+    [SerializeField] private LayerMask whatIsChaseTarget;
+    [SerializeField] private LayerMask whatIsAlertTarget;
+
     #region Check Transform
-    [SerializeField] private Transform wallCheckTransform;
     [SerializeField] private Transform detectionRangeTransform;
     [SerializeField] private Transform aggroRangeTransform;
     [SerializeField] private Transform meleeAttackTransform;
+    [SerializeField] private Transform rangedAttackTransform;
     #endregion
 
     #region Check Variables
-    [SerializeField] private float wallCheckDistance;
+    [SerializeField] private Transform jumpCheckTransform;
+    [SerializeField] private float jumpCheckDistance;
+    [SerializeField] private float alertRadius;
     [SerializeField] private float rangedAttackRadius;
+    [SerializeField] private Vector2 rangedAttackSize;
     [SerializeField] private float meleeAttackRadius;
+    [SerializeField] private Vector2 meleeAttackSize;
     [SerializeField] private float detectionRangeRadius;
     [SerializeField] private Vector2 detectionRangeSize;
     [SerializeField] private float aggroRangeRadius;
@@ -22,38 +30,116 @@ public class EnemyDetection : Detection
     #endregion
 
     #region Other Variables
-    [SerializeField] private LayerMask whatIsPlayer;
-    
     public GameObject target { get; private set; }
     #endregion
 
     public bool isDetectingWall()
     {
-        return Physics2D.Raycast(wallCheckTransform.position, transform.right, wallCheckDistance, whatIsGround);
+        return Physics2D.Raycast(wallCheckTransformTop.position, transform.right, wallCheckDistance, whatIsGround) || Physics2D.Raycast(wallCheckTransformBottom.position, transform.right, wallCheckDistance, whatIsGround);
+        // return Physics2D.OverlapBox(wallCheckTransformTop.position, Vector2.one, 0.0f, whatIsGround);
+    }
+
+    public bool ShouldJump()
+    {
+        RaycastHit2D raycast = Physics2D.Raycast(jumpCheckTransform.position, transform.right, jumpCheckDistance, whatIsGround);
+        
+        if (raycast)
+        {
+            return Vector2.Angle(raycast.normal, -transform.right) < epsilon;
+        }
+        else return false;
+    }
+
+    public bool InStepbackDistance()
+    {
+        return Physics2D.Raycast(jumpCheckTransform.position, transform.right, jumpCheckDistance - 1, whatIsGround);
     }
 
     public bool isPlayerInDetectionRange()
     {
-        Collider2D collider = detectionRangeRadius < float.Epsilon ? Physics2D.OverlapBox(detectionRangeTransform.position, detectionRangeSize, 0.0f, whatIsPlayer) : Physics2D.OverlapCircle(detectionRangeTransform.position, detectionRangeRadius, whatIsPlayer);
-        target = collider != null ? collider.gameObject : null;
+        Collider2D[] colliders = detectionRangeRadius < float.Epsilon ? Physics2D.OverlapBoxAll(detectionRangeTransform.position, detectionRangeSize, 0.0f, whatIsChaseTarget) : Physics2D.OverlapCircleAll(detectionRangeTransform.position, detectionRangeRadius, whatIsChaseTarget);
+
+        Collider2D playerChaseTarget = colliders.Where(collider => collider.gameObject.TryGetComponent<Player>(out var comp)).FirstOrDefault();
+        Collider2D otherChaseTarget = colliders.Where(collider => collider.gameObject.TryGetComponent<Enemy>(out var comp) && (1 << collider.gameObject.layer & whatIsChaseTarget) != 0).OrderBy(x => (transform.position - x.transform.position).magnitude).FirstOrDefault();
+
+        if (playerChaseTarget != null)
+        {
+            target = playerChaseTarget.gameObject;
+        }
+        else if (otherChaseTarget != null)
+        {
+            target = otherChaseTarget.gameObject;
+        }
+        else
+        {
+            target = null;
+        }
+
         return target != null;
     }
 
     public bool isPlayerInAggroRange()
     {
-        Collider2D collider = aggroRangeRadius < float.Epsilon ? Physics2D.OverlapBox(aggroRangeTransform.position, aggroRangeSize, 0.0f, whatIsPlayer) : Physics2D.OverlapCircle(aggroRangeTransform.position, aggroRangeRadius, whatIsPlayer);
-        target = collider != null ? collider.gameObject : null;
+        Collider2D[] colliders = aggroRangeRadius < float.Epsilon ? Physics2D.OverlapBoxAll(aggroRangeTransform.position, aggroRangeSize, 0.0f, whatIsChaseTarget) : Physics2D.OverlapCircleAll(aggroRangeTransform.position, aggroRangeRadius, whatIsChaseTarget);
+
+        Collider2D playerChaseTarget = colliders.Where(collider => collider.gameObject.TryGetComponent<Player>(out var comp)).FirstOrDefault();
+        Collider2D otherChaseTarget = colliders.Where(collider => collider.gameObject.TryGetComponent<Enemy>(out var comp) && (1 << collider.gameObject.layer & whatIsChaseTarget) != 0).OrderBy(x => (transform.position - x.transform.position).magnitude).FirstOrDefault();
+
+        if (playerChaseTarget != null)
+        {
+            target = playerChaseTarget.gameObject;
+        }
+        else if (otherChaseTarget != null)
+        {
+            target = otherChaseTarget.gameObject;
+        }
+        else
+        {
+            target = null;
+        }
+
         return target != null;
+
+        /*if (colliders.Length > 0)
+        {
+            Collider2D player = colliders.Where(collider => collider.gameObject.TryGetComponent<Player>(out var comp)).ToList()[0];
+            Collider2D chaseTarget = colliders.Where(collider => collider.gameObject.TryGetComponent<Enemy>(out var comp) && (1 << collider.gameObject.layer & whatIsChaseTarget) != 0).OrderBy(x => (transform.position - x.transform.position).magnitude).ToList()[0];
+
+            target = player != null ? player.gameObject : chaseTarget.gameObject;
+        }
+        else
+        {
+            target = null;
+        }
+        return target != null;*/
     }
 
     public bool isPlayerInMeleeAttackRange()
     {
-        return Physics2D.OverlapCircle(meleeAttackTransform.position, meleeAttackRadius, whatIsPlayer);
+        return Physics2D.OverlapCircle(meleeAttackTransform.position, meleeAttackRadius, whatIsChaseTarget);
     }
 
     public bool isPlayerInRangedAttackRange()
     {
-        return Physics2D.OverlapCircle(transform.position, rangedAttackRadius, whatIsPlayer);
+        return Physics2D.OverlapCircle(transform.position, rangedAttackRadius, whatIsChaseTarget);
+    }
+
+    public void DoAlert()
+    {
+        Collider2D[] alertTargets = Physics2D.OverlapCircleAll(transform.position, alertRadius, whatIsAlertTarget);
+
+        foreach (Collider2D alertTarget in alertTargets)
+        {
+            alertTarget.SendMessage("GetAlerted");
+        }
+    }
+
+    public void GetAlerted()
+    {
+        if (enemy.sleepState.isSleeping)
+        {
+            enemy.sleepState.WakeUp();
+        }
     }
 
     protected override void OnDrawGizmos()
@@ -61,13 +147,11 @@ public class EnemyDetection : Detection
         base.OnDrawGizmos();
 
         Gizmos.color = Color.green;
-        if (wallCheckTransform != null)
-        {
-            Gizmos.DrawRay(wallCheckTransform.position, transform.right * wallCheckDistance);
-        }
+
+        Gizmos.DrawLine(jumpCheckTransform.position, jumpCheckTransform.position + transform.right * jumpCheckDistance);
 
         Gizmos.color = Color.blue;
-        if (detectionRangeRadius > float.Epsilon)
+        if (detectionRangeRadius > epsilon)
         {
             Gizmos.DrawWireSphere(detectionRangeTransform.position, detectionRangeRadius);
         }
@@ -75,7 +159,7 @@ public class EnemyDetection : Detection
         {
             Gizmos.DrawWireCube(detectionRangeTransform.position, detectionRangeSize);
         }
-        if (aggroRangeRadius > float.Epsilon)
+        if (aggroRangeRadius > epsilon)
         {
             Gizmos.DrawWireSphere(aggroRangeTransform.position, aggroRangeRadius);
         }
@@ -83,9 +167,24 @@ public class EnemyDetection : Detection
         {
             Gizmos.DrawWireCube(aggroRangeTransform.position, aggroRangeSize);
         }
+        Gizmos.DrawWireSphere(transform.position, alertRadius);
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(meleeAttackTransform.position, meleeAttackRadius);
-        Gizmos.DrawWireSphere(transform.position, rangedAttackRadius);
+        if (rangedAttackRadius > epsilon)
+        {
+            Gizmos.DrawWireSphere(rangedAttackTransform.position, rangedAttackRadius);
+        }
+        else
+        {
+            Gizmos.DrawWireCube(rangedAttackTransform.position, rangedAttackSize);
+        }
+        if (meleeAttackRadius > epsilon)
+        {
+            Gizmos.DrawWireSphere(meleeAttackTransform.position, meleeAttackRadius);
+        }
+        else
+        {
+            Gizmos.DrawWireCube(meleeAttackTransform.position, meleeAttackSize);
+        }
     }
 }

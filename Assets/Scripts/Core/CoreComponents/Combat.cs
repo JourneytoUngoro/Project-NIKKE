@@ -8,9 +8,8 @@ using System.Linq;
 
 public class Combat : CoreComponent
 {
-    [SerializeField] protected LayerMask whatIsDamageable;
     [SerializeField] protected LayerMask whatIsGround;
-    [SerializeField] protected Transform entityCenterTransform;
+    [SerializeField] protected LayerMask whatIsDamageable;
     [SerializeField] protected Transform meleeAttackTransform;
     [SerializeField] protected float meleeAttackRadius;
     [SerializeField] protected Transform rangedAttackTransform;
@@ -18,15 +17,7 @@ public class Combat : CoreComponent
 
     [SerializeField] protected GameObject projectile;
 
-    [SerializeField] protected float damage;
-    [SerializeField] protected float poiseDamage;
-
-    public virtual void Awake()
-    {
-        
-    }
-
-    public virtual void GetDamage(CombatInfo combatInfo)
+    public virtual void GetDamage(AttackInfo combatInfo)
     {
         if (gameObject.layer != LayerMask.NameToLayer("Invincible"))
         {
@@ -42,12 +33,7 @@ public class Combat : CoreComponent
         }
     }
 
-    public virtual void DoMeleeAttack(float damage, Vector2 center, float radius)
-    {
-        
-    }
-
-    public virtual void DoMeleeAttack(float damage, Vector2 center, Vector2 size, float angle)
+    public virtual void DoMeleeAttack()
     {
         
     }
@@ -55,6 +41,12 @@ public class Combat : CoreComponent
     public virtual void DoRangedAttack()
     {
         
+    }
+
+    public bool CheckWithinAngle(Vector2 baseVector, Vector2 targetVector, float counterClockwiseAngle, float clockwiseAngle)
+    {
+        float angleBetweenVectors = -Vector2.SignedAngle(baseVector, targetVector);
+        return counterClockwiseAngle <= angleBetweenVectors && angleBetweenVectors <= clockwiseAngle;
     }
 
     public virtual void OnDrawGizmos()

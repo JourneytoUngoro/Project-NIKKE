@@ -4,12 +4,25 @@ using UnityEngine;
 
 public class EnemyMeleeAttackState : EnemyState
 {
+    public Timer meleeAttackCoolDownTimer;
+    public bool canMeleeAttack { get; private set; }
+
     protected bool isPlayerInMeleeAttackRange;
     protected bool isPlayerInRangedAttackRange;
     protected bool isPlayerInAggroRange;
 
     public EnemyMeleeAttackState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
+        meleeAttackCoolDownTimer = new Timer(enemyData.meleeAttackCoolDown);
+        meleeAttackCoolDownTimer.timerAction += () => { canMeleeAttack = true; };
+    }
+
+    public override void AnimationFinishTrigger()
+    {
+        base.AnimationFinishTrigger();
+
+        isAbilityDone = true;
+        meleeAttackCoolDownTimer.StartSingleUseTimer();
     }
 
     public override void DoChecks()
@@ -25,6 +38,8 @@ public class EnemyMeleeAttackState : EnemyState
     {
         base.Enter();
 
+        canMeleeAttack = false;
+        enemy.stateMachineToAnimator.state = this;
         enemy.movement.SetVelocityX(0.0f);
     }
 
@@ -37,14 +52,22 @@ public class EnemyMeleeAttackState : EnemyState
     {
         base.LogicUpdate();
 
-        if (isAnimationFinished)
+        if (!onStateExit)
         {
-            stateMachine.ChangeState(enemy.playerInAggroRangeState);
+            if (isAbilityDone)
+            {
+                stateMachine.ChangeState(enemy.playerInAggroRangeState);
+            }
         }
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+
+        if (!onStateExit)
+        {
+            enemy.movement.SetVelocityZero();
+        }
     }
 }

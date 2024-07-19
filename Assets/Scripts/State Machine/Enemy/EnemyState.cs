@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR.Haptics;
 
-public class EnemyState
+public class EnemyState : State
 {
     #region Components
     protected Enemy enemy;
@@ -12,15 +13,9 @@ public class EnemyState
     #endregion
 
     #region Other Variables
-    protected bool onStateExit;
-    protected bool isAnimationFinished;
+    protected bool isAbilityDone;
 
-    protected Vector2 currentPosition;
-    protected Vector2 currentVelocity;
-
-    protected int facingDirection;
-
-    protected float epsilon = 0.001f;
+    public bool gotHit;
     #endregion
 
     #region Shared Detection
@@ -30,8 +25,6 @@ public class EnemyState
     protected bool isOnSlope;
     #endregion
 
-    public float startTime;
-
     public EnemyState(Enemy enemy, string animBoolName)
     {
         this.enemy = enemy;
@@ -40,35 +33,22 @@ public class EnemyState
         this.animBoolName = animBoolName;
     }
 
-    public virtual void AnimationStartTrigger()
+    public override void DoChecks()
     {
+        base.DoChecks();
 
-    }
-
-    public virtual void AnimationFinishTrigger()
-    {
-        isAnimationFinished = true;
-    }
-
-    public virtual void AnimationActionTrigger()
-    {
-
-    }
-
-    public virtual void DoChecks()
-    {
         isOnSlope = enemy.detection.isOnSlope();
         isGrounded = enemy.detection.isGrounded();
         isDetectingLedge = enemy.detection.isDetectingLedge();
         isDetectingWall = enemy.detection.isDetectingWall();
     }
 
-    public virtual void Enter()
+    public override void Enter()
     {
-        startTime = Time.time;
+        base.Enter();
+
+        isAbilityDone = false;
         enemy.animator.SetBool(animBoolName, true);
-        onStateExit = false;
-        isAnimationFinished = false;
         SetMovementVariables();
 
         DoChecks();
@@ -82,13 +62,24 @@ public class EnemyState
 
     public virtual void LogicUpdate()
     {
-        SetMovementVariables();
         TickPublicTimers();
+    }
+
+    public virtual void LateLogicUpdate()
+    {
+        gotHit = false;
     }
 
     public virtual void PhysicsUpdate()
     {
         DoChecks();
+
+        if (!isGrounded)
+        {
+            // enemy.rigidBody.gravityScale = 9.5f;
+        }
+
+        SetMovementVariables();
     }
 
     protected void SetMovementVariables()
@@ -101,5 +92,20 @@ public class EnemyState
     private void TickPublicTimers()
     {
         enemy.teleportState.teleportCoolDownTimer.Tick();
+        enemy.meleeAttackState.meleeAttackCoolDownTimer.Tick();
+        enemy.rangedAttackState.rangedAttackCoolDownTimer.Tick();
+    }
+
+    protected bool GotHit()
+    {
+        if (gotHit)
+        {
+            gotHit = false;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

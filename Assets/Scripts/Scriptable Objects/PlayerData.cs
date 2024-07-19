@@ -35,12 +35,13 @@ public class PlayerData : ScriptableObject
     public float dodgeDelay = 0.2f;
 
     [Header("Attack State")]
-    public float meleeAttackDamage = 10.0f;
-    public float meleeAttackRadius = 2.0f;
-    public float rangedAttackDamage = 1.0f;
-    public Vector2 rangedAttackDetectionSize;
-    public float rangedAttackCoolDownTime = 0.1f;
     public int maxAmmo = 40;
+    public float rangedAttackPeriod = 0.1f;
+    public AttackInfo playerMeleeAttackInfo;
+    public AttackInfo playerJumpAttackInfo;
+    public AttackInfo playerUltimateAttackInfo;
+    public AttackInfo playerRangedAttackInfo;
+    public float attackStrokeResetTime = 1.5f;
 
     [Header("Wall Slide State")]
     public float wallSlideSpeed = 5.0f;
@@ -49,6 +50,7 @@ public class PlayerData : ScriptableObject
     public Vector2 wallJumpAngleVector;
     public float wallJumpSpeed = 30.0f;
     public float wallJumpTime = 0.5f;
+    public float wallJumpAvailTime = 0.1f;
     public float preventInputXTime = 0.8f;
 
     [Header("Escape State")]

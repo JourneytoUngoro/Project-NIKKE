@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StateMachineToAnimator : MonoBehaviour
 {
-    public PlayerState state;
+    public State state;
 
     public void AnimationStartTrigger()
     {

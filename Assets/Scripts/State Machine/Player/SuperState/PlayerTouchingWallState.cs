@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class PlayerTouchingWallState : PlayerState
 {
+    public Timer wallJumpAvailTimer;
+
+    private bool wallJumpAvail;
+
     #region Check Variables
     protected bool isGrounded;
     protected bool isTouchingWall;
@@ -13,6 +17,8 @@ public class PlayerTouchingWallState : PlayerState
 
     public PlayerTouchingWallState(Player player, string animBoolName) : base(player, animBoolName)
     {
+        wallJumpAvailTimer = new Timer(playerData.wallJumpAvailTime);
+        wallJumpAvailTimer.timerAction += () => { wallJumpAvail = false; };
     }
 
     public override void DoChecks()
@@ -35,6 +41,10 @@ public class PlayerTouchingWallState : PlayerState
     public override void Exit()
     {
         base.Exit();
+
+        wallJumpAvail = true;
+        player.wallJumpState.SetJumpDirection(-facingDirection);
+        wallJumpAvailTimer.StartSingleUseTimer();
     }
 
     public override void LogicUpdate()
@@ -65,4 +75,8 @@ public class PlayerTouchingWallState : PlayerState
         player.movement.SetPositionX(initialXPosition);
         #endregion
     }
+
+    public bool IsWallJumpAvail() => wallJumpAvail;
+
+    public void InavailWallJump() => wallJumpAvail = false;
 }

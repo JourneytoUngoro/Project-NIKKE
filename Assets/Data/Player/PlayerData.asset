@@ -29,12 +29,21 @@ MonoBehaviour:
   dodgeCoolDownTime: 1
   dodgeTime: 0.2
   dodgeDelay: 0.2
-  meleeAttackDamage: 10
-  meleeAttackRadius: 0.7
-  rangedAttackDamage: 1
-  rangedAttackDetectionSize: {x: 5, y: 1.4}
-  rangedAttackCoolDownTime: 0.1
   maxAmmo: 40
+  rangedAttackPeriod: 0.1
+  playerMeleeAttackInfo:
+    damage: 0
+    postureDamage: 0
+  playerJumpAttackInfo:
+    damage: 0
+    postureDamage: 0
+  playerUltimateAttackInfo:
+    damage: 0
+    postureDamage: 0
+  playerRangedAttackInfo:
+    damage: 0
+    postureDamage: 0
+  attackStrokeResetTime: 1.5
   wallSlideSpeed: 10
   wallJumpAngleVector: {x: 2, y: 5}
   wallJumpSpeed: 85

@@ -40,7 +40,7 @@ public class PlayerInputHandler : MonoBehaviour
         playerInput = GetComponent<PlayerInput>();
         player = GetComponent<Player>();
 
-        jumpInputBufferTimer = new Timer(player.PlayerData.jumpInputBufferTime);
+        jumpInputBufferTimer = new Timer(player.playerData.jumpInputBufferTime);
         jumpInputBufferTimer.timerAction += InactiveJumpInput;
     }
 

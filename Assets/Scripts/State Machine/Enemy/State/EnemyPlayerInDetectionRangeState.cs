@@ -12,12 +12,26 @@ public class EnemyPlayerInDetectionRangeState : EnemyState
     {
     }
 
+    public override void AnimationActionTrigger()
+    {
+        base.AnimationActionTrigger();
+
+        enemy.detection.DoAlert();
+    }
+
+    public override void AnimationFinishTrigger()
+    {
+        base.AnimationFinishTrigger();
+
+        isAbilityDone = true;
+    }
+
     public override void DoChecks()
     {
         base.DoChecks();
 
-        isPlayerInRangedAttackRange = enemy.detection.isPlayerInRangedAttackRange();
-        isPlayerInMeleeAttackRange = enemy.detection.isPlayerInMeleeAttackRange();
+        //isPlayerInRangedAttackRange = enemy.detection.isPlayerInRangedAttackRange();
+        //isPlayerInMeleeAttackRange = enemy.detection.isPlayerInMeleeAttackRange();
         isPlayerInAggroRange = enemy.detection.isPlayerInAggroRange();
     }
 
@@ -25,8 +39,15 @@ public class EnemyPlayerInDetectionRangeState : EnemyState
     {
         base.Enter();
 
+        isAbilityDone = !enemyData.canAlert;
         enemy.movement.SetVelocityX(0.0f);
-        // TODO: Alert adjacent enemies
+        
+        if (enemyData.canAlert)
+        {
+            enemy.detection.DoAlert();
+            enemy.animator.SetBool("move", false);
+            enemy.animator.SetBool("alert", true);
+        }
     }
 
     public override void Exit()
@@ -38,21 +59,25 @@ public class EnemyPlayerInDetectionRangeState : EnemyState
     {
         base.LogicUpdate();
 
-        if (isPlayerInMeleeAttackRange)
+
+        if (isAbilityDone)
         {
-            stateMachine.ChangeState(enemy.meleeAttackState);
-        }
-        else if (isPlayerInRangedAttackRange)
-        {
-            stateMachine.ChangeState(enemy.rangedAttackState);
-        }
-        else if (isPlayerInAggroRange)
-        {
-            stateMachine.ChangeState(enemy.playerInAggroRangeState);
-        }
-        else
-        {
-            stateMachine.ChangeState(enemy.lookForPlayerState);
+            if (isPlayerInMeleeAttackRange)
+            {
+                stateMachine.ChangeState(enemy.meleeAttackState);
+            }
+            else if (isPlayerInRangedAttackRange)
+            {
+                stateMachine.ChangeState(enemy.rangedAttackState);
+            }
+            else if (isPlayerInAggroRange)
+            {
+                stateMachine.ChangeState(enemy.playerInAggroRangeState);
+            }
+            else
+            {
+                stateMachine.ChangeState(enemy.lookForPlayerState);
+            }
         }
     }
 

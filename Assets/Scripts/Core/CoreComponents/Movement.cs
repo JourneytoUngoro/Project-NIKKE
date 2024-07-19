@@ -8,20 +8,21 @@ public class Movement : CoreComponent
     public event Action synchronizeValues;
 
     private Rigidbody2D rigidBody;
-    private Vector2 workSpace;
     private Vector2 velocityMultiplier = Vector2.one;
     private Vector2 baseVelocity = Vector2.zero;
 
     public int facingDirection { get; private set; }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         rigidBody = GetComponentInParent<Rigidbody2D>();
     }
 
     private void Start()
     {
-        facingDirection = 1;
+        facingDirection = transform.rotation.y == 0 ? 1 : -1;
     }
 
     public void SetVelocityX(float velocity)
@@ -50,15 +51,6 @@ public class Movement : CoreComponent
             rigidBody.velocity = workSpace;
             synchronizeValues?.Invoke();
         }
-    }
-
-    public void SetVelocity(Vector2 angleVector, float speed)
-    {
-        // workSpace.Set(angleVector.x * facingDirection, angleVector.y);
-        SetWorkSpace(angleVector.x * facingDirection, angleVector.y);
-        rigidBody.velocity = workSpace.normalized * speed;
-        synchronizeValues?.Invoke();
-        // player.playerStateMachine.currentState.SetMovementVariables();
     }
 
     public void SetVelocity(Vector2 velocity)

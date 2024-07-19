@@ -93,13 +93,13 @@ public class PlayerGroundedState : PlayerState
             {
                 stateMachine.ChangeState(player.escapeState);
             }
-            else if (blockParryInput && player.blockParryState.IsBlockAvail())
+            else if (blockParryInput && player.shieldParryState.IsBlockAvail())
             {
-                stateMachine.ChangeState(player.blockParryState);
+                stateMachine.ChangeState(player.shieldParryState);
             }
-            else if (attackInput)
+            else if (attackInputActive)
             {
-                stateMachine.ChangeState(player.normalAttackState);
+                stateMachine.ChangeState(player.meleeAttackState);
             }
             else if (dashAttackInput && player.dashAttackState.IsDashAttackAvail())
             {

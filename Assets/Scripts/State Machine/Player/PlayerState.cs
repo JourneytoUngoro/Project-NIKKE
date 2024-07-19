@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerState
+public class PlayerState : State
 {
     #region Components
     protected Player player;
@@ -22,6 +22,7 @@ public class PlayerState
     protected bool dodgeInputActive;
 
     protected bool attackInput;
+    protected bool attackInputActive;
 
     protected bool escapeInput;
 
@@ -30,61 +31,25 @@ public class PlayerState
     protected bool blockParryInput;
     #endregion
 
-    #region Other Variables
-    protected bool onStateExit;
-    protected bool isAnimationStarted;
-    protected bool isAnimationActionTriggered;
-    protected bool isAnimationFinished;
-
-    protected Vector2 currentPosition;
-    protected Vector2 currentVelocity;
-    protected Vector2 workSpace;
-
-    protected int facingDirection;
-
-    protected float baseVelocity;
-    protected float speedMultiplier;
-    protected float epsilon = 0.001f;
-    #endregion
-
-    public float startTime { get; protected set; }
-
     public PlayerState(Player player, string animBoolName)
     {
         this.player = player;
         this.stateMachine = player.playerStateMachine;
-        this.playerData = player.PlayerData;
+        this.playerData = player.playerData;
         this.animBoolName = animBoolName;
         player.movement.synchronizeValues += SetMovementVariables;
     }
 
-    public virtual void AnimationStartTrigger()
+    public override void DoChecks()
     {
-
+        base.DoChecks();
     }
 
-    public virtual void AnimationFinishTrigger()
+    public override void Enter()
     {
-        isAnimationFinished = true;
-    }
+        base.Enter();
 
-    public virtual void AnimationActionTrigger()
-    {
-
-    }
-
-    public virtual void DoChecks()
-    {
-
-    }
-
-    public virtual void Enter()
-    {
-        startTime = Time.time;
         player.animator.SetBool(animBoolName, true);
-        onStateExit = false;
-        isAnimationActionTriggered = false;
-        isAnimationFinished = false;
         SetInputVariables();
         SetMovementVariables();
         
@@ -131,6 +96,7 @@ public class PlayerState
         dodgeInput = player.inputHandler.dodgeInput;
         dodgeInputActive = player.inputHandler.dodgeInputActive;
         attackInput = player.inputHandler.attackInput;
+        attackInputActive = player.inputHandler.attackInputActive;
         escapeInput = player.inputHandler.escapeInput;
         dashAttackInput = player.inputHandler.dashAttackInput;
         blockParryInput = player.inputHandler.blockParryInput;
@@ -149,17 +115,9 @@ public class PlayerState
         player.wallJumpState.preventInputXTimer.Tick();
         player.escapeState.escapeCoolDownTimer.Tick();
         player.dashAttackState.dashCoolDownTimer.Tick();
-        player.blockParryState.defendCoolDownTimer.Tick();
+        player.shieldParryState.defendCoolDownTimer.Tick();
         player.moveState.dashInputTimer.Tick();
-    }
-
-    public void SetBaseVelocity(float baseVelocity)
-    {
-        this.baseVelocity = baseVelocity;
-    }
-
-    public void SetSpeedMultiplier(float speedMultiplier)
-    {
-        this.speedMultiplier = speedMultiplier;
+        player.meleeAttackState.attackComboResetTimer.Tick();
+        player.wallSlideState.wallJumpAvailTimer.Tick();
     }
 }

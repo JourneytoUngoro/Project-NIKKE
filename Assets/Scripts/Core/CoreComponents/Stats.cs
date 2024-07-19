@@ -5,13 +5,13 @@ using UnityEngine;
 public class Stats : CoreComponent
 {
     [field: SerializeField] public Stat health { get; private set; }
-    [field: SerializeField] public Stat poise { get; private set; }
+    [field: SerializeField] public Stat posture { get; private set; }
     [field: SerializeField] public Stat energy { get; private set; }
 
     private void Awake()
     {
         health.Init();
-        poise.Init();
+        posture.Init();
         energy.Init();
     }
 
@@ -24,7 +24,7 @@ public class Stats : CoreComponent
             energy.Recovery();
         }*/
         health.Recovery();
-        poise.Recovery();
+        posture.Recovery();
         energy.Recovery();
     }
 }

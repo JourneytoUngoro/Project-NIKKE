@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerDashAttackState : PlayerAttackState
+public class PlayerJumpAttackState : PlayerAttackState
 {
     public Timer dashCoolDownTimer;
 
@@ -10,7 +10,7 @@ public class PlayerDashAttackState : PlayerAttackState
 
     private bool dashAttackAvail;
 
-    public PlayerDashAttackState(Player player, Transform attackTransform, string animBoolName) : base(player, attackTransform, animBoolName)
+    public PlayerJumpAttackState(Player player, string animBoolName) : base(player, animBoolName)
     {
         dashAttackAvail = true;
         /*dashAttackTimer = new Timer(playerData.dashAttackTime);

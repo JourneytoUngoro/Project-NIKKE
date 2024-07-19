@@ -11,7 +11,7 @@ public class EnemyCombat : Combat
 
     public void MeleeAttack()
     {
-        Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
+        /*Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
         
         if (Array.Exists(detectedObjects, x => x.CompareTag("BlockParry")))
         {
@@ -19,7 +19,7 @@ public class EnemyCombat : Combat
             {
                 if (detectedObject.CompareTag("Player"))
                 {
-                    CombatInfo combatInfo = new CombatInfo(gameObject, damage * blockMultiplier, poiseDamage);
+                    EnemyAttackInfo combatInfo = new EnemyAttackInfo(gameObject, damage * blockMultiplier, poiseDamage);
                     detectedObject.SendMessage("GetDamage", combatInfo);
                     break;
                 }
@@ -31,12 +31,23 @@ public class EnemyCombat : Combat
             {
                 if (detectedObject.CompareTag("Player"))
                 {
-                    CombatInfo combatInfo = new CombatInfo(gameObject, damage, poiseDamage);
+                    EnemyAttackInfo combatInfo = new EnemyAttackInfo(gameObject, damage, poiseDamage);
                     detectedObject.SendMessage("GetDamage", combatInfo);
                     break;
                 }
             }
-        }
+        }*/
+    }
+
+    public override void GetDamage(AttackInfo attackInfo)
+    {
+        base.GetDamage(attackInfo);
+
+        PlayerAttackInfo playerAttackInfo = attackInfo as PlayerAttackInfo;
+
+        enemy.enemyStateMachine.currentState.gotHit = true;
+        enemy.stats.health.DecreaseCurrentValue(playerAttackInfo.damage);
+        enemy.stats.posture.DecreaseCurrentValue(playerAttackInfo.postureDamage);
     }
 
     public void RangedAttack()
@@ -45,18 +56,18 @@ public class EnemyCombat : Combat
 
         Collider2D detectedObject = Physics2D.OverlapCircle(transform.position, 20.0f, whatIsDamageable);
         GameObject temp = Instantiate(projectile, transform.position, Quaternion.identity);
-        Vector2 projectileAngle = CalculateAngle(transform.position, detectedObject.transform.position, 10.0f, 1);
-        if (projectileAngle != Vector2.zero)
+        /*Vector2? projectileAngle = CalculateAngle(transform.position, detectedObject.transform.position, 10.0f, 1);
+        if (projectileAngle != null)
         {
-            temp.GetComponent<Rigidbody2D>().velocity = projectileAngle * 10.0f;
+            temp.GetComponent<Rigidbody2D>().velocity = (Vector2)projectileAngle * 10.0f;
         }
         else
         {
             Destroy(temp);
-        }
+        }*/
     }
 
-    public Vector2 CalculateAngle(Vector2 projectileFirePosition, Vector2 targetPosition, float projectileSpeed, float projectileGravityScale)
+    public Vector2? CalculateProjectileAngle(Vector2 projectileFirePosition, Vector2 targetPosition, float projectileSpeed, float projectileGravityScale)
     {
         float distance = Vector2.Distance(projectileFirePosition, targetPosition);
         float gravityAccelaration = Mathf.Abs(Physics2D.gravity.y * projectileGravityScale);
@@ -83,11 +94,11 @@ public class EnemyCombat : Combat
                 }
                 else
                 {
-                    return Vector2.zero;
+                    return null;
                 }
             }
         }
-        else return Vector2.zero;
+        else return null;
     }
 
     private bool CheckProjectileRoute(Vector2 projectileFirePosition, Vector2 targetPosition, Vector2 projectileVelocity)
@@ -105,7 +116,7 @@ public class EnemyCombat : Combat
             Vector2 movementVector = new Vector2(projectileVelocity.x * timeElapsed, projectileVelocity.y * timeElapsed + 0.5f * Physics2D.gravity.y * Mathf.Pow(timeElapsed, 2));
             prevPosition = currentPosition;
             currentPosition = movementVector + projectileFirePosition;
-            
+
             if (Physics2D.Raycast(prevPosition, currentPosition - prevPosition, Vector2.Distance(currentPosition, prevPosition), whatIsGround))
             {
                 if (Vector2.Distance(currentPosition, targetPosition) < distance * 0.2f)

@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class EnemyIdleState : EnemyState
 {
-    protected bool haveSeenPlayer;
+    protected System.Random random;
+    
+    protected float waitForSeconds;
     protected bool isPlayerInDetectionRange;
 
     public EnemyIdleState(Enemy entity, string animBoolName) : base(entity, animBoolName)
     {
+        random = new System.Random();
     }
 
     public override void DoChecks()
@@ -23,26 +26,32 @@ public class EnemyIdleState : EnemyState
         base.Enter();
 
         enemy.movement.SetVelocityZero();
+        waitForSeconds = (float)random.NextDouble() * (enemyData.maxWaitTime - enemyData.minWaitTime) + enemyData.minWaitTime;
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
     }
 
     public override void LogicUpdate()
     {
         base.LogicUpdate();
 
-        if (isPlayerInDetectionRange)
+        if (!onStateExit)
         {
-            haveSeenPlayer = true;
-            stateMachine.ChangeState(enemy.playerInDetectionRangeState);
-        }
-        else if (haveSeenPlayer)
-        {
-            if (isDetectingWall || isDetectingLedge)
+            if (isPlayerInDetectionRange)
+            {
+                stateMachine.ChangeState(enemy.playerInDetectionRangeState);
+            }
+            else if (GotHit())
+            {
+                stateMachine.ChangeState(enemy.lookForPlayerState);
+            }
+            else if (Time.time - startTime >= waitForSeconds)
             {
                 enemy.movement.Flip();
-            }
-            else
-            {
-                enemy.movement.SetVelocityX(enemy.movement.facingDirection * enemyData.moveSpeed);
+                stateMachine.ChangeState(enemy.moveState);
             }
         }
     }
@@ -50,5 +59,10 @@ public class EnemyIdleState : EnemyState
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
+
+        if (!onStateExit)
+        {
+            enemy.movement.SetVelocityZero();
+        }
     }
 }

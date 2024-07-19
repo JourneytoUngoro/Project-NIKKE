@@ -85,7 +85,7 @@ public class PlayerIdleState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.moveState);
             }
-            else if (player.normalAttackState.currentAmmo < playerData.maxAmmo)
+            else if (player.meleeAttackState.currentAmmo < playerData.maxAmmo)
             {
                 stateMachine.ChangeState(player.reloadState);
             }
