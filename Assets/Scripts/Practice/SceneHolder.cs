@@ -8,9 +8,18 @@ public class SceneHolder : MonoBehaviour
     [SerializeField] private SceneField currentScene;
     [SerializeField] private SceneField targetScene;
 
+    private void Awake()
+    {
+        Debug.Log("Awake");
+    }
+
+    private void OnEnable()
+    {
+        Debug.Log("OnEnable");
+    }
+
     private void Start()
     {
-        Manager.instance.sceneTransitionManager.LoadAndUnloadScenes(scenesToLoad, currentScene);
-        Manager.instance.sceneTransitionManager.SceneTransition(targetScene);
+        Debug.Log("Start");
     }
 }

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,6 @@ public class PlayerDodgeState : PlayerAbilityState
 {
     #region Timer Variable
     public Timer dodgeCoolDownTimer;
-    #endregion
-
-    #region Check Variables
-    private bool isOnSlope;
     #endregion
 
     #region Other Variables
@@ -29,35 +26,39 @@ public class PlayerDodgeState : PlayerAbilityState
         dodgeAvail = true;
     }
 
-    public override void AnimationActionTrigger()
+    public override void AnimationActionTrigger(int index)
     {
-        base.AnimationActionTrigger();
+        base.AnimationActionTrigger(index);
 
-        isAnimationActionTriggered = true;
         player.gameObject.layer = LayerMask.NameToLayer("Player");
     }
 
-    public override void AnimationFinishTrigger()
+    public override void AnimationFinishTrigger(int index)
     {
-        base.AnimationFinishTrigger();
+        base.AnimationFinishTrigger(index);
 
+        if (doBackstep)
+        {
+            isAbilityDone = true;
+        }
+        else
+        {
+            if (!isGrounded)
+            {
+                isAbilityDone = true;
+            }
+            else if (functionCalled)
+            {
+                isAbilityDone = true;
+            }
+        }
+        
         functionCalled = true;
-
-        if (!isGrounded)
-        {
-            isAbilityDone = true;
-        }
-        else if (functionCalled)
-        {
-            isAbilityDone = true;
-        }
     }
 
     public override void DoChecks()
     {
         base.DoChecks();
-
-        isOnSlope = player.detection.isOnSlope();
     }
 
     public override void Enter()
@@ -68,17 +69,26 @@ public class PlayerDodgeState : PlayerAbilityState
         elapsedTime = 0.0f;
         dodgeAvail = false;
         player.inputHandler.InactiveDodgeInput();
-        dodgeCoolDownTimer.StartSingleUseTimer();
         player.stateMachineToAnimator.state = this;
         player.gameObject.layer = LayerMask.NameToLayer("PlayerDodge");
         doBackstep = inputX == 0;
         player.animator.SetBool("backstep", doBackstep);
+        
+        if (doBackstep)
+        {
+            player.movement.SetVelocityXChangeOverTime(playerData.backstepSpeed * -facingDirection, playerData.backstepTime, Ease.InCubic, true);
+        }
+        else
+        {
+            player.movement.SetVelocityXChangeOverTime(playerData.dodgeSpeed * facingDirection, playerData.dodgeTime, Ease.InSine, true);
+        }
     }
 
     public override void Exit()
     {
         base.Exit();
 
+        dodgeCoolDownTimer.StartSingleUseTimer();
         player.gameObject.layer = LayerMask.NameToLayer("Player");
         player.movement.SetVelocityMultiplier(Vector2.one);
         player.animator.SetBool("backstep", false);
@@ -96,75 +106,7 @@ public class PlayerDodgeState : PlayerAbilityState
         #region Physics Logic
         if (!onStateExit)
         {
-            if (!isAnimationActionTriggered)
-            {
-                elapsedTime += Time.fixedDeltaTime;
-
-                if (doBackstep)
-                {
-                    float velocityMultiplierOverTime = Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, elapsedTime / 0.2f, Ease.InCubic), 0.0f, 1.0f);
-                    
-                    if (isOnSlope && isGrounded)
-                    {
-                        if (player.detection.slopePerpNormal.y * -facingDirection > 0)
-                        {
-                            player.movement.SetVelocityMultiplier(Vector2.one * 0.8f);
-                        }
-                        else
-                        {
-                            player.movement.SetVelocityMultiplier(Vector2.one * 1.4f);
-                        }
-
-                        workSpace.Set(player.detection.slopePerpNormal.x * -facingDirection, player.detection.slopePerpNormal.y * -facingDirection);
-
-                        player.movement.SetVelocity(workSpace * velocityMultiplierOverTime * playerData.backstepSpeed);
-                    }
-                    else
-                    {
-                        player.movement.SetVelocityMultiplier(Vector2.one);
-                        if (isGrounded)
-                        {
-                            player.movement.SetVelocityY(0.0f);
-                        }
-
-                        player.movement.SetVelocityX(velocityMultiplierOverTime * -facingDirection * playerData.backstepSpeed);
-                    }
-                }
-                else
-                {
-                    float velocityMultiplierOverTime = Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, elapsedTime / 0.4f, Ease.InSine), 0.0f, 1.0f);
-
-                    if (isOnSlope && isGrounded)
-                    {
-                        if (player.detection.slopePerpNormal.y * facingDirection > 0)
-                        {
-                            player.movement.SetVelocityMultiplier(Vector2.one * 0.8f);
-                        }
-                        else
-                        {
-                            player.movement.SetVelocityMultiplier(Vector2.one * 1.4f);
-                        }
-
-                        workSpace.Set(player.detection.slopePerpNormal.x * facingDirection, player.detection.slopePerpNormal.y * facingDirection);
-
-                        player.movement.SetVelocity(workSpace * velocityMultiplierOverTime * playerData.dodgeSpeed);
-                    }
-                    else
-                    {
-                        player.movement.SetVelocityMultiplier(Vector2.one);
-                        if (isGrounded)
-                        {
-                            player.movement.SetVelocityY(0.0f);
-                        }
-
-                        player.movement.SetVelocityX(velocityMultiplierOverTime * facingDirection * playerData.dodgeSpeed);
-                    }
-                }
-            }
-            else if (isGrounded && currentVelocity.y < epsilon)
-            {
-                player.movement.SetVelocityZero();
-            }
+            player.movement.RigidBodyController(!doBackstep);
         }
         #endregion
     }

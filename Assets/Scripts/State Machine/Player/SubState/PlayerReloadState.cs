@@ -10,9 +10,9 @@ public class PlayerReloadState : PlayerGroundedState
     {
     }
 
-    public override void AnimationFinishTrigger()
+    public override void AnimationFinishTrigger(int index)
     {
-        base.AnimationFinishTrigger();
+        base.AnimationFinishTrigger(index);
 
         isReloadDone = true;
     }

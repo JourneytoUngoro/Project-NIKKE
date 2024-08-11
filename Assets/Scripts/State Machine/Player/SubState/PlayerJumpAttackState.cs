@@ -19,16 +19,6 @@ public class PlayerJumpAttackState : PlayerAttackState
         dashCoolDownTimer.timerAction += () => { dashAttackAvail = true; };
     }
 
-    public override void AnimationActionTrigger()
-    {
-        base.AnimationActionTrigger();
-    }
-
-    public override void AnimationFinishTrigger()
-    {
-        base.AnimationFinishTrigger();
-    }
-
     public override void DoChecks()
     {
         base.DoChecks();

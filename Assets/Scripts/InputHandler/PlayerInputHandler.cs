@@ -12,6 +12,10 @@ public class PlayerInputHandler : MonoBehaviour
 
     private Timer jumpInputBufferTimer;
 
+    private Timer attackInputBufferTimer;
+
+    [HideInInspector] public Controls controls;
+
     public Vector2 movementInput { get; private set; }
     public int normInputX { get; private set; }
     public int normInputY { get; private set; }
@@ -19,7 +23,7 @@ public class PlayerInputHandler : MonoBehaviour
     public int fixedInputX { get; private set; }
     public bool preventInputX { get; private set; }
     public bool jumpInput { get; private set; }
-    public bool jumpInputActive { get; private set; }
+    public bool jumpInputActive { get; private set; } // input을 저장해야하거나, 버튼을 꾹 누를 경우 연속해서 사용되기를 원하지 않을때 그러나 누르는 즉시 실행될 수 있어야한다.
     public bool dodgeInput { get; private set; }
     public bool dodgeInputActive { get; private set; }
     public bool attackInput { get; private set; }
@@ -28,25 +32,37 @@ public class PlayerInputHandler : MonoBehaviour
     public bool dashAttackInput { get; private set; }
     public bool wideAttackInput { get; private set; }
     public bool ultimateInput { get; private set; }
-    public bool blockParryInput { get; private set; }
-    public bool blockParryInputActive { get; private set; }
-    public bool interactionInput { get; private set; }
-    public bool interactionInputActive { get; private set; }
+    public bool shieldParryInput { get; private set; }
+    public bool shieldParryInputActive { get; private set; }
+    public bool objectInteractionInput { get; private set; }
+    public bool doorInteractionInput { get; private set; }
     public bool menuInput { get; private set; }
-    public bool menuInputActive { get; private set; }
+    public bool cureInput { get; private set; }
 
     private void Awake()
     {
+        controls = new Controls();
+        controls.Enable();
         playerInput = GetComponent<PlayerInput>();
         player = GetComponent<Player>();
 
         jumpInputBufferTimer = new Timer(player.playerData.jumpInputBufferTime);
         jumpInputBufferTimer.timerAction += InactiveJumpInput;
+        attackInputBufferTimer = new Timer(0.1f);
+        attackInputBufferTimer.timerAction += InactiveAttackInput;
     }
 
     private void Update()
     {
         jumpInputBufferTimer.Tick();
+        attackInputBufferTimer.Tick();
+        
+        cureInput = controls.InGame.Cure.WasPressedThisFrame();
+        objectInteractionInput = controls.InGame.ObjectInteraction.WasPressedThisFrame();
+        doorInteractionInput = controls.InGame.DoorInteraction.WasPressedThisFrame();
+        dodgeInputActive = controls.InGame.Dodge.WasPressedThisFrame();
+        shieldParryInputActive = controls.InGame.ShieldParry.WasPressedThisFrame();
+        menuInput = controls.InGame.Menu.WasPressedThisFrame();
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
@@ -77,10 +93,6 @@ public class PlayerInputHandler : MonoBehaviour
         if (context.started)
         {
             dodgeInput = true;
-            if (player.dodgeState.IsDodgeAvail())
-            {
-                dodgeInputActive = true;
-            }
         }
 
         if (context.canceled)
@@ -93,13 +105,12 @@ public class PlayerInputHandler : MonoBehaviour
     {
         if (context.started)
         {
-            blockParryInput = true;
-            blockParryInputActive = true;
+            shieldParryInput = true;
         }
 
         if (context.canceled)
         {
-            blockParryInput = false;
+            shieldParryInput = false;
         }
     }
 
@@ -109,6 +120,7 @@ public class PlayerInputHandler : MonoBehaviour
         {
             attackInput = true;
             attackInputActive = true;
+            attackInputBufferTimer.StartSingleUseTimer();
         }
 
         if (context.canceled)
@@ -169,43 +181,11 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
-    public void OnInteractionInput(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            interactionInput = true;
-            interactionInputActive = true;
-        }
-
-        if (context.canceled)
-        {
-            interactionInput = false;
-        }
-    }
-
-    public void OnMenuInput(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            menuInput = true;
-            menuInputActive = true;
-        }
-
-        if (context.canceled)
-        {
-            menuInput = false;
-        }
-    }
-
     public void InactiveJumpInput() => jumpInputActive = false;
 
     public void InactiveDodgeInput() => dodgeInputActive = false;
 
-    public void InactiveInteractionInput() => interactionInputActive = false;
-
     public void InactiveAttackInput() => attackInputActive = false;
-
-    public void InactiveMenuInput() => menuInputActive = false;
 
     public void PreventInputX(int fixedInputX)
     {

@@ -8,15 +8,19 @@ public class Enemy : Entity
     #region State Variables
     public EnemyStateMachine enemyStateMachine { get; private set; }
 
-    public EnemyIdleState idleState { get; private set; }
-    public EnemyMoveState moveState { get; private set; }
-    public EnemySleepState sleepState { get; private set; }
-    public EnemyPlayerInDetectionRangeState playerInDetectionRangeState { get; private set; }
-    public EnemyPlayerInAggroRangeState playerInAggroRangeState { get; private set; }
-    public EnemyLookForPlayerState lookForPlayerState { get; private set; }
-    public EnemyMeleeAttackState meleeAttackState { get; private set; }
-    public EnemyRangedAttackState rangedAttackState { get; private set; }
-    public EnemyTeleportState teleportState { get; private set; }
+    public EnemyIdleState idleState { get; protected set; }
+    public EnemyMoveState moveState { get; protected set; }
+    public EnemySleepState sleepState { get; protected set; }
+    public EnemyTargetInDetectionRangeState targetInDetectionRangeState { get; protected set; }
+    public EnemyTargetInAggroRangeState targetInAggroRangeState { get; protected set; }
+    public EnemyLookForPlayerState lookForTargetState { get; protected set; }
+    public EnemyAttackState meleeAttackState { get; protected set; }
+    public EnemyAttackState midRAttackState { get; protected set; }
+    public EnemyAttackState rangedAttackState { get; protected set; }
+    public EnemyTeleportState teleportState { get; protected set; }
+    public EnemyStunnedState stunnedState { get; protected set; }
+    public EnemyDazedState dazedState { get; protected set; }
+    public EnemyKnockbackState knockbackState { get; protected set; }
     [field: SerializeField] public EnemyData enemyData { get; private set; }
     #endregion
 
@@ -24,11 +28,13 @@ public class Enemy : Entity
     public EnemyMovement movement { get; protected set; }
     public EnemyDetection detection { get; protected set; }
     public EnemyCombat combat { get; protected set; }
-    public Stats stats { get; protected set; }
+    public EnemyStats stats { get; protected set; }
     [field: SerializeField] public Seeker seeker { get; private set; }
     #endregion
 
     #region Other Variables
+    [field: SerializeField] public Transform[] projectileGeneratePosition;
+
     protected bool isDead;
     #endregion
 
@@ -37,33 +43,28 @@ public class Enemy : Entity
         base.Awake();
     }
 
-    protected virtual void Start()
+    protected override void Start()
     {
-        movement = core.GetCoreComponent<EnemyMovement>();
-        detection = core.GetCoreComponent<EnemyDetection>();
-        combat = core.GetCoreComponent<EnemyCombat>();
+        base.Start();
+
+        movement = entityMovement as EnemyMovement;
+        detection = entityDetection as EnemyDetection;
+        combat = entityCombat as EnemyCombat;
+        stats = entityStats as EnemyStats;
 
         enemyStateMachine = new EnemyStateMachine();
 
         idleState = new EnemyIdleState(this, "idle");
         sleepState = new EnemySleepState(this, "sleep");
         moveState = new EnemyMoveState(this, "move");
-        playerInDetectionRangeState = new EnemyPlayerInDetectionRangeState(this, "alert");
-        playerInAggroRangeState = new EnemyPlayerInAggroRangeState(this, "move");
-        lookForPlayerState = new EnemyLookForPlayerState(this, "idle");
-        meleeAttackState = new EnemyMeleeAttackState(this, "meleeAttack");
-        rangedAttackState = new EnemyRangedAttackState(this, "rangedAttack");
+        targetInDetectionRangeState = new EnemyTargetInDetectionRangeState(this, "alert");
+        targetInAggroRangeState = new EnemyTargetInAggroRangeState(this, "move");
+        lookForTargetState = new EnemyLookForPlayerState(this, "idle");
         teleportState = new EnemyTeleportState(this, "teleport");
+        stunnedState = new EnemyStunnedState(this, "stunned");
+        dazedState = new EnemyDazedState(this, "idle");
+        knockbackState = new EnemyKnockbackState(this, "knockback");
 
-        if (enemyData.canSleep)
-        {
-            enemyStateMachine.Initialize(sleepState);
-        }
-        else
-        {
-            enemyStateMachine.Initialize(idleState);
-        }
-        // enemyStateMachine.Initialize(idleState);
         // State initializing is done in specific enemy script
     }
 

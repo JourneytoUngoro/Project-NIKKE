@@ -7,36 +7,72 @@ using UnityEngine;
 
 public class EnemyCombat : Combat
 {
-    [SerializeField] private float blockMultiplier;
+    [field: SerializeField] public Transform midRAttackTransform { get; private set; }
+    [SerializeField] private float midRAttackRadius;
+    [SerializeField] private Vector2 midRAttackSize;
 
-    public void MeleeAttack()
+    public bool isTargetInMeleeAttackRange()
     {
-        /*Collider2D[] detectedObjects = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
-        
-        if (Array.Exists(detectedObjects, x => x.CompareTag("BlockParry")))
+        if (meleeAttackRadius > epsilon)
         {
-            foreach (var detectedObject in detectedObjects)
+            return Physics2D.OverlapCircle(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
+        }
+        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
+        {
+            return Physics2D.OverlapBox(meleeAttackTransform.position, meleeAttackSize, 0.0f, whatIsDamageable);
+        }
+        else return false;
+    }
+
+    public bool isTargetInMidRAttackRange()
+    {
+        if (midRAttackRadius > epsilon)
+        {
+            return Physics2D.OverlapCircle(midRAttackTransform.position, midRAttackRadius, whatIsDamageable);
+        }
+        else if (midRAttackSize.x > epsilon && midRAttackSize.y > epsilon)
+        {
+            return Physics2D.OverlapBox(midRAttackTransform.position, midRAttackSize, 0.0f, whatIsDamageable);
+        }
+        else return false;
+    }
+
+    public bool isTargetInRangedAttackRange()
+    {
+        if (rangedAttackRadius > epsilon)
+        {
+            return Physics2D.OverlapCircle(rangedAttackTransform.position, rangedAttackRadius, whatIsDamageable);
+        }
+        else if (rangedAttackSize.x > epsilon && rangedAttackSize.y > epsilon)
+        {
+            return Physics2D.OverlapBox(rangedAttackTransform.position, rangedAttackSize, 0.0f, whatIsDamageable);
+        }
+        else return false;
+    }
+
+    public override void DoMeleeAttack()
+    {
+        Collider2D[] damageTargets = { };
+
+        if (meleeAttackRadius > epsilon)
+        {
+            damageTargets = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
+        }
+        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
+        {
+            damageTargets = Physics2D.OverlapBoxAll(meleeAttackTransform.position, meleeAttackSize, 0.0f, whatIsDamageable);
+        }
+
+        foreach(Collider2D damageTarget in damageTargets)
+        {
+            if (!damagedTargets.Contains(damageTarget))
             {
-                if (detectedObject.CompareTag("Player"))
-                {
-                    EnemyAttackInfo combatInfo = new EnemyAttackInfo(gameObject, damage * blockMultiplier, poiseDamage);
-                    detectedObject.SendMessage("GetDamage", combatInfo);
-                    break;
-                }
+                enemy.enemyData.meleeAttackInfo.attackSubject = enemy.gameObject;
+                Debug.Log("Do damage to: " + damageTarget.gameObject.name);
+                damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemy.enemyData.meleeAttackInfo);
+                damagedTargets.Add(damageTarget);
             }
         }
-        else
-        {
-            foreach (var detectedObject in detectedObjects)
-            {
-                if (detectedObject.CompareTag("Player"))
-                {
-                    EnemyAttackInfo combatInfo = new EnemyAttackInfo(gameObject, damage, poiseDamage);
-                    detectedObject.SendMessage("GetDamage", combatInfo);
-                    break;
-                }
-            }
-        }*/
     }
 
     public override void GetDamage(AttackInfo attackInfo)
@@ -46,89 +82,67 @@ public class EnemyCombat : Combat
         PlayerAttackInfo playerAttackInfo = attackInfo as PlayerAttackInfo;
 
         enemy.enemyStateMachine.currentState.gotHit = true;
-        enemy.stats.health.DecreaseCurrentValue(playerAttackInfo.damage);
-        enemy.stats.posture.DecreaseCurrentValue(playerAttackInfo.postureDamage);
+        enemy.stats.health.DecreaseCurrentValue(playerAttackInfo.healthDamage);
+        enemy.stats.posture.IncreaseCurrentValue(playerAttackInfo.postureDamage);
     }
 
-    public void RangedAttack()
+    public override void GetPostureDamage(float postureDamage)
     {
-        if (projectile == null) return;
+        base.GetPostureDamage(postureDamage);
 
-        Collider2D detectedObject = Physics2D.OverlapCircle(transform.position, 20.0f, whatIsDamageable);
-        GameObject temp = Instantiate(projectile, transform.position, Quaternion.identity);
-        /*Vector2? projectileAngle = CalculateAngle(transform.position, detectedObject.transform.position, 10.0f, 1);
-        if (projectileAngle != null)
+        enemy.enemyStateMachine.currentState.gotHit = true;
+    }
+
+    public void FireProjectile(string objectName, Vector2 projectileFirePosition, Vector2? targetPosition, float projectileSpeed, float projectileGravityScale)
+    {
+        GameObject projectile = Manager.Instance.objectPoolingManager.GetGameObject(objectName);
+        projectile.GetComponent<Explosion>().SetAttackSubject(gameObject);
+        Rigidbody2D projectileRigidbody = projectile.GetComponent<Rigidbody2D>();
+
+        if (projectile == null)
         {
-            temp.GetComponent<Rigidbody2D>().velocity = (Vector2)projectileAngle * 10.0f;
+            Debug.LogError($"Can't find projectile name: {objectName}");
+            return;
         }
-        else
+        
+        if (targetPosition.HasValue)
         {
-            Destroy(temp);
-        }*/
-    }
+            Vector2? projectileAngle = CalculateProjectileAngle(projectileFirePosition, targetPosition.Value, projectileSpeed, projectileGravityScale);
 
-    public Vector2? CalculateProjectileAngle(Vector2 projectileFirePosition, Vector2 targetPosition, float projectileSpeed, float projectileGravityScale)
-    {
-        float distance = Vector2.Distance(projectileFirePosition, targetPosition);
-        float gravityAccelaration = Mathf.Abs(Physics2D.gravity.y * projectileGravityScale);
-        float xDifference = targetPosition.x - projectileFirePosition.x;
-        float yDifference = targetPosition.y - projectileFirePosition.y;
-        float speedSquare = Mathf.Pow(projectileSpeed, 2);
-        float rootUnderValue = Mathf.Pow(speedSquare, 2) - gravityAccelaration * (gravityAccelaration * Mathf.Pow(xDifference, 2) + 2 * yDifference * speedSquare);
-        if (rootUnderValue >= 0.0f)
-        {
-            float lowAngle = Mathf.Atan2(speedSquare - Mathf.Sqrt(rootUnderValue), gravityAccelaration * xDifference);
-            float highAngle = Mathf.Atan2(speedSquare + Mathf.Sqrt(rootUnderValue), gravityAccelaration * xDifference);
-            Vector2 highAngleVector = new Vector2(Mathf.Cos(highAngle), Mathf.Sin(highAngle));
-            Vector2 lowAngleVector = new Vector2(Mathf.Cos(lowAngle), Mathf.Sin(lowAngle));
-
-            if (CheckProjectileRoute(projectileFirePosition, targetPosition, projectileSpeed * lowAngleVector))
+            if (projectileAngle.HasValue)
             {
-                return lowAngleVector;
+                projectileRigidbody.velocity = projectileAngle.Value * projectileSpeed;
             }
             else
             {
-                if (CheckProjectileRoute(projectileFirePosition, targetPosition, projectileSpeed * highAngleVector))
-                {
-                    return highAngleVector;
-                }
-                else
-                {
-                    return null;
-                }
+                Manager.Instance.objectPoolingManager.ReleaseGameObject(projectile);
             }
         }
-        else return null;
+        else
+        {
+            projectile.transform.position = projectileFirePosition;
+            projectile.transform.rotation = enemy.movement.facingDirection == 1 ? Quaternion.Euler(0.0f, 0.0f, 0.0f) : Quaternion.Euler(0.0f, -180.0f, 0.0f);
+            if (projectileRigidbody != null)
+            {
+                projectileRigidbody.velocity = projectile.transform.right * projectileSpeed;
+                projectileRigidbody.gravityScale = projectileGravityScale;
+            }
+        }
     }
 
-    private bool CheckProjectileRoute(Vector2 projectileFirePosition, Vector2 targetPosition, Vector2 projectileVelocity)
+    protected override void OnDrawGizmos()
     {
-        float distance = Vector2.Distance(projectileFirePosition, targetPosition);
-        float xDifference = targetPosition.x - projectileFirePosition.x;
-        float expectedTravelDuration = xDifference / projectileVelocity.x;
-        float timeStep = expectedTravelDuration / 20.0f;
+        base.OnDrawGizmos();
 
-        Vector2 prevPosition;
-        Vector2 currentPosition = projectileFirePosition;
-        for (int i = 0; i < 20; i++)
+        Gizmos.color = Color.red;
+
+        if (midRAttackRadius > epsilon)
         {
-            float timeElapsed = timeStep * i;
-            Vector2 movementVector = new Vector2(projectileVelocity.x * timeElapsed, projectileVelocity.y * timeElapsed + 0.5f * Physics2D.gravity.y * Mathf.Pow(timeElapsed, 2));
-            prevPosition = currentPosition;
-            currentPosition = movementVector + projectileFirePosition;
-
-            if (Physics2D.Raycast(prevPosition, currentPosition - prevPosition, Vector2.Distance(currentPosition, prevPosition), whatIsGround))
-            {
-                if (Vector2.Distance(currentPosition, targetPosition) < distance * 0.2f)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            Gizmos.DrawWireSphere(midRAttackTransform.position, midRAttackRadius);
         }
-        return true;
+        else if (midRAttackSize.x > epsilon && midRAttackSize.y > epsilon)
+        {
+            Gizmos.DrawWireCube(midRAttackTransform.position, midRAttackSize);
+        }
     }
 }

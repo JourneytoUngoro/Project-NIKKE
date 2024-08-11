@@ -89,41 +89,15 @@ public class PlayerMoveState : PlayerGroundedState
         #region Physics Logic
         if (!onStateExit)
         {
-            if (isOnSlope)
-            {
-                if (player.detection.slopePerpNormal.y * inputX > 0)
-                {
-                    player.movement.SetVelocityMultiplier(Vector2.one * 0.8f);
-                }
-                else
-                {
-                    player.movement.SetVelocityMultiplier(Vector2.one * 1.4f);
-                }
+            player.movement.RigidBodyController();
 
-                workSpace.Set(player.detection.slopePerpNormal.x * inputX, player.detection.slopePerpNormal.y * inputX);
-                
-                if (isDashing)
-                {
-                    player.movement.SetVelocity(workSpace * playerData.dashSpeed);
-                }
-                else
-                {
-                    player.movement.SetVelocity(workSpace * playerData.moveSpeed);
-                }
+            if (isDashing)
+            {
+                player.movement.SetVelocityX(playerData.dashSpeed * inputX, true);
             }
             else
             {
-                player.movement.SetVelocityMultiplier(Vector2.one);
-
-                if (isDashing)
-                {
-                    player.movement.SetVelocityX(inputX * playerData.dashSpeed);
-                }
-                else
-                {
-                    player.movement.SetVelocityX(inputX * playerData.moveSpeed);
-                }
-                player.movement.SetVelocityLimitY(0.0f); // 비탈면의 반동으로 캐릭터가 위로 튀어오르는 현상 방지
+                player.movement.SetVelocityX(playerData.moveSpeed * inputX, true);
             }
         }
         #endregion

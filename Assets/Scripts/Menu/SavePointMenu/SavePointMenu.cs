@@ -53,14 +53,14 @@ public class SavePointMenu : Menu
     {
         isSlotOpened = false;
         slotMenu.SetActive(false);
-        Manager.instance.uiManager.CloseSavePointMenu();
+        Manager.Instance.uiManager.CloseSavePointMenu();
     }
 
     public void OnMainMenuButtonClicked()
     {
         isSlotOpened = false;
         slotMenu.SetActive(false);
-        Manager.instance.uiManager.CloseSavePointMenu();
+        Manager.Instance.uiManager.CloseSavePointMenu();
         SceneManager.LoadSceneAsync("MainMenu");
     }
 }

@@ -22,7 +22,7 @@ public class SavePointSaveSlotMenu : Menu
             customNav.selectOnDown = button.navigation.selectOnDown;
             customNav.selectOnLeft = savePointMenu.prevButton;
             button.navigation = customNav;
-            if (Manager.instance.dataManager.selectedProfileId == button.gameObject.GetComponent<SaveSlot>().GetProfileId())
+            if (Manager.Instance.dataManager.selectedProfileId == button.gameObject.GetComponent<SaveSlot>().GetProfileId())
             {
                 SetFirstSelected(button);
             }

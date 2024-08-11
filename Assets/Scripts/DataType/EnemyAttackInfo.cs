@@ -6,26 +6,31 @@ using UnityEngine;
 public class EnemyAttackInfo : AttackInfo
 {
     [HideInInspector] public GameObject attackSubject;
-    public Vector3 initialAttackPoint;
     
     public int attackLevel;
     
     public bool isProjectile;
-    public bool dazedWhenAvoided;
+    [HideInInspector] public GameObject projectileSender;
+   
+    public bool isDazedWhenAvoided;
+    public float dazedTime;
     
     public float damageWhenShielded;
     public float postureDamageWhenShielded;
+    public float knockbackTimeWhenShielded;
+    public Vector2 knockbackVelocityWhenShielded;
     public float damageWhenParried;
     public float postureDamageWhenParried;
     public float counterPostureDamageWhenParried;
-    public float xVelocityWhenHit;
-    public float yVelocityWhenHit;
-    public float dazedTime;
+    public float knockbackTimeWhenParried;
+    public Vector2 knockbackVelocityWhenParried;
+    public float counterKnockbackTimeWhenParried;
+    public Vector2 counterKnockbackVelocityWhenParried;
 
     public EnemyAttackInfo(GameObject sender, float damage, float poiseDamage)
     {
         this.attackSubject = sender;
-        this.damage = damage;
+        this.healthDamage = damage;
         this.postureDamage = poiseDamage;
     }
 }

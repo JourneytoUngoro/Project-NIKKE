@@ -2,7 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Timer class for replacement of coroutines
+/// Timer must be used in Update function
+/// Using Timer in FixedUpdate might cause serious problems
+/// </summary>
 public class Timer
 {
     public event Action timerAction;
@@ -26,45 +30,10 @@ public class Timer
         resetStartTime = true;
     }
 
-    public void Tick()
+    public void Tick(bool condition = true)
     {
-        if (timerActive)
-        {
-            if (Time.time + timeOffset > startTime + duration)
-            {
-                timerAction?.Invoke();
+        startTime += Time.deltaTime * (1.0f - Time.timeScale);
 
-                if (isSingleUse)
-                {
-                    StopTimer();
-
-                    if (isAdjustTimeSingleUse)
-                    {
-                        timeOffset = 0.0f;
-                    }
-                }
-                else
-                {
-                    startTime = Time.time;
-
-                    if (maxMultiUseAmount != 0)
-                    {
-                        if (currentMultiUseAmount < maxMultiUseAmount)
-                        {
-                            currentMultiUseAmount += 1;
-                        }
-                        else
-                        {
-                            StopTimer();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public void Tick(bool condition)
-    {
         if (condition)
         {
             if (timerActive)
@@ -103,16 +72,16 @@ public class Timer
         }
     }
 
+    /// <summary>
+    /// Used when you need to renew the startTime every time the condition is fit
+    /// </summary>
+    /// <param name="condition"></param>
     public void TickResetTime(bool condition)
     {
+        startTime += Time.deltaTime * (1.0f - Time.timeScale);
+
         if (condition)
         {
-            if (resetStartTime)
-            {
-                startTime = Time.time;
-                resetStartTime = false;
-            }
-
             if (timerActive)
             {
                 if (Time.time + timeOffset > startTime + duration)
@@ -147,6 +116,10 @@ public class Timer
                 }
             }
         }
+        else
+        {
+            startTime = Time.time;
+        }
     }
 
     public void StartSingleUseTimer()
@@ -156,20 +129,23 @@ public class Timer
         startTime = Time.time;
     }
 
-    public void StartMultiUseTimer()
-    {
-        timerActive = true;
-        isSingleUse = false;
-        startTime = Time.time;
-    }
-
-    public void StartMultiUseTimer(int maxMultiUseAmount)
+    public void StartMultiUseTimer(int maxMultiUseAmount = 0)
     {
         timerActive = true;
         isSingleUse = false;
         startTime = Time.time;
         currentMultiUseAmount = 0;
         this.maxMultiUseAmount = maxMultiUseAmount;
+    }
+
+    public void ChangeDuration(float duration)
+    {
+        this.duration = duration;
+    }
+
+    public void ChangeStartTime(float startTime)
+    {
+        this.startTime = startTime;
     }
 
     public void StopTimer()

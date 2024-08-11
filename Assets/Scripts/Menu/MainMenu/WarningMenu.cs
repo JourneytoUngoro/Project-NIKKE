@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class WarningMenu : Menu
 {
     [Header("Components")]
-    [SerializeField] private TextMeshProUGUI warningText;
+    [SerializeField] private TMP_Text mainText;
     [SerializeField] private Button confirmButton;
     [SerializeField] private GameObject confirmButtonPointer;
     [SerializeField] private Button cancelButton;
@@ -29,11 +29,11 @@ public class WarningMenu : Menu
         }
     }
 
-    public void ActivateMenu(string warningText, UnityAction confirmAction, UnityAction cancelAction)
+    public void ActivateMenu(string mainText, UnityAction confirmAction, UnityAction cancelAction)
     {
         gameObject.SetActive(true);
 
-        this.warningText.text = warningText;
+        this.mainText.text = mainText;
 
         foreach (Button button in menuButtons)
         {

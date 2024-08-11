@@ -28,7 +28,10 @@ public class PlayerState : State
 
     protected bool dashAttackInput;
 
-    protected bool blockParryInput;
+    protected bool shieldParryInput;
+    protected bool shieldParryInputActive;
+
+    protected bool cureInput;
     #endregion
 
     public PlayerState(Player player, string animBoolName)
@@ -38,6 +41,9 @@ public class PlayerState : State
         this.playerData = player.playerData;
         this.animBoolName = animBoolName;
         player.movement.synchronizeValues += SetMovementVariables;
+        afterImageTimer = new Timer(0.1f);
+        afterImageTimer.timerAction += () => { player.UseAfterImage(new Color(1.0f, 0.2f, 1.0f)); };
+        afterImageTimer.StartMultiUseTimer();
     }
 
     public override void DoChecks()
@@ -70,14 +76,6 @@ public class PlayerState : State
     public virtual void LogicUpdate()
     {
         TickPublicTimers();
-        /*if (player.dashState.isDashing)
-        {
-            player.afterImagePool.StartAfterImage(player.spriteRenderer, 0.2f, 0.8f);
-        }
-        else
-        {
-            player.afterImagePool.StopAfterImage();
-        }*/
     }
 
     public virtual void PhysicsUpdate()
@@ -99,7 +97,9 @@ public class PlayerState : State
         attackInputActive = player.inputHandler.attackInputActive;
         escapeInput = player.inputHandler.escapeInput;
         dashAttackInput = player.inputHandler.dashAttackInput;
-        blockParryInput = player.inputHandler.blockParryInput;
+        shieldParryInput = player.inputHandler.shieldParryInput;
+        shieldParryInputActive = player.inputHandler.shieldParryInputActive;
+        cureInput = player.inputHandler.cureInput;
     }
 
     protected void SetMovementVariables()
@@ -111,11 +111,12 @@ public class PlayerState : State
 
     private void TickPublicTimers()
     {
+        afterImageTimer.Tick(player.moveState.isDashing);
         player.dodgeState.dodgeCoolDownTimer.Tick(player.detection.isGrounded());
         player.wallJumpState.preventInputXTimer.Tick();
         player.escapeState.escapeCoolDownTimer.Tick();
         player.dashAttackState.dashCoolDownTimer.Tick();
-        player.shieldParryState.defendCoolDownTimer.Tick();
+        player.shieldParryState.shieldCoolDownTimer.Tick();
         player.moveState.dashInputTimer.Tick();
         player.meleeAttackState.attackComboResetTimer.Tick();
         player.wallSlideState.wallJumpAvailTimer.Tick();

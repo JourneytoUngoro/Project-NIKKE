@@ -14,6 +14,13 @@ public class Entity : MonoBehaviour
     public StateMachineToAnimator stateMachineToAnimator { get; protected set; }
     #endregion
 
+    #region Entity Components
+    public Movement entityMovement { get; protected set; }
+    public Detection entityDetection { get; protected set; }
+    public Combat entityCombat { get; protected set; }
+    public Stats entityStats { get; protected set; }
+    #endregion
+
     protected virtual void Awake()
     {
         animator = GetComponent<Animator>();
@@ -23,5 +30,22 @@ public class Entity : MonoBehaviour
         stateMachineToAnimator = GetComponent<StateMachineToAnimator>();
 
         core = GetComponentInChildren<Core>();
+    }
+
+    protected virtual void Start()
+    {
+        entityDetection = core.GetCoreComponent<Detection>();
+        entityMovement = core.GetCoreComponent<Movement>();
+        entityCombat = core.GetCoreComponent<Combat>();
+        entityStats = core.GetCoreComponent<Stats>();
+    }
+
+    public void UseAfterImage(Color color)
+    {
+        GameObject afterImage = Manager.Instance.objectPoolingManager.GetGameObject("AfterImage");
+        afterImage.GetComponent<AfterImage>().spriteRenderer.sprite = spriteRenderer.sprite;
+        afterImage.GetComponent<AfterImage>().spriteRenderer.color = color;
+        afterImage.transform.position = transform.position;
+        afterImage.transform.rotation = transform.rotation;
     }
 }

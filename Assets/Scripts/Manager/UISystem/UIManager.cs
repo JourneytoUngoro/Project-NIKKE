@@ -14,9 +14,6 @@ public class UIManager : MonoBehaviour
     [field: SerializeField] public GameObject savePointMenu { get; private set; }
     [field: SerializeField] public GameObject slotMenu { get; private set; }
 
-    [Header("Health Bar")]
-    [SerializeField] private Slider healthBar;
-
     private void Update()
     {
         // healthBar.value = Manager.instance.player.stats.health.SliderValue();
@@ -24,18 +21,16 @@ public class UIManager : MonoBehaviour
 
     public void OpenSavePointMenu()
     {
-        Manager.instance.gameManager.isPaused = true;
-        Time.timeScale = 0.0f;
-        Manager.instance.player.playerInput.SwitchCurrentActionMap("UI");
+        Manager.Instance.gameManager.PauseGame();
+        Manager.Instance.gameManager.player.playerInput.SwitchCurrentActionMap("UI");
         savePointMenu.SetActive(true);
         notificationWindow.SetActive(false);
     }
 
     public void CloseSavePointMenu()
     {
-        Manager.instance.gameManager.isPaused = false;
-        Time.timeScale = 1.0f;
-        Manager.instance.player.playerInput.SwitchCurrentActionMap("InGame");
+        Manager.Instance.gameManager.ResumeGame();
+        Manager.Instance.gameManager.player.playerInput.SwitchCurrentActionMap("InGame");
         savePointMenu.SetActive(false);
     }
 
@@ -52,15 +47,13 @@ public class UIManager : MonoBehaviour
 
     public void OpenPauseMenu()
     {
-        Manager.instance.gameManager.isPaused = true;
-        Time.timeScale = 0.0f;
+        Manager.Instance.gameManager.PauseGame();
         pauseMenu.SetActive(true);
     }
 
     public void ClosePauseMenu()
     {
-        Manager.instance.gameManager.isPaused = false;
-        Time.timeScale = 1.0f;
+        Manager.Instance.gameManager.ResumeGame();
         pauseMenu.SetActive(false);
     }
 }

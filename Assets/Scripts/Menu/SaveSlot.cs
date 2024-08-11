@@ -11,11 +11,11 @@ public class SaveSlot : MonoBehaviour
     [SerializeField] private string profileId;
 
     [Header("Content")]
-    [SerializeField] private GameObject noDataContent;
     [SerializeField] private GameObject hasDataContent;
-    [SerializeField] private TextMeshProUGUI playerLevel;
-    [SerializeField] private TextMeshProUGUI savePointName;
-    [SerializeField] private TextMeshProUGUI lastPlayTime;
+    [SerializeField] private GameObject noDataContent;
+    [SerializeField] private TMP_Text playerLevel;
+    [SerializeField] private TMP_Text lastSavePoint;
+    [SerializeField] private TMP_Text lastPlayTime;
 
     private Button slotButton;
     private Button clearButton;
@@ -45,14 +45,14 @@ public class SaveSlot : MonoBehaviour
             clearButton.gameObject.SetActive(true);
 
             playerLevel.text = "Lv. " + data.playerLevel.ToString();
-            savePointName.text = "Save Point: " + data.lastSavePoint.ToString();
+            lastSavePoint.text = "Save Point: " + data.lastSavePoint.ToString();
             lastPlayTime.text = "Last Play Time: " + data.lastPlayTime;
         }
     }
 
     public string GetProfileId()
     {
-        return this.profileId;
+        return profileId;
     }
 
     public void SetInteractable(bool interactable)

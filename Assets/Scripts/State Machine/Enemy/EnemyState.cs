@@ -31,6 +31,10 @@ public class EnemyState : State
         this.stateMachine = enemy.enemyStateMachine;
         this.enemyData = enemy.enemyData;
         this.animBoolName = animBoolName;
+        enemy.movement.synchronizeValues += SetMovementVariables;
+        afterImageTimer = new Timer(0.1f);
+        afterImageTimer.timerAction += () => { enemy.UseAfterImage(new Color(0.5f, 0.5f, 1.0f)); };
+        afterImageTimer.StartMultiUseTimer();
     }
 
     public override void DoChecks()
@@ -56,6 +60,7 @@ public class EnemyState : State
 
     public virtual void Exit()
     {
+        enemy.movement.SetVelocityMultiplier(Vector2.one);
         enemy.animator.SetBool(animBoolName, false);
         onStateExit = true;
     }
@@ -73,12 +78,6 @@ public class EnemyState : State
     public virtual void PhysicsUpdate()
     {
         DoChecks();
-
-        if (!isGrounded)
-        {
-            // enemy.rigidBody.gravityScale = 9.5f;
-        }
-
         SetMovementVariables();
     }
 
@@ -92,8 +91,9 @@ public class EnemyState : State
     private void TickPublicTimers()
     {
         enemy.teleportState.teleportCoolDownTimer.Tick();
-        enemy.meleeAttackState.meleeAttackCoolDownTimer.Tick();
-        enemy.rangedAttackState.rangedAttackCoolDownTimer.Tick();
+        enemy.meleeAttackState.attackCoolDownTimer.Tick();
+        enemy.midRAttackState.attackCoolDownTimer.Tick();
+        enemy.rangedAttackState.attackCoolDownTimer.Tick();
     }
 
     protected bool GotHit()
@@ -106,6 +106,55 @@ public class EnemyState : State
         else
         {
             return false;
+        }
+    }
+
+    protected void RigidBodyController(bool isMovingForward = true, bool limitYVelocity = true)
+    {
+        if (isGrounded)
+        {
+            if (isOnSlope)
+            {
+                enemy.rigidBody.gravityScale = 0.0f;
+
+                if (isMovingForward)
+                {
+                    if (enemy.detection.slopePerpNormal.y * facingDirection > 0)
+                    {
+                        enemy.movement.SetVelocityMultiplier(Vector2.one * 0.8f);
+                    }
+                    else
+                    {
+                        enemy.movement.SetVelocityMultiplier(Vector2.one * 1.4f);
+                    }
+                }
+                else
+                {
+                    if (enemy.detection.slopePerpNormal.y * -facingDirection > 0)
+                    {
+                        enemy.movement.SetVelocityMultiplier(Vector2.one * 0.8f);
+                    }
+                    else
+                    {
+                        enemy.movement.SetVelocityMultiplier(Vector2.one * 1.4f);
+                    }
+                }
+            }
+            else
+            {
+                enemy.movement.SetVelocityMultiplier(Vector2.one);
+                enemy.rigidBody.gravityScale = 9.5f;
+                
+                if (limitYVelocity)
+                {
+                    enemy.movement.SetVelocityLimitY(0.0f);
+                }
+            }
+        }
+        else
+        {
+            enemy.movement.SetVelocityMultiplier(Vector2.one);
+            enemy.rigidBody.gravityScale = 9.5f;
         }
     }
 }

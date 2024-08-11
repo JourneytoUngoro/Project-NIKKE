@@ -12,10 +12,8 @@ public class EnemyData : ScriptableObject
     public float postureRecoveryRate;
     public bool canSleep;
     public bool canAlert;
-    public bool canFall;
-    public bool canJump;
+    public bool canFallDownLedge;
     public bool canSmartPathFind;
-    public bool canSmartFollow;
     public bool canMeleeAttack;
     public bool canMidRAttack;
     public bool canRangedAttack;
@@ -26,13 +24,6 @@ public class EnemyData : ScriptableObject
 
     [Header("Move State")]
     public float moveSpeed = 6.0f;
-
-    [Header("Enemy Pathfinding")]
-    public float nextWaypointDistance = 3.0f;
-    public float pathUpdatePeriods = 0.5f;
-    public float jumpHeightRequirement = 0.8f;
-    public float maxMovementDistance = 10.0f;
-    public float jumpSpeed = 10.0f;
 
     [Header("Teleport State")]
     public float teleportCoolDown = 10.0f;
@@ -46,12 +37,20 @@ public class EnemyData : ScriptableObject
 
     [Header("Stunned State")]
     public float stunnedTime = 4.0f;
+    public float stunnedKnockbackSpeed = 5.0f;
+
+    [Header("Enemy Pathfinding")]
+    public float nextWaypointDistance = 3.0f;
+    public float pathUpdatePeriods = 0.5f;
+    public float jumpHeightRequirement = 0.8f;
+    public float maxMovementDistance = 10.0f;
+    public float jumpSpeed = 10.0f;
 
     [Header("Attack Information")]
-    public EnemyAttackInfo meleeAttackInfo;
     public float meleeAttackCoolDown;
-    public EnemyAttackInfo midrAttackInfo;
-    public float midrAttackCoolDown;
-    public EnemyAttackInfo rangedAttackInfo;
+    public EnemyAttackInfo meleeAttackInfo;
+    public float midRAttackCoolDown;
+    public EnemyAttackInfo midRAttackInfo;
     public float rangedAttackCoolDown;
+    public EnemyAttackInfo rangedAttackInfo;
 }

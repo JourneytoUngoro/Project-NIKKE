@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,6 +11,11 @@ public class Movement : CoreComponent
     private Rigidbody2D rigidBody;
     private Vector2 velocityMultiplier = Vector2.one;
     private Vector2 baseVelocity = Vector2.zero;
+
+    private Coroutine velocityChangeOverTimeCoroutine;
+
+    private bool isOnSlope;
+    private bool isGrounded;
 
     public int facingDirection { get; private set; }
 
@@ -25,13 +31,38 @@ public class Movement : CoreComponent
         facingDirection = transform.rotation.y == 0 ? 1 : -1;
     }
 
-    public void SetVelocityX(float velocity)
+    private void FixedUpdate()
     {
-        // workSpace.Set(velocity, rigidBody.velocity.y);
-        SetWorkSpace(velocity, rigidBody.velocity.y);
-        rigidBody.velocity = workSpace;
+        isOnSlope = entity.entityDetection.isOnSlope();
+        isGrounded = entity.entityDetection.isGrounded();
+    }
+
+    public void SetVelocityX(float velocity, bool considerGroundCondition = false)
+    {
+        if (considerGroundCondition)
+        {
+            if (isOnSlope && isGrounded)
+            {
+                SetVelocity(entity.entityDetection.slopePerpNormal * velocity);
+            }
+            else
+            {
+                if (isGrounded)
+                {
+                    SetVelocityLimitY(0.0f);
+                }
+
+                SetVelocityX(velocity);
+            }
+        }
+        else
+        {
+            // workSpace.Set(velocity, rigidBody.velocity.y);
+            SetWorkSpace(velocity, rigidBody.velocity.y);
+            rigidBody.velocity = workSpace;
+            // player.playerStateMachine.currentState.SetMovementVariables();
+        }
         synchronizeValues?.Invoke();
-        // player.playerStateMachine.currentState.SetMovementVariables();
     }
 
     public void SetVelocityY(float velocity)
@@ -144,10 +175,106 @@ public class Movement : CoreComponent
         this.velocityMultiplier = velocityMultiplier;
     }
 
+    public void RigidBodyController(bool isMovingForward = true, bool limitYVelocity = true)
+    {
+        if (isGrounded)
+        {
+            if (isOnSlope)
+            {
+                entity.rigidBody.gravityScale = rigidBody.velocity.magnitude > epsilon ? 9.5f : 0.0f;
+
+                if (isMovingForward)
+                {
+                    if (entity.entityDetection.slopePerpNormal.y * facingDirection > 0)
+                    {
+                        SetVelocityMultiplier(Vector2.one * 0.8f);
+                    }
+                    else
+                    {
+                        SetVelocityMultiplier(Vector2.one * 1.4f);
+                    }
+                }
+                else
+                {
+                    if (entity.entityDetection.slopePerpNormal.y * -facingDirection > 0)
+                    {
+                        SetVelocityMultiplier(Vector2.one * 0.8f);
+                    }
+                    else
+                    {
+                        SetVelocityMultiplier(Vector2.one * 1.4f);
+                    }
+                }
+            }
+            else
+            {
+                SetVelocityMultiplier(Vector2.one);
+                player.rigidBody.gravityScale = 9.5f;
+
+                if (limitYVelocity)
+                {
+                    SetVelocityLimitY(0.0f);
+                }
+            }
+        }
+        else
+        {
+            if (entity.entityDetection.isOnSlopeBack())
+            {
+                if (limitYVelocity)
+                {
+                    SetVelocityLimitY(0.0f);
+                }
+            }
+
+            SetVelocityMultiplier(Vector2.one);
+            entity.rigidBody.gravityScale = 9.5f;
+        }
+    }
+
+    public void SetVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    {
+        if (velocityChangeOverTimeCoroutine != null)
+        {
+            StopCoroutine(velocityChangeOverTimeCoroutine);
+        }
+        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
+    }
+
+    public void StopVelocityXChangeOverTime()
+    {
+        StopCoroutine(velocityChangeOverTimeCoroutine);
+    }
+
     private void SetWorkSpace(float x, float y)
     {
         workSpace.Set(x, y);
         workSpace += baseVelocity;
         workSpace *= velocityMultiplier;
+    }
+
+    private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    {
+        float coroutineElapsedTime = 0.0f;
+        WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
+
+        while (true)
+        {
+            float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
+
+            SetVelocityX(velocityMultiplierOverTime * velocity, true);
+
+
+            if (coroutineElapsedTime > moveTime)
+            {
+                yield break;
+            }
+            else
+            {
+                yield return waitForFixedUpdate;
+            }
+
+            coroutineElapsedTime += Time.deltaTime;
+        }
     }
 }

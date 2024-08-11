@@ -21,6 +21,16 @@ public class SceneField
     {
         return sceneField.SceneName;
     }
+
+    public override bool Equals(object obj)
+    {
+        return m_SceneName.Equals((obj as SceneField).m_SceneName);
+    }
+
+    public override int GetHashCode()
+    {
+        return m_SceneName.GetHashCode();
+    }
 }
 
 #if UNITY_EDITOR
@@ -36,7 +46,7 @@ public class SceneFieldPropertyDrawer : PropertyDrawer
         if (sceneAsset != null)
         {
             sceneAsset.objectReferenceValue = EditorGUI.ObjectField(_position, sceneAsset.objectReferenceValue, typeof(SceneAsset), false);
-
+            
             if (sceneAsset.objectReferenceValue != null)
             {
                 sceneName.stringValue = (sceneAsset.objectReferenceValue as SceneAsset).name;

@@ -87,7 +87,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Interaction",
+                    "name": "ObjectInteraction",
                     "type": "Button",
                     "id": "302c3133-e831-43f1-81bf-ed354790a3de",
                     "expectedControlType": "Button",
@@ -99,6 +99,33 @@
                     "name": "Menu",
                     "type": "Button",
                     "id": "cf18f2e0-8f01-480d-a6b4-61a92e6e12fc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cure",
+                    "type": "Button",
+                    "id": "374dafba-869d-44f3-95d2-8d7ce21f7461",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DoorInteraction",
+                    "type": "Button",
+                    "id": "343bf50d-1395-4e79-9dd4-b7b5b8148d3c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Map",
+                    "type": "Button",
+                    "id": "00074f28-45cd-4570-b23d-6d0fb7866cb2",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -256,7 +283,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Computer",
-                    "action": "Interaction",
+                    "action": "ObjectInteraction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,6 +295,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7bee3423-e666-4411-91c3-37af9ad475c2",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Computer",
+                    "action": "Cure",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fab5966b-8992-4fa9-b86c-3c5e7a05c094",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Computer",
+                    "action": "DoorInteraction",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fca6e6cc-2ce8-4855-8337-71c480746981",
+                    "path": "<Keyboard>/m",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Computer",
+                    "action": "Map",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -486,6 +546,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard & Mouse;Computer",
+                    "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ccd0772d-915a-404d-82c4-543d3803146f",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Submit",
                     "isComposite": false,
                     "isPartOfComposite": false

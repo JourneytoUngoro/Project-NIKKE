@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,21 +8,14 @@ using UnityEngine.UI;
 public class MainMenu : Menu
 {
     [Header("Menu Navigation")]
-    [SerializeField] private MainMenuSaveSlotMenu saveSlotMenu;
+    [SerializeField] private SaveSlotMenu saveSlotMenu;
 
     [Header("Menu Button")]
     [SerializeField] private Button loadGameButton;
 
-    public override void Awake()
-    {
-        base.Awake();
-
-
-    }
-
     private void Start()
     {
-        if (Manager.instance.dataManager.HasGameData())
+        if (Manager.Instance.dataManager.HasGameData())
         {
             SetFirstSelected(loadGameButton);
         }
@@ -31,7 +25,7 @@ public class MainMenu : Menu
 
     private void DisableButtonsDependingOnData()
     {
-        if (!Manager.instance.dataManager.HasGameData())
+        if (!Manager.Instance.dataManager.HasGameData())
         {
             loadGameButton.interactable = false;
         }
@@ -54,5 +48,10 @@ public class MainMenu : Menu
     {
         saveSlotMenu.ActivateMenu(true);
         this.DeactivateMenu();
+    }
+
+    public void OnExitGameClicked()
+    {
+        Application.Quit();
     }
 }

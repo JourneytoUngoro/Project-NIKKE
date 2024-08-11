@@ -26,28 +26,14 @@ MonoBehaviour:
   gotoLandingStateTime: 1.5
   dodgeSpeed: 100
   backstepSpeed: 80
-  dodgeCoolDownTime: 1
-  dodgeTime: 0.2
-  dodgeDelay: 0.2
-  maxAmmo: 40
-  rangedAttackPeriod: 0.1
-  playerMeleeAttackInfo:
-    damage: 0
-    postureDamage: 0
-  playerJumpAttackInfo:
-    damage: 0
-    postureDamage: 0
-  playerUltimateAttackInfo:
-    damage: 0
-    postureDamage: 0
-  playerRangedAttackInfo:
-    damage: 0
-    postureDamage: 0
-  attackStrokeResetTime: 1.5
+  dodgeCoolDownTime: 0.5
+  dodgeTime: 0.4
+  backstepTime: 0.2
   wallSlideSpeed: 10
   wallJumpAngleVector: {x: 2, y: 5}
   wallJumpSpeed: 85
   wallJumpTime: 0.2
+  wallJumpAvailTime: 0.1
   preventInputXTime: 0.2
   escapeAngleVector: {x: 2, y: 1}
   escapeSpeed: 50
@@ -65,3 +51,26 @@ MonoBehaviour:
   defendCoolDownTime: 1
   parryTime: 0.5
   landingTime: 0.5
+  maxAmmo: 40
+  rangedAttackPeriod: 0.1
+  playerMeleeAttackInfo:
+    damage: 0
+    postureDamage: 0
+    knockbackVelocityWhenHit: {x: 0, y: 0}
+  playerRangedAttackInfo:
+    damage: 0
+    postureDamage: 0
+    knockbackVelocityWhenHit: {x: 0, y: 0}
+  playerJumpAttackInfo:
+    damage: 0
+    postureDamage: 0
+    knockbackVelocityWhenHit: {x: 0, y: 0}
+  playerUltimateAttackInfo:
+    damage: 0
+    postureDamage: 0
+    knockbackVelocityWhenHit: {x: 0, y: 0}
+  playerEscapeAttackInfo:
+    damage: 0
+    postureDamage: 0
+    knockbackVelocityWhenHit: {x: 0, y: 0}
+  attackStrokeResetTime: 1.5

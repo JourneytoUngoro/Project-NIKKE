@@ -218,7 +218,7 @@ public class FileDataHandler
             {
                 File.Copy(backupFilePath, fullPath, true);
                 success = true;
-                Debug.LogWarning("Roll backed file to backup file at: " + backupFilePath);
+                Debug.LogWarning("Rolled back file to backup file at: " + backupFilePath);
             }
             else
             {

@@ -32,7 +32,7 @@ public class PlayerEscapeState : PlayerState
     {
         base.Enter();
 
-        stateMachine.prevState.AnimationFinishTrigger();
+        stateMachine.prevState.AnimationFinishTrigger(0);
         // 공격하다가 도중에 빠져나왔을 경우
         player.inputHandler.AvailInputX();
         SetInputVariables();
@@ -88,5 +88,5 @@ public class PlayerEscapeState : PlayerState
         base.PhysicsUpdate();
     }
 
-    public bool isEscapeAvail() => escapeAvail;
+    public bool IsEscapeAvail() => escapeAvail;
 }

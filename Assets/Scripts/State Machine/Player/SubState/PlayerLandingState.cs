@@ -9,7 +9,7 @@ public class PlayerLandingState : PlayerGroundedState
     public PlayerLandingState(Player player, string animBoolName) : base(player, animBoolName)
     {
         stateTransitTimer = new Timer(playerData.landingTime);
-        stateTransitTimer.timerAction += () => { allowStateTransition = true; };
+        stateTransitTimer.timerAction += () => { canTransit = true; };
     }
 
     public override void DoChecks()
@@ -21,7 +21,7 @@ public class PlayerLandingState : PlayerGroundedState
     {
         base.Enter();
 
-        allowStateTransition = false;
+        canTransit = false;
         player.movement.SetVelocityX(0.0f);
         player.inputHandler.PreventInputX(inputX);
         stateTransitTimer.StartSingleUseTimer();
@@ -48,7 +48,7 @@ public class PlayerLandingState : PlayerGroundedState
         #region State Transition Logic
         if (!onStateExit)
         {
-            if (allowStateTransition)
+            if (canTransit)
             {
                 if (inputX == 0)
                 {

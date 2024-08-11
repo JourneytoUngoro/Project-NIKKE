@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public class Player : Entity, IDataPersistance
+public class Player : Entity
 {
     #region State Variables
     public PlayerStateMachine playerStateMachine { get; private set; }
@@ -24,8 +24,10 @@ public class Player : Entity, IDataPersistance
     public PlayerCrouchIdleState crouchIdleState { get; private set; }
     public PlayerCrouchMoveState crouchMoveState { get; private set; }
     public PlayerReloadState reloadState { get; private set; }
-    public PlayerBlockParryState shieldParryState { get; private set; }
-    public PlayerDashState dashState { get; private set; }
+    public PlayerShieldParryState shieldParryState { get; private set; }
+    public PlayerKnockbackState knockbackState { get; private set; }
+    public PlayerStunnedState stunnedState { get; private set; }
+    public PlayerCureState cureState { get; private set; }
 
     [field: SerializeField] public PlayerData playerData { get; private set; }
     #endregion
@@ -34,16 +36,13 @@ public class Player : Entity, IDataPersistance
     public PlayerMovement movement { get; protected set; }
     public PlayerDetection detection { get; protected set; }
     public PlayerCombat combat { get; protected set; }
-    public Stats stats { get; protected set; }
+    public PlayerStats stats { get; protected set; }
     public PlayerInput playerInput { get; private set; }
     public PlayerInputHandler inputHandler { get; private set; }
-
-    [field: SerializeField] public GameObject blockParryArea { get; private set; }
     #endregion
 
     #region Other Variables
-    public event Action OnInteractionInput;
-    public GameData currentData;
+    
     #endregion
 
     protected override void Awake()
@@ -54,12 +53,18 @@ public class Player : Entity, IDataPersistance
         inputHandler = GetComponent<PlayerInputHandler>();
     }
 
-    private void Start()
+    protected override void Start()
     {
-        movement = core.GetCoreComponent<PlayerMovement>();
+        base.Start();
+
+        /*movement = core.GetCoreComponent<PlayerMovement>();
         detection = core.GetCoreComponent<PlayerDetection>();
         combat = core.GetCoreComponent<PlayerCombat>();
-        stats = core.GetCoreComponent<Stats>();
+        stats = core.GetCoreComponent<PlayerStats>();*/
+        movement = entityMovement as PlayerMovement;
+        detection = entityDetection as PlayerDetection;
+        combat = entityCombat as PlayerCombat;
+        stats = entityStats as PlayerStats;
 
         playerStateMachine = new PlayerStateMachine();
 
@@ -78,38 +83,34 @@ public class Player : Entity, IDataPersistance
         crouchIdleState = new PlayerCrouchIdleState(this, "crouch");
         crouchMoveState = new PlayerCrouchMoveState(this, "crouch");
         reloadState = new PlayerReloadState(this, "reload");
-        shieldParryState = new PlayerBlockParryState(this, "blockParry");
-        dashState = new PlayerDashState(this, "move");
+        shieldParryState = new PlayerShieldParryState(this, "blockParry");
+        knockbackState = new PlayerKnockbackState(this, "knockback");
+        cureState = new PlayerCureState(this, "cure");
 
         playerStateMachine.Initialize(idleState);
     }
 
     private void Update()
     {
-        if (inputHandler.interactionInputActive)
+        if (inputHandler.menuInput)
         {
-            inputHandler.InactiveInteractionInput();
-            OnInteractionInput?.Invoke();
-        }
-        else if (inputHandler.menuInputActive)
-        {
-            inputHandler.InactiveMenuInput();
-            if (Manager.instance.uiManager.savePointMenu.activeSelf)
+            if (Manager.Instance.uiManager.savePointMenu.activeSelf)
             {
-                Manager.instance.uiManager.CloseSavePointMenu();
+                Manager.Instance.uiManager.CloseSavePointMenu();
             }
             else
             {
-                if (Manager.instance.uiManager.pauseMenu.activeSelf)
+                if (Manager.Instance.uiManager.pauseMenu.activeSelf)
                 {
-                    Manager.instance.uiManager.ClosePauseMenu();
+                    Manager.Instance.uiManager.ClosePauseMenu();
                 }
                 else
                 {
-                    Manager.instance.uiManager.OpenPauseMenu();
+                    Manager.Instance.uiManager.OpenPauseMenu();
                 }
             }
         }
+
         playerStateMachine.currentState.LogicUpdate();
     }
 
@@ -122,7 +123,7 @@ public class Player : Entity, IDataPersistance
     {
         if (collision.CompareTag("SavePoint"))
         {
-            Manager.instance.uiManager.OpenNotificationWindow("Press Z to interact");
+            Manager.Instance.uiManager.OpenNotificationWindow("Press Z to interact");
         }
     }
 
@@ -130,7 +131,7 @@ public class Player : Entity, IDataPersistance
     {
         if (collision.CompareTag("SavePoint"))
         {
-            Manager.instance.uiManager.CloseNotificationWindow();
+            Manager.Instance.uiManager.CloseNotificationWindow();
         }
     }
 
@@ -145,15 +146,5 @@ public class Player : Entity, IDataPersistance
         entityCollider.size = changeSize;
         center += (changeSize - currentSize) / 2.0f;
         entityCollider.offset = center;
-    }
-
-    public void LoadData(GameData data)
-    {
-        this.currentData = data;
-    }
-
-    public void SaveData(GameData data)
-    {
-        data = this.currentData;
     }
 }

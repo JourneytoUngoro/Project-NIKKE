@@ -19,6 +19,7 @@ public class PlayerJumpState : PlayerAbilityState
     {
         base.Enter();
 
+        Manager.Instance.dialogueManager.SendDialogue("Default Dialogue");
         jumpCount += 1;
         player.movement.SetVelocityY(playerData.jumpSpeed);
         player.inAirState.InavailCoyoteTime();

@@ -31,17 +31,9 @@ public class PlayerData : ScriptableObject
     public float dodgeSpeed = 20.0f;
     public float backstepSpeed = 20.0f;
     public float dodgeCoolDownTime = 1.0f;
-    public float dodgeTime = 0.2f;
-    public float dodgeDelay = 0.2f;
-
-    [Header("Attack State")]
-    public int maxAmmo = 40;
-    public float rangedAttackPeriod = 0.1f;
-    public AttackInfo playerMeleeAttackInfo;
-    public AttackInfo playerJumpAttackInfo;
-    public AttackInfo playerUltimateAttackInfo;
-    public AttackInfo playerRangedAttackInfo;
-    public float attackStrokeResetTime = 1.5f;
+    public float dodgeTime = 0.4f;
+    public float backstepTime = 0.2f;
+    // public float dodgeDelay = 0.2f;
 
     [Header("Wall Slide State")]
     public float wallSlideSpeed = 5.0f;
@@ -72,10 +64,20 @@ public class PlayerData : ScriptableObject
     public Vector2 standColliderSize;
     public Vector2 crouchColliderSize;
 
-    [Header("Defend State")]
-    public float defendCoolDownTime = 1.0f;
+    [Header("ShieldParry State")]
+    public float shieldParryCoolDownTime = 1.0f;
     public float parryTime = 0.5f;
 
     [Header("Landing State")]
     public float landingTime = 1.0f;
+
+    [Header("Attack State")]
+    public int maxAmmo = 40;
+    public float rangedAttackPeriod = 0.1f;
+    public AttackInfo playerMeleeAttackInfo;
+    public AttackInfo playerRangedAttackInfo;
+    public AttackInfo playerJumpAttackInfo;
+    public AttackInfo playerUltimateAttackInfo;
+    public AttackInfo playerEscapeAttackInfo;
+    public float attackStrokeResetTime = 1.5f;
 }

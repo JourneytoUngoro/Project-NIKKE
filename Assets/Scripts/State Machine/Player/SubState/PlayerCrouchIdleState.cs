@@ -54,5 +54,22 @@ public class PlayerCrouchIdleState : PlayerGroundedState
             }*/
         }
         #endregion
+
+        #region Physics Logic
+        if (!onStateExit)
+        {
+            player.movement.SetVelocityX(0.0f);
+
+            if (isOnSlope)
+            {
+                player.rigidBody.gravityScale = 0.0f;
+                player.movement.SetVelocityY(0.0f);
+            }
+            else
+            {
+                player.rigidBody.gravityScale = 9.5f;
+            }
+        }
+        #endregion
     }
 }

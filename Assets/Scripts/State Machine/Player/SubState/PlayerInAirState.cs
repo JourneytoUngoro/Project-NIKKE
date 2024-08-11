@@ -55,6 +55,8 @@ public class PlayerInAirState : PlayerState
     public override void Exit()
     {
         base.Exit();
+
+        player.movement.SetVelocityLimitY(0.0f);
     }
 
     public override void LogicUpdate()
@@ -129,7 +131,7 @@ public class PlayerInAirState : PlayerState
         #region State Transition Logic
         if (!onStateExit)
         {
-            if (escapeInput && player.escapeState.isEscapeAvail())
+            if (escapeInput && player.escapeState.IsEscapeAvail())
             {
                 stateMachine.ChangeState(player.escapeState);
             }

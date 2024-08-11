@@ -22,7 +22,7 @@ public class PlayerIdleState : PlayerGroundedState
     {
         base.Enter();
 
-        player.movement.SetVelocityX(0.0f);
+        player.movement.SetVelocityZero();
         dashMaintainTimer.StartSingleUseTimer();
     }
 

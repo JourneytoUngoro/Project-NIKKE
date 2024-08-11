@@ -4,20 +4,18 @@ using UnityEngine;
 
 public class PlayerAttackState : PlayerAbilityState
 {
-    protected bool isOnSlope;
-
     public PlayerAttackState(Player player, string animBoolName) : base(player, animBoolName)
     {
     }
 
-    public override void AnimationActionTrigger()
+    public override void AnimationActionTrigger(int index)
     {
-        base.AnimationActionTrigger();
+        base.AnimationActionTrigger(index);
     }
 
-    public override void AnimationFinishTrigger()
+    public override void AnimationFinishTrigger(int index)
     {
-        base.AnimationFinishTrigger();
+        base.AnimationFinishTrigger(index);
 
         isAbilityDone = true;
     }
@@ -25,8 +23,6 @@ public class PlayerAttackState : PlayerAbilityState
     public override void DoChecks()
     {
         base.DoChecks();
-
-        isOnSlope = player.detection.isOnSlope();
     }
 
     public override void Enter()

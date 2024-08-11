@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerAbilityState : PlayerState
 {
     #region Check Variables
+    protected bool isOnSlope;
     protected bool isGrounded;
     protected bool isTouchingWall;
     #endregion
@@ -20,6 +21,7 @@ public class PlayerAbilityState : PlayerState
     {
         base.DoChecks();
 
+        isOnSlope = player.detection.isOnSlope();
         isGrounded = player.detection.isGrounded();
         isTouchingWall = player.detection.isTouchingWall();
     }
@@ -73,7 +75,7 @@ public class PlayerAbilityState : PlayerState
         base.PhysicsUpdate();
 
         #region State Transition Logic
-        if (escapeInput && player.escapeState.isEscapeAvail())
+        if (escapeInput && player.escapeState.IsEscapeAvail())
         {
             stateMachine.ChangeState(player.escapeState);
         }

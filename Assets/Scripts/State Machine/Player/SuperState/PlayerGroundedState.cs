@@ -12,13 +12,13 @@ public class PlayerGroundedState : PlayerState
     protected bool isOnSlope;
     #endregion
 
-    #region
-    protected bool allowStateTransition;
+    #region Other Variables
+    protected bool canTransit;
     #endregion
 
     public PlayerGroundedState(Player player, string animBoolName) : base(player, animBoolName)
     {
-        allowStateTransition = true;
+        canTransit = true;
     }
 
     public override void DoChecks()
@@ -87,15 +87,19 @@ public class PlayerGroundedState : PlayerState
         base.PhysicsUpdate();
 
         #region State Transition Logic
-        if (allowStateTransition)
+        if (canTransit)
         {
-            if (escapeInput && player.escapeState.isEscapeAvail())
+            if (escapeInput && player.escapeState.IsEscapeAvail())
             {
                 stateMachine.ChangeState(player.escapeState);
             }
-            else if (blockParryInput && player.shieldParryState.IsBlockAvail())
+            else if (shieldParryInput && player.shieldParryState.isParryAvail)
             {
                 stateMachine.ChangeState(player.shieldParryState);
+            }
+            else if (cureInput)
+            {
+                stateMachine.ChangeState(player.cureState);
             }
             else if (attackInputActive)
             {

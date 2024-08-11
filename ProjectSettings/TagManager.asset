@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - SavePoint
   layers:
   - Default
   - TransparentFX
@@ -15,7 +16,7 @@ TagManager:
   - Ground
   - PlayerDodge
   - Damageable
-  - 
+  - PlayerParry
   - 
   - 
   - 
@@ -48,11 +49,17 @@ TagManager:
   - name: Platform
     uniqueID: 2784813943
     locked: 0
+  - name: Interactable
+    uniqueID: 746205771
+    locked: 0
   - name: Enemy
     uniqueID: 1774988667
     locked: 0
   - name: Player
     uniqueID: 806041217
+    locked: 0
+  - name: AttackEffect
+    uniqueID: 269034865
     locked: 0
   - name: Foreground
     uniqueID: 3111609701

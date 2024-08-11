@@ -7,7 +7,7 @@ public class PauseMenu : Menu
 {
     public void OnResumeClicked()
     {
-        Manager.instance.uiManager.ClosePauseMenu();
+        Manager.Instance.uiManager.ClosePauseMenu();
         DeactivateMenu();
     }
 

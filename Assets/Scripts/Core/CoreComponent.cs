@@ -6,6 +6,7 @@ public class CoreComponent : MonoBehaviour
 {
     protected Player player;
     protected Enemy enemy;
+    protected Entity entity;
     protected float epsilon = 0.001f;
     protected Vector2 workSpace;
 
@@ -13,5 +14,6 @@ public class CoreComponent : MonoBehaviour
     {
         player = GetComponentInParent<Player>();
         enemy = GetComponentInParent<Enemy>();
+        entity = GetComponentInParent<Entity>();
     }
 }

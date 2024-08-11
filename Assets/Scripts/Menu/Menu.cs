@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class Menu : MonoBehaviour
 {
     [Header("First Selected Button")]
-    [SerializeField] private Button firstSelected;
+    [SerializeField] protected Button firstSelected;
 
     protected Button[] menuButtons;
 
@@ -44,11 +44,6 @@ public class Menu : MonoBehaviour
     }
 
     public virtual void ActivateMenu()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public virtual void ActivateMenu(bool isLoadingGame)
     {
         gameObject.SetActive(true);
     }

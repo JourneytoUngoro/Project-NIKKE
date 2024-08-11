@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class State
 {
@@ -19,6 +20,8 @@ public class State
     #endregion
 
     #region Other Variables
+    protected Timer afterImageTimer;
+
     protected Vector2 workSpace;
 
     protected float epsilon = 0.001f;
@@ -26,24 +29,25 @@ public class State
 
     public float startTime {  get; protected set; }
 
-    public virtual void AnimationStartTrigger()
+    public virtual void AnimationStartTrigger(int index)
     {
-
+        isAnimationStarted = true;
+        isAnimationFinished = false;
     }
 
-    public virtual void AnimationFinishTrigger()
+    public virtual void AnimationFinishTrigger(int index)
     {
         isAnimationFinished = true;
     }
 
-    public virtual void AnimationActionTrigger()
+    public virtual void AnimationActionTrigger(int index)
     {
 
     }
 
     public virtual void DoChecks()
     {
-
+        
     }
 
     public virtual void Enter()
