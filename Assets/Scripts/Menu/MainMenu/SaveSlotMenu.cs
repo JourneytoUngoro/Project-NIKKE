@@ -60,7 +60,8 @@ public class SaveSlotMenu : Menu
     {
         Manager.Instance.dataManager.SaveGame();
 
-        SceneManager.LoadSceneAsync(Manager.Instance.dataManager.gameData.currentScene);
+        // SceneManager.LoadSceneAsync(Manager.Instance.dataManager.gameData.currentScene);
+        Manager.Instance.sceneTransitionManager.SceneTransition(new SceneField(Manager.Instance.dataManager.gameData.currentScene), true, true);
     }
 
     public void OnClearClicked(SaveSlot slot)

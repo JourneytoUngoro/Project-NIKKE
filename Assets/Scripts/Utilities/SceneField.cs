@@ -16,6 +16,11 @@ public class SceneField
         get { return m_SceneName; }
     }
 
+    public SceneField(string sceneName)
+    {
+        m_SceneName = sceneName;
+    }
+
     // makes it work with the existing Unity methods (LoadLevel/LoadScene)
     public static implicit operator string(SceneField sceneField)
     {

@@ -336,7 +336,7 @@ RectTransform:
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -433,7 +433,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4252340997542957888}
   m_Layer: 0
-  m_Name: Canvas
+  m_Name: InGame Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -452,10 +452,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5586063367022951600}
-  - {fileID: 4366868043269674329}
   - {fileID: 5586063366021520632}
   m_Father: {fileID: 2428256609074333778}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1148815434761664237
 GameObject:
@@ -490,8 +489,8 @@ RectTransform:
   m_Children:
   - {fileID: 2464755750271331570}
   - {fileID: 1672309117}
-  m_Father: {fileID: 4252340997542957888}
-  m_RootOrder: 1
+  m_Father: {fileID: 2428256609074333778}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -515,7 +514,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 25
+  m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 1
   m_TargetDisplay: 0
@@ -685,6 +684,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90105835c81d4dc42a6349b18004daad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 5586063367542306881}
   adjacentScene:
     _serializedList:
     - Key:
@@ -712,9 +712,16 @@ MonoBehaviour:
   fadeInTime: 0.5
   currentColor: {r: 0, g: 0, b: 0, a: 0}
   loadingBar: {fileID: 1672309118}
-  currentActiveScene:
-    m_SceneAsset: {fileID: 102900000, guid: 8c9cfa26abfee488c85f1582747f6a02, type: 3}
-    m_SceneName: SampleScene
+  loadingBarText: {fileID: 1721094046}
+  loadingText:
+  - Invasion of the Raptures started about 100 years before.
+  - Some attacks includes special moves such as dodging, or parrying.
+  - Life is not that easy, right?
+  - In time, you too will bloom.
+  - Everything that blooms is bound to wither one day.
+  - There are attacks that you can't parry.
+  - Posture instability gained by parrying won't make you get stunned.
+  - Using ult makes you invincible for short period of time.
 --- !u!1 &5531367100016125917
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,6 +754,7 @@ Transform:
   - {fileID: 820689016434350399}
   - {fileID: 5586063366247211065}
   - {fileID: 5586063367832678202}
+  - {fileID: 4366868043269674329}
   - {fileID: 4252340997542957888}
   - {fileID: 5586063367825474133}
   m_Father: {fileID: 0}
@@ -802,7 +810,7 @@ RectTransform:
   - {fileID: 5586063366771008855}
   - {fileID: 5586063366498329181}
   m_Father: {fileID: 4252340997542957888}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2481,8 +2489,8 @@ GameObject:
   - component: {fileID: 5586063367076229946}
   - component: {fileID: 5586063367076229943}
   - component: {fileID: 5586063367076229940}
-  - component: {fileID: 5586063367076229945}
   - component: {fileID: 5586063367076229941}
+  - component: {fileID: 5586063367076229945}
   - component: {fileID: 5586063367076229947}
   m_Layer: 3
   m_Name: Core
@@ -2531,35 +2539,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraFollowObject: {fileID: 5586063366076298968}
---- !u!114 &5586063367076229945
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5586063367076229949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 538fd90764bd7f64bb9df1c7b94fab99, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 64
-  groundCheckTransform: {fileID: 5586063366182864898}
-  ledgeCheckTransform: {fileID: 5586063366312410581}
-  wallCheckTransformTop: {fileID: 5586063366128955649}
-  wallCheckTransformBottom: {fileID: 5586063367923872190}
-  groundCheckSize: {x: 0, y: 0}
-  groundCheckRadius: 1.6
-  ledgeCheckDistance: 10
-  slopeCheckDistance: 3.2
-  wallCheckDistance: 0.3
-  ceilingCheckTransform: {fileID: 5586063367989841614}
-  wallCheckTransformTopBehind: {fileID: 5586063367087806567}
-  wallCheckTransformBottomBehind: {fileID: 5586063368016591211}
-  ceilingCheckSize: {x: 3, y: 0.5}
-  colliderCheckOffset: {x: 0, y: 0}
 --- !u!114 &5586063367076229941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2596,6 +2575,35 @@ MonoBehaviour:
     <recoveryStartTime>k__BackingField: 0
     <recoveryDuration>k__BackingField: 0
     <recoveryValue>k__BackingField: 0
+--- !u!114 &5586063367076229945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5586063367076229949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 538fd90764bd7f64bb9df1c7b94fab99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 64
+  groundCheckTransform: {fileID: 5586063366182864898}
+  ledgeCheckTransform: {fileID: 5586063366312410581}
+  wallCheckTransformTop: {fileID: 5586063366128955649}
+  wallCheckTransformBottom: {fileID: 5586063367923872190}
+  groundCheckSize: {x: 0, y: 0}
+  groundCheckRadius: 1.6
+  ledgeCheckDistance: 10
+  slopeCheckDistance: 3.2
+  wallCheckDistance: 0.3
+  ceilingCheckTransform: {fileID: 5586063367989841614}
+  wallCheckTransformTopBehind: {fileID: 5586063367087806567}
+  wallCheckTransformBottomBehind: {fileID: 5586063368016591211}
+  ceilingCheckSize: {x: 3, y: 0.5}
+  colliderCheckOffset: {x: 0, y: 0}
 --- !u!114 &5586063367076229947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3775,7 +3783,7 @@ Transform:
   - {fileID: 5586063366402309411}
   - {fileID: 5586063367125760893}
   m_Father: {fileID: 2428256609074333778}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5586063367825474132
 SpriteRenderer:
