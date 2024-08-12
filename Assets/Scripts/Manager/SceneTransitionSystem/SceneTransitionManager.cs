@@ -1,12 +1,10 @@
 using AYellowpaper.SerializedCollections;
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Xml;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -15,10 +13,10 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     public bool isFadingIn { get; private set; }
     public bool isFadingOut { get; private set; }
 
-    [SerializeField] private Camera mainCamera;
-    private SceneField currentActiveScene;
+    [SerializeField] private SceneField currentActiveScene;
     [SerializeField] private SerializedDictionary<SceneField, List<SceneField>> adjacentScene;
 
+    [SerializeField] private CinemachineVirtualCamera cinemachineVirtualCamera;
     [SerializeField] private Image fadeInOutImage;
     [Range(0.1f, 3.0f), SerializeField] private float fadeOutTime;
     [Range(0.1f, 3.0f), SerializeField] private float fadeInTime;
@@ -35,18 +33,16 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     private float currentProgress;
     private bool useLoadingBar;
 
-
+    // Awake is done before singleton object is destroyed
     private void Awake()
     {
-        currentActiveScene = new SceneField(SceneManager.GetActiveScene().name);
         currentColor.a = 0.0f;
         fadeInOutImage.color = currentColor;
-        // Debug.Log("SceneManager.GetSceneByName(\"SampleScene\").name: " + SceneManager.GetSceneByName("SampleScene").name); // SampleScene
-        // Debug.Log("SceneManager.GetSceneByName(\"SampleScene2\").name: " + SceneManager.GetSceneByName("SampleScene2").name); // null
-        // Debug.Log("SceneManager.GetSceneByName(\"NonExistingScene\").name: " + SceneManager.GetSceneByName("NonExistingScene").name); // null
-        // Debug.Log("SceneManager.GetAllScenes().Contains(SceneManager.GetSceneByName(\"NonExistingScene\")): " + SceneManager.GetAllScenes().Contains(SceneManager.GetSceneByName("NonExistingScene"))); // false
-        // SceneManager.LoadSceneAsync("SampleScene2", LoadSceneMode.Additive);
-        // Debug.Log("SceneManager.GetSceneByName(\"SampleScene2\"): " + SceneManager.GetSceneByName("SampleScene2").name);
+    }
+
+    private void Start()
+    {
+        currentActiveScene = new SceneField(SceneManager.GetActiveScene().name);
     }
 
     private void OnEnable()
@@ -64,7 +60,7 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     private void Update()
     {
         loadingBar.value = Mathf.MoveTowards(loadingBar.value, currentProgress, 3 * Time.unscaledDeltaTime);
-        
+
         if (isFadingOut)
         {
             elapsedTime += Time.unscaledDeltaTime;
@@ -94,7 +90,10 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
             {
                 isFadingIn = false;
                 Manager.Instance.gameManager.ResumeGame();
-                // Manager.Instance.gameManager.player.playerInput.currentActionMap.Enable();
+                if (Manager.Instance.gameManager.player.gameObject.activeSelf)
+                {
+                    Manager.Instance.gameManager.player.playerInput.currentActionMap.Enable();
+                }
             }
         }
     }
@@ -113,21 +112,28 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         loadingBar.gameObject.SetActive(false);
         fadeInOutImage.color = currentColor;
         isFadingIn = true;
+        Debug.Log("isFadingIn: " + isFadingIn);
     }
 
     // called on scene transition
     public void FadeOut()
     {
         Manager.Instance.gameManager.PauseGame();
-        // Manager.Instance.gameManager.player.playerInput.currentActionMap.Disable();
+        if (Manager.Instance.gameManager.player.gameObject.activeSelf)
+        {
+            Manager.Instance.gameManager.player.playerInput.currentActionMap.Disable();
+        }
         elapsedTime = 0.0f;
         fadeInOutImage.color = currentColor;
         isFadingOut = true;
     }
 
-    // called when player arrives specific position for scene transition
+    // called when player arrives the boundary of the current scene
     public void SceneTransition(SceneField targetScene, DoorTriggerInteraction.DoorToSpawnAt doorToSpawnAt, bool useFadeInOut = false, bool useLoadingBar = false)
     {
+        this.doorToSpawnAt = doorToSpawnAt;
+        this.direction = SceneConnectorInteraction.Direction.None;
+
         if (useFadeInOut)
         {
             FadeOut();
@@ -144,21 +150,28 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         {
             Debug.Log($"Target scene \"{targetScene.SceneName}\" is not done loading.");
             Manager.Instance.gameManager.PauseGame();
-
-            this.useLoadingBar = useLoadingBar;
-            if (useLoadingBar)
-            {
-                LoadingBar(targetScene.SceneName);
-            }
+        }
+        else
+        {
+            currentActiveScene = targetScene;
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene.SceneName));
         }
 
-        this.doorToSpawnAt = doorToSpawnAt;
-        this.direction = SceneConnectorInteraction.Direction.None;
+        this.useLoadingBar = useLoadingBar;
+        if (useLoadingBar)
+        {
+            LoadingBar(targetScene.SceneName);
+        }
+
         currentActiveScene = targetScene;
     }
 
+    // called when player interacts with a door
     public void SceneTransition(SceneField targetScene, SceneConnectorInteraction.Direction direction, bool useFadeInOut = false, bool useLoadingBar = false)
     {
+        this.doorToSpawnAt = DoorTriggerInteraction.DoorToSpawnAt.None;
+        this.direction = direction;
+
         if (useFadeInOut)
         {
             FadeOut();
@@ -175,21 +188,27 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         {
             Debug.Log($"Target scene \"{targetScene.SceneName}\" is not done loading.");
             Manager.Instance.gameManager.PauseGame();
-
-            this.useLoadingBar = useLoadingBar;
-            if (useLoadingBar)
-            {
-                LoadingBar(targetScene.SceneName);
-            }
+        }
+        else
+        {
+            currentActiveScene = targetScene;
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene.SceneName));
         }
 
-        this.doorToSpawnAt = DoorTriggerInteraction.DoorToSpawnAt.None;
-        this.direction = direction;
+        this.useLoadingBar = useLoadingBar;
+        if (useLoadingBar)
+        {
+            LoadingBar(targetScene.SceneName);
+        }
+
         currentActiveScene = targetScene;
     }
 
     public void SceneTransition(SceneField targetScene, bool useFadeInOut = false, bool useLoadingBar = false)
     {
+        this.doorToSpawnAt = DoorTriggerInteraction.DoorToSpawnAt.None;
+        this.direction = SceneConnectorInteraction.Direction.None;
+
         if (useFadeInOut)
         {
             FadeOut();
@@ -206,16 +225,19 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         {
             Debug.Log($"Target scene \"{targetScene.SceneName}\" is not done loading.");
             Manager.Instance.gameManager.PauseGame();
-
-            this.useLoadingBar = useLoadingBar;
-            if (useLoadingBar)
-            {
-                LoadingBar(targetScene.SceneName);
-            }
+        }
+        else
+        {
+            currentActiveScene = targetScene;
+            SceneManager.SetActiveScene(SceneManager.GetSceneByName(targetScene.SceneName));
         }
 
-        this.doorToSpawnAt = DoorTriggerInteraction.DoorToSpawnAt.None;
-        this.direction = SceneConnectorInteraction.Direction.None;
+        this.useLoadingBar = useLoadingBar;
+        if (useLoadingBar)
+        {
+            LoadingBar(targetScene.SceneName);
+        }
+
         currentActiveScene = targetScene;
     }
 
@@ -230,27 +252,23 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     // below function loads the scene that is adjacent to target scene
     private void LoadScene()
     {
+        Debug.Log($"Adjacent Scene of {currentActiveScene.SceneName}");
         foreach (SceneField sceneField in adjacentScene[currentActiveScene])
         {
+            Debug.Log(sceneField.SceneName);
             if (!IsLoadingScene(sceneField.SceneName))
             {
                 Debug.Log($"Load scene: {sceneField.SceneName}");
                 AsyncOperation loadingScene = SceneManager.LoadSceneAsync(sceneField, LoadSceneMode.Additive);
                 currentAsyncOperationDictionary.Add(sceneField.SceneName, loadingScene);
-                loadingScene.allowSceneActivation = false;
             }
         }
     }
 
     // below function unloads the scenes that seems to be unnecessary
     // wait until fading out is done
-    private async void UnloadScene()
+    private void UnloadScene()
     {
-        while (isFadingOut)
-        {
-            await Task.Delay(10);
-        }
-
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             Scene currentScene = SceneManager.GetSceneAt(i);
@@ -265,7 +283,7 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
 
     private bool IsAdjacentScene(string sceneName)
     {
-        foreach(SceneField sceneField in adjacentScene[currentActiveScene])
+        foreach (SceneField sceneField in adjacentScene[currentActiveScene])
         {
             if (sceneName.Equals(sceneField.SceneName))
             {
@@ -291,36 +309,35 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
 
     private void FindDoor(DoorTriggerInteraction.DoorToSpawnAt doorToSpawnAt)
     {
-        Debug.Log("doorToSpawnAt: " + doorToSpawnAt);
         if (doorToSpawnAt.Equals(DoorTriggerInteraction.DoorToSpawnAt.None)) return;
-        
+
         DoorTriggerInteraction[] doorTriggerInteractions = FindObjectsOfType<DoorTriggerInteraction>();
 
         foreach (DoorTriggerInteraction doorTriggerInteraction in doorTriggerInteractions)
         {
-            if (doorTriggerInteraction.currentDoorIndex.Equals(doorToSpawnAt))
+            if (doorTriggerInteraction.currentDoorIndex.Equals(doorToSpawnAt) && (doorTriggerInteraction.gameObject.scene.name == currentActiveScene.SceneName))
             {
-                Debug.Log("Door found");
                 Collider2D doorCollider = doorTriggerInteraction.gameObject.GetComponent<Collider2D>();
                 Vector2 groundPosition = new Vector2(doorCollider.bounds.center.x, doorCollider.bounds.min.y);
-                Manager.Instance.gameManager.player.transform.position = groundPosition + Manager.Instance.gameManager.player.entityCollider.bounds.extents.y * Vector2.up;
+                Manager.Instance.gameManager.player.movement.SetPosition(groundPosition + Manager.Instance.gameManager.player.entityCollider.bounds.extents.y * Vector2.up);
                 break;
             }
         }
-        Debug.Log("Position Set");
     }
 
     private void ChangePosition(SceneConnectorInteraction.Direction direction)
     {
         if (direction.Equals(SceneConnectorInteraction.Direction.None)) return;
-
+        Debug.Log("Target direction: " + direction);
         Vector2 targetPosition = Manager.Instance.gameManager.player.transform.position;
 
         switch (direction)
         {
             case SceneConnectorInteraction.Direction.Up:
+                Debug.Log("Target correction: " + Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.up);
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.up; break;
             case SceneConnectorInteraction.Direction.Down:
+                Debug.Log("Target correction: " + Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.down);
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.down; break;
             case SceneConnectorInteraction.Direction.Left:
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.x * Vector2.left; break;
@@ -329,17 +346,27 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
             default: break;
         }
 
-        Manager.Instance.gameManager.player.transform.position = targetPosition;
+        Manager.Instance.gameManager.player.movement.SetPosition(targetPosition);
     }
 
-    private void OnActiveSceneChanged(Scene current, Scene next)
+    private async void OnActiveSceneChanged(Scene current, Scene next)
     {
+        while (isFadingOut)
+        {
+            await Task.Delay(10);
+        }
+
+        /*while (Manager.Instance.gameManager.player == null)
+        {
+            await Task.Delay(10);
+        }*/
+
         Debug.Log($"Active scene changed from \"{current.name}\" to \"{next.name}\"");
-        FadeIn();
         LoadAndUnloadScenes();
         FindDoor(doorToSpawnAt);
-        // ChangePosition(direction);
-        mainCamera.transform.position = Manager.Instance.gameManager.player.transform.position + Manager.Instance.gameManager.player.transform.right * 5.0f;
+        ChangePosition(direction);
+        FadeIn();
+        cinemachineVirtualCamera.ForceCameraPosition(Manager.Instance.gameManager.player.transform.position + Manager.Instance.gameManager.player.transform.right * 5.0f, Quaternion.identity);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -379,15 +406,17 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
             await Task.Delay(10);
         } while (asyncOperation.progress < 1.0f);
     }
-
+    
+    // TODO: below part should be deleted later
+    // saving will be supported on saving spots
     public void LoadData(GameData data)
     {
-        
+
     }
 
     public void SaveData(GameData data)
     {
-        if (currentActiveScene.SceneName != "MainMenu")
+        if (!currentActiveScene.SceneName.Equals("MainMenu"))
         {
             data.currentScene = currentActiveScene.SceneName;
             // data system saves the game before loading the game

@@ -76,6 +76,84 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &1022949952
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1022949955}
+  - component: {fileID: 1022949954}
+  - component: {fileID: 1022949956}
+  m_Layer: 0
+  m_Name: EventSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1022949955
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022949952}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2428256609074333778}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1022949954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022949952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_FirstSelected: {fileID: 0}
+  m_sendNavigationEvents: 1
+  m_DragThreshold: 10
+--- !u!114 &1022949956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022949952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 161f0a90b8b7ac245b904c181874e22d, type: 3}
+  m_PointAction: {fileID: 0}
+  m_MoveAction: {fileID: -3016975572594363759, guid: 161f0a90b8b7ac245b904c181874e22d, type: 3}
+  m_SubmitAction: {fileID: 4697080937046131417, guid: 161f0a90b8b7ac245b904c181874e22d, type: 3}
+  m_CancelAction: {fileID: 0}
+  m_LeftClickAction: {fileID: 0}
+  m_MiddleClickAction: {fileID: 0}
+  m_RightClickAction: {fileID: 0}
+  m_ScrollWheelAction: {fileID: 0}
+  m_TrackedDevicePositionAction: {fileID: 0}
+  m_TrackedDeviceOrientationAction: {fileID: 0}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
 --- !u!1 &1672309116
 GameObject:
   m_ObjectHideFlags: 0
@@ -558,7 +636,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!1 &1285721481506680385
+--- !u!1 &2884251220238928092
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -566,8 +644,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 820689016434350399}
-  - component: {fileID: 4628918558980997063}
+  - component: {fileID: 6104698226790696028}
+  - component: {fileID: 7751010217259887103}
   m_Layer: 0
   m_Name: Global Light
   m_TagString: Untagged
@@ -575,14 +653,14 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &820689016434350399
+--- !u!4 &6104698226790696028
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1285721481506680385}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_GameObject: {fileID: 2884251220238928092}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -590,13 +668,13 @@ Transform:
   m_Father: {fileID: 2428256609074333778}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4628918558980997063
+--- !u!114 &7751010217259887103
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1285721481506680385}
+  m_GameObject: {fileID: 2884251220238928092}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
@@ -684,7 +762,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90105835c81d4dc42a6349b18004daad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainCamera: {fileID: 5586063367542306881}
+  currentActiveScene:
+    m_SceneAsset: {fileID: 102900000, guid: 8f205758a9bf5eb4791f957b831ba913, type: 3}
+    m_SceneName: MainMenu
   adjacentScene:
     _serializedList:
     - Key:
@@ -694,19 +774,34 @@ MonoBehaviour:
     - Key:
         m_SceneAsset: {fileID: 102900000, guid: 8c9cfa26abfee488c85f1582747f6a02, type: 3}
         m_SceneName: SampleScene
-      Value: []
+      Value:
+      - m_SceneAsset: {fileID: 102900000, guid: a465aea00e02ec245bcb0bff595c0a51, type: 3}
+        m_SceneName: SampleScene2
+      - m_SceneAsset: {fileID: 102900000, guid: 72f70e4219bf7cd4b95585806a49752c, type: 3}
+        m_SceneName: SampleScene3
     - Key:
         m_SceneAsset: {fileID: 102900000, guid: a465aea00e02ec245bcb0bff595c0a51, type: 3}
         m_SceneName: SampleScene2
-      Value: []
+      Value:
+      - m_SceneAsset: {fileID: 102900000, guid: 8c9cfa26abfee488c85f1582747f6a02, type: 3}
+        m_SceneName: SampleScene
+      - m_SceneAsset: {fileID: 102900000, guid: 25d94d2a983f4b74fb9b736c673442b0, type: 3}
+        m_SceneName: SampleScene4
     - Key:
         m_SceneAsset: {fileID: 102900000, guid: 72f70e4219bf7cd4b95585806a49752c, type: 3}
         m_SceneName: SampleScene3
-      Value: []
+      Value:
+      - m_SceneAsset: {fileID: 102900000, guid: 8c9cfa26abfee488c85f1582747f6a02, type: 3}
+        m_SceneName: SampleScene
     - Key:
         m_SceneAsset: {fileID: 102900000, guid: 25d94d2a983f4b74fb9b736c673442b0, type: 3}
         m_SceneName: SampleScene4
-      Value: []
+      Value:
+      - m_SceneAsset: {fileID: 102900000, guid: 8c9cfa26abfee488c85f1582747f6a02, type: 3}
+        m_SceneName: SampleScene
+      - m_SceneAsset: {fileID: 102900000, guid: a465aea00e02ec245bcb0bff595c0a51, type: 3}
+        m_SceneName: SampleScene2
+  cinemachineVirtualCamera: {fileID: 5586063367613456861}
   fadeInOutImage: {fileID: 5038574316635380054}
   fadeOutTime: 0.5
   fadeInTime: 0.5
@@ -714,14 +809,7 @@ MonoBehaviour:
   loadingBar: {fileID: 1672309118}
   loadingBarText: {fileID: 1721094046}
   loadingText:
-  - Invasion of the Raptures started about 100 years before.
-  - Some attacks includes special moves such as dodging, or parrying.
-  - Life is not that easy, right?
-  - In time, you too will bloom.
-  - Everything that blooms is bound to wither one day.
-  - There are attacks that you can't parry.
-  - Posture instability gained by parrying won't make you get stunned.
-  - Using ult makes you invincible for short period of time.
+  - Invasion of the Raptures first happend about 100 years ago.
 --- !u!1 &5531367100016125917
 GameObject:
   m_ObjectHideFlags: 0
@@ -751,12 +839,13 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 820689016434350399}
+  - {fileID: 6104698226790696028}
   - {fileID: 5586063366247211065}
   - {fileID: 5586063367832678202}
   - {fileID: 4366868043269674329}
   - {fileID: 4252340997542957888}
   - {fileID: 5586063367825474133}
+  - {fileID: 1022949955}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1261,7 +1350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27104736c7846ab4bbf65afb18964f7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  disableDataPersistance: 0
+  disableAutoSaving: 0
   initializeDataIfNull: 0
   overrideSelectedProfileId: 0
   testSelectedProfileId: test

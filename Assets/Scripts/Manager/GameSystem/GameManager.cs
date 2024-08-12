@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
-public class GameManager : MonoBehaviour, IDataPersistance
+public class GameManager : MonoBehaviour
 {
     [field: SerializeField] public Player player { get; private set; }
     public bool isPaused { get; private set; }
@@ -27,15 +27,5 @@ public class GameManager : MonoBehaviour, IDataPersistance
     {
         Time.timeScale = timeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
-    }
-
-    public void LoadData(GameData data)
-    {
-        player.transform.position = data.lastSavePosition;
-    }
-
-    public void SaveData(GameData data)
-    {
-        data.lastSavePosition = player.transform.position;
     }
 }

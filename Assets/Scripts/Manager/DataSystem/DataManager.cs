@@ -9,7 +9,7 @@ using System;
 public class DataManager : MonoBehaviour
 {
     [Header("Debugging")]
-    [SerializeField] private bool disableDataPersistance = false;
+    [SerializeField] private bool disableAutoSaving = false;
     [SerializeField] private bool initializeDataIfNull = false;
     [SerializeField] private bool overrideSelectedProfileId;
     [SerializeField] private string testSelectedProfileId = "test";
@@ -26,9 +26,9 @@ public class DataManager : MonoBehaviour
 
     private void Awake()
     {
-        if (disableDataPersistance)
+        if (disableAutoSaving)
         {
-            Debug.LogWarning("Data Persistance is currently disabled. No auto save supported when you leave the game.");
+            Debug.LogWarning("Auto saving is currently disabled. No auto save supported when you leave the game.");
         }
 
         dataHandler = new FileDataHandler(Application.persistentDataPath, fileName, useEncryption);
@@ -86,7 +86,7 @@ public class DataManager : MonoBehaviour
 
     public void SaveGame()
     {
-        if (disableDataPersistance) return;
+        if (disableAutoSaving) return;
 
         if (gameData == null)
         {
@@ -106,7 +106,7 @@ public class DataManager : MonoBehaviour
 
     public void LoadGame()
     {
-        if (disableDataPersistance) return;
+        if (disableAutoSaving) return;
 
         gameData = dataHandler.Load(selectedProfileId);
 

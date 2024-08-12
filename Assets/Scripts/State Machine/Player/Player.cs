@@ -147,4 +147,18 @@ public class Player : Entity
         center += (changeSize - currentSize) / 2.0f;
         entityCollider.offset = center;
     }
+
+    public void LoadData(GameData data)
+    {
+        // player's position should be set only when loading from MainMenu
+        if (SceneManager.GetActiveScene().name.Equals("MainMenu"))
+        {
+            transform.position = data.lastSavePosition;
+        }
+    }
+
+    public void SaveData(GameData data)
+    {
+        data.lastSavePosition = transform.position;
+    }
 }

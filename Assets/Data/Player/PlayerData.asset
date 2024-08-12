@@ -18,7 +18,7 @@ MonoBehaviour:
   dashSpeed: 75
   dashInputTime: 0.5
   dashMaintainTime: 0.1
-  maxJumpCount: 1
+  maxJumpCount: 2
   jumpSpeed: 85
   jumpInputBufferTime: 0.1
   coyoteTime: 0.1
@@ -48,29 +48,34 @@ MonoBehaviour:
   crouchMoveSpeed: 5
   standColliderSize: {x: 1, y: 1.5}
   crouchColliderSize: {x: 1, y: 1.2}
-  defendCoolDownTime: 1
+  shieldParryCoolDownTime: 1
   parryTime: 0.5
   landingTime: 0.5
   maxAmmo: 40
   rangedAttackPeriod: 0.1
   playerMeleeAttackInfo:
-    damage: 0
+    healthDamage: 0
     postureDamage: 0
     knockbackVelocityWhenHit: {x: 0, y: 0}
+    knockbackTimeWhenHit: 0
   playerRangedAttackInfo:
-    damage: 0
+    healthDamage: 0
     postureDamage: 0
     knockbackVelocityWhenHit: {x: 0, y: 0}
+    knockbackTimeWhenHit: 0
   playerJumpAttackInfo:
-    damage: 0
+    healthDamage: 0
     postureDamage: 0
     knockbackVelocityWhenHit: {x: 0, y: 0}
+    knockbackTimeWhenHit: 0
   playerUltimateAttackInfo:
-    damage: 0
+    healthDamage: 0
     postureDamage: 0
     knockbackVelocityWhenHit: {x: 0, y: 0}
+    knockbackTimeWhenHit: 0
   playerEscapeAttackInfo:
-    damage: 0
+    healthDamage: 0
     postureDamage: 0
     knockbackVelocityWhenHit: {x: 0, y: 0}
+    knockbackTimeWhenHit: 0
   attackStrokeResetTime: 1.5
