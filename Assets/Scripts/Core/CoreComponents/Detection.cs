@@ -18,8 +18,7 @@ public class Detection : CoreComponent
     #endregion
 
     #region Check Variables
-    [SerializeField] protected Vector2 groundCheckSize;
-    [SerializeField] protected float groundCheckRadius;
+    [SerializeField] protected OverlapCollider groundCheck;
     [SerializeField] protected float ledgeCheckDistance;
     [SerializeField] protected float slopeCheckDistance;
     [SerializeField] protected float wallCheckDistance;
@@ -33,13 +32,13 @@ public class Detection : CoreComponent
 
     public bool isGrounded()
     {
-        if (groundCheckRadius > epsilon)
+        if (groundCheck.overlapCircle)
         {
-            return Physics2D.OverlapCircle(groundCheckTransform.position, groundCheckRadius, whatIsGround);
+            return Physics2D.OverlapCircle(groundCheckTransform.position, groundCheck.circleRadius, whatIsGround);
         }
-        else if (groundCheckSize.x > epsilon && groundCheckSize.y > epsilon)
+        else if (groundCheck.overlapBox)
         {
-            return Physics2D.OverlapBox(groundCheckTransform.position, groundCheckSize, 0.0f, whatIsGround);
+            return Physics2D.OverlapBox(groundCheckTransform.position, groundCheck.boxSize, 0.0f, whatIsGround);
         }
         else return false;
     }
@@ -53,11 +52,11 @@ public class Detection : CoreComponent
 
         if (entity.rigidBody.velocity.x * entity.entityMovement.facingDirection >= 0)
         {
-            rayHitFront = groundCheckRadius < epsilon ? Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheckRadius, -transform.up, slopeCheckDistance, whatIsGround);
+            rayHitFront = groundCheck.overlapBox ? Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheck.boxSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheck.circleRadius, -transform.up, slopeCheckDistance, whatIsGround);
         }
         else
         {
-            rayHitFront = groundCheckRadius < epsilon ? Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheckSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheckRadius, -transform.up, slopeCheckDistance, whatIsGround);
+            rayHitFront = groundCheck.overlapBox ? Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheck.boxSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheck.circleRadius, -transform.up, slopeCheckDistance, whatIsGround);
         }
 
         if (rayHitFront)
@@ -106,11 +105,11 @@ public class Detection : CoreComponent
 
         if (entity.rigidBody.velocity.x * entity.entityMovement.facingDirection >= 0)
         {
-            rayHitBack = groundCheckRadius < epsilon ? Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheckSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheckRadius, -transform.up, slopeCheckDistance, whatIsGround);
+            rayHitBack = groundCheck.overlapBox ? Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheck.boxSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position - transform.right * groundCheck.circleRadius, -transform.up, slopeCheckDistance, whatIsGround);
         }
         else
         {
-            rayHitBack = groundCheckRadius < epsilon ? Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheckRadius, -transform.up, slopeCheckDistance, whatIsGround);
+            rayHitBack = groundCheck.overlapBox ? Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheck.boxSize.x / 2.0f, -transform.up, slopeCheckDistance, whatIsGround) : Physics2D.Raycast(groundCheckTransform.position + transform.right * groundCheck.circleRadius, -transform.up, slopeCheckDistance, whatIsGround);
         }
 
         if (rayHitBack)
@@ -124,38 +123,22 @@ public class Detection : CoreComponent
         return false;
     }
 
-    public bool isGrounded(Vector2 position)
-    {
-        if (groundCheckRadius != 0.0f) return Physics2D.OverlapCircle(position, groundCheckRadius, whatIsGround);
-        else return Physics2D.OverlapBox(position, groundCheckSize, 0.0f, whatIsGround);
-    }
-
     public bool isDetectingLedge()
     {
         return !Physics2D.Raycast(ledgeCheckTransform.position, -transform.up, ledgeCheckDistance, whatIsGround);
-    }
-
-    public bool isDetectingLedge(Vector2 position)
-    {
-        return !Physics2D.Raycast(position, -transform.up, ledgeCheckDistance, whatIsGround);
-    }
-
-    public void ChangeGroundCheckSize(Vector2 groundCheckSize)
-    {
-       this.groundCheckSize = groundCheckSize;
     }
 
     protected virtual void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
 
-        if (groundCheckRadius > epsilon)
+        if (groundCheck.overlapCircle)
         {
-            Gizmos.DrawWireSphere(groundCheckTransform.position, groundCheckRadius);
+            Gizmos.DrawWireSphere(groundCheckTransform.position, groundCheck.circleRadius);
         }
-        else if (groundCheckSize.x > epsilon && groundCheckSize.y > epsilon)
+        else if (groundCheck.overlapBox)
         {
-            Gizmos.DrawWireCube(groundCheckTransform.position, groundCheckSize);
+            Gizmos.DrawWireCube(groundCheckTransform.position, groundCheck.boxSize);
         }
 
         if (wallCheckTransformTop != null)
@@ -169,37 +152,37 @@ public class Detection : CoreComponent
 
         Gizmos.DrawLine(groundCheckTransform.position, groundCheckTransform.position - transform.up * slopeCheckDistance);
 
-        if (groundCheckRadius > epsilon)
+        if (groundCheck.overlapCircle)
         {
             if (!Application.isPlaying)
             {
-                Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f, groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f - transform.up * slopeCheckDistance);
+                Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheck.circleRadius, groundCheckTransform.position + transform.right * groundCheck.circleRadius - transform.up * slopeCheckDistance);
             }
             else {
                 if (entity.rigidBody.velocity.x * entity.entityMovement.facingDirection >= 0)
                 {
-                    Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheckRadius, groundCheckTransform.position + transform.right * groundCheckRadius - transform.up * slopeCheckDistance);
+                    Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheck.circleRadius, groundCheckTransform.position + transform.right * groundCheck.circleRadius - transform.up * slopeCheckDistance);
                 }
                 else
                 {
-                    Gizmos.DrawLine(groundCheckTransform.position - transform.right * groundCheckRadius, groundCheckTransform.position - transform.right * groundCheckRadius - transform.up * slopeCheckDistance);
+                    Gizmos.DrawLine(groundCheckTransform.position - transform.right * groundCheck.circleRadius, groundCheckTransform.position - transform.right * groundCheck.circleRadius - transform.up * slopeCheckDistance);
                 }
             }
         }
-        else if (groundCheckSize.x > epsilon && groundCheckSize.y > epsilon)
+        else if (groundCheck.overlapBox)
         {
             if (!Application.isPlaying)
             {
-                Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f, groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f - transform.up * slopeCheckDistance);
+                Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheck.boxSize.x / 2.0f, groundCheckTransform.position + transform.right * groundCheck.boxSize.x / 2.0f - transform.up * slopeCheckDistance);
             }
             else {
                 if (entity.rigidBody.velocity.x * entity.entityMovement.facingDirection >= 0)
                 {
-                    Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f, groundCheckTransform.position + transform.right * groundCheckSize.x / 2.0f - transform.up * slopeCheckDistance);
+                    Gizmos.DrawLine(groundCheckTransform.position + transform.right * groundCheck.boxSize.x / 2.0f, groundCheckTransform.position + transform.right * groundCheck.boxSize.x / 2.0f - transform.up * slopeCheckDistance);
                 }
                 else
                 {
-                    Gizmos.DrawLine(groundCheckTransform.position - transform.right * groundCheckSize.x / 2.0f, groundCheckTransform.position - transform.right * groundCheckSize.x / 2.0f - transform.up * slopeCheckDistance);
+                    Gizmos.DrawLine(groundCheckTransform.position - transform.right * groundCheck.boxSize.x / 2.0f, groundCheckTransform.position - transform.right * groundCheck.boxSize.x / 2.0f - transform.up * slopeCheckDistance);
                 }
             }
         }

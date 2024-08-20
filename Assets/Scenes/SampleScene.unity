@@ -206,8 +206,11 @@ MonoBehaviour:
   ledgeCheckTransform: {fileID: 709613109}
   wallCheckTransformTop: {fileID: 1039131755}
   wallCheckTransformBottom: {fileID: 336084727}
-  groundCheckSize: {x: 3.8, y: 1}
-  groundCheckRadius: 0
+  groundCheck:
+    overlapBox: 1
+    overlapCircle: 0
+    boxSize: {x: 4, y: 1}
+    circleRadius: 0
   ledgeCheckDistance: 8
   slopeCheckDistance: 3
   wallCheckDistance: 1
@@ -865,7 +868,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 446125624}
   m_CullTransparentMesh: 1
---- !u!1001 &541067349
+--- !u!1001 &627969336
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -883,19 +886,7 @@ PrefabInstance:
     - target: {fileID: 2239496749875527864, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: currentActiveScene.m_SceneAsset
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2239496749875527864, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-      propertyPath: adjacentScene._serializedList.Array.data[1].Value.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 2239496749875527864, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-      propertyPath: adjacentScene._serializedList.Array.data[1].Value.Array.data[2].m_SceneName
-      value: SampleScene4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2239496749875527864, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-      propertyPath: adjacentScene._serializedList.Array.data[1].Value.Array.data[2].m_SceneAsset
-      value: 
-      objectReference: {fileID: 102900000, guid: 25d94d2a983f4b74fb9b736c673442b0, type: 3}
+      objectReference: {fileID: 102900000, guid: 8c9cfa26abfee488c85f1582747f6a02, type: 3}
     - target: {fileID: 2428256609074333778, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -948,10 +939,6 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5586063366235829871, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-      propertyPath: disableAutoSaving
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5586063366268547726, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -971,6 +958,26 @@ PrefabInstance:
     - target: {fileID: 5586063366960834995, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: m_AnchorMin.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: groundCheck.overlapBox
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: groundCheck.circleRadius
+      value: 1.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: groundCheck.overlapCircle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367542307006, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367613456860, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367803708689, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: m_AnchorMax.x
@@ -10854,7 +10861,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1597955612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10969,7 +10976,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1597955611}
   m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
-  m_LocalPosition: {x: 1.4, y: 0, z: 0}
+  m_LocalPosition: {x: -22, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

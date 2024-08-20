@@ -38,6 +38,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool doorInteractionInput { get; private set; }
     public bool menuInput { get; private set; }
     public bool cureInput { get; private set; }
+    public bool mapInput { get; private set; }
 
     private void Awake()
     {
@@ -63,6 +64,7 @@ public class PlayerInputHandler : MonoBehaviour
         dodgeInputActive = controls.InGame.Dodge.WasPressedThisFrame();
         shieldParryInputActive = controls.InGame.ShieldParry.WasPressedThisFrame();
         menuInput = controls.InGame.Menu.WasPressedThisFrame();
+        mapInput = controls.InGame.Map.WasPressedThisFrame();
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
