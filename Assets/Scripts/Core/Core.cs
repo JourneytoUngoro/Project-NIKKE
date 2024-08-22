@@ -9,7 +9,7 @@ public class Core : MonoBehaviour
 
     private void Awake()
     {
-        coreComponents = GetComponents<CoreComponent>().ToList();
+        coreComponents = GetComponentsInChildren<CoreComponent>().ToList();
     }
 
     public T GetCoreComponent<T>() where T : CoreComponent

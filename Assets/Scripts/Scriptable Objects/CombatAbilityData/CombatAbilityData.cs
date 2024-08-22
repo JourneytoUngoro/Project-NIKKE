@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "newAttackData", menuName = "Data/Attack Data")]
+[CreateAssetMenu(fileName = "newCombatAbilityData", menuName = "Data/Combat Ability Data")]
 public class CombatAbilityData : ScriptableObject
 {
     [field: SerializeField] public Sprite combatAbilityIcon { get; private set; }
-    [field: SerializeField] public string combatAbilityName { get; private set; }
-    [field: SerializeField] public int numberOfStrokes { get; private set; }
+    [field: SerializeField] public string combatAbilityName { get; private set; } = "Default Combat Ability Name";
+    [field: SerializeField] public int numberOfStrokes { get; private set; } = 1;
+    [field: SerializeField, TextArea] public string combatAbilityDescription { get; private set; } = "Default Combat Ability Description";
     [field: SerializeReference] public List<CombatAbilityComponentData> combatAbilityComponents { get; private set; }
 
     public void AddComponent(CombatAbilityComponentData componentData)

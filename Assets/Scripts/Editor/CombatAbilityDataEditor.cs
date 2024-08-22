@@ -19,6 +19,12 @@ public class CombatAbilityDataEditor : Editor
     private void OnEnable()
     {
         combatAbilityData = target as CombatAbilityData;
+        SceneView.duringSceneGui += DrawGizmos;
+    }
+
+    private void OnDisable()
+    {
+        SceneView.duringSceneGui -= DrawGizmos;
     }
 
     public override void OnInspectorGUI()
@@ -56,6 +62,14 @@ public class CombatAbilityDataEditor : Editor
             {
                 attackComponent.InitializeCombatAbilityData(combatAbilityData.numberOfStrokes);
             }
+        }
+    }
+
+    private void DrawGizmos(SceneView sceneView)
+    {
+        if (Application.isPlaying)
+        {
+
         }
     }
 

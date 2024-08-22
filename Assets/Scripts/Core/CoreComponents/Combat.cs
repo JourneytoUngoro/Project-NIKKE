@@ -20,6 +20,8 @@ public class Combat : CoreComponent
     [SerializeField] protected float rangedAttackRadius;
     [SerializeField] protected Vector2 rangedAttackSize;
 
+    [SerializeField] protected List<CombatAbilityDataWithTransform> combatAbilityDataWithTransformList;
+
     protected List<Collider2D> damagedTargets;
 
     protected override void Awake()

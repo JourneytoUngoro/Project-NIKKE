@@ -4,5 +4,8 @@ using UnityEngine;
 
 public class ReboundComponentData : CombatAbilityComponentData<ReboundComponentElementData>
 {
-    
+    public override void CombatAbility()
+    {
+        throw new System.NotImplementedException();
+    }
 }

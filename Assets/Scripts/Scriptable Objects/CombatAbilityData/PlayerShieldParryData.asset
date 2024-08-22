@@ -10,27 +10,26 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36ad1eeb35ef68d448baecd66369689d, type: 3}
-  m_Name: newAttackData
+  m_Name: PlayerShieldParryData
   m_EditorClassIdentifier: 
   <combatAbilityIcon>k__BackingField: {fileID: 0}
-  <combatAbilityName>k__BackingField: 
-  <numberOfStrokes>k__BackingField: 0
+  <combatAbilityName>k__BackingField: Player Shield/Parry
+  <numberOfStrokes>k__BackingField: 1
+  <combatAbilityDescription>k__BackingField: Default Player Shield/Parry
   <combatAbilityComponents>k__BackingField:
-  - rid: 5299658596027727881
-  - rid: 5299658596027727882
+  - rid: 7585601589865349120
   references:
     version: 2
     RefIds:
-    - rid: 5299658596027727881
+    - rid: 7585601589865349120
       type: {class: ShieldParryComponentData, ns: , asm: Assembly-CSharp}
       data:
         name: ShieldParryComponentData
-        repeatData: 0
+        shieldParryCollider:
+          overlapBox: 1
+          overlapCircle: 0
+          boxSize: {x: 0, y: 0}
+          circleRadius: 0
         clockwiseShieldParryAngle: 0
         counterClockwiseShieldParryAngle: 0
-    - rid: 5299658596027727882
-      type: {class: ReboundComponentData, ns: , asm: Assembly-CSharp}
-      data:
-        name: ReboundComponentData
-        repeatData: 0
-        repeatData: 0
+        parryTime: 0

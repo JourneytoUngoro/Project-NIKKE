@@ -4,16 +4,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public abstract class CombatAbilityComponentData
+public abstract class CombatAbilityComponentData : ICombatAbility
 {
     [SerializeField, HideInInspector] private string name;
 
-    [SerializeField] private bool repeatData;
+    protected Entity entity;
 
     public CombatAbilityComponentData()
     {
         name = this.GetType().Name;
     }
+
+    public abstract void CombatAbility();
 
     public virtual void InitializeCombatAbilityData(int numberOfAttacks) { }
 }
@@ -23,6 +25,7 @@ public abstract class CombatAbilityComponentData<T> : CombatAbilityComponentData
 {
     [SerializeField] private bool repeatData;
     [SerializeField] private T[] elementData;
+    public T[] ElementData => elementData;
     
     public T GetElementData(int index) => elementData[repeatData ? 0 : index];
 

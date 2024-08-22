@@ -78,4 +78,5 @@ MonoBehaviour:
     postureDamage: 0
     knockbackVelocityWhenHit: {x: 0, y: 0}
     knockbackTimeWhenHit: 0
+  meleeAttackData: {fileID: 11400000, guid: 2ead41cf2fd9776489b8d147bff6f991, type: 2}
   attackStrokeResetTime: 1.5
