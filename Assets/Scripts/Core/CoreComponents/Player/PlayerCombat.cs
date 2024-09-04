@@ -14,6 +14,7 @@ public class PlayerCombat : Combat
     [SerializeField] [Range(0, 180)] private float jumpFinishAttackCounterClockwiseAngle;
     [SerializeField] [Range(0, 180)] private float shieldParryAreaClockwiseAngle;
     [SerializeField] [Range(0, 180)] private float shieldParryAreaCounterClockwiseAngle;
+    [SerializeField] List<CombatAbilityDataWithTransform> shieldParry;
 
     public override void GetDamage(AttackInfo combatInfo)
     {
@@ -162,6 +163,50 @@ public class PlayerCombat : Combat
             Gizmos.DrawLine(jumpFinishAttackTransform.position, jumpFinishAttackTransform.position + Quaternion.AngleAxis(-jumpFinishAttackClockwiseAngle, Vector3.forward) * transform.up * jumpFinishAttackRadius);
             Gizmos.DrawLine(jumpFinishAttackTransform.position, jumpFinishAttackTransform.position + Quaternion.AngleAxis(jumpFinishAttackCounterClockwiseAngle, Vector3.forward) * transform.up * jumpFinishAttackRadius);
             Gizmos.DrawWireCube(jumpAttackTransform.position, jumpAttackSize);
+        }
+
+        foreach(CombatAbilityDataWithTransform combatAbility in shieldParry)
+        {
+            if (combatAbility.overlapCollider.overlapBox)
+            {
+                Gizmos.DrawWireCube(combatAbility.centerTransform.position, combatAbility.overlapCollider.boxSize);
+
+                if (combatAbility.overlapCollider.clockwiseAngle < Mathf.Atan2(combatAbility.overlapCollider.boxSize.y, combatAbility.overlapCollider.boxSize.x) * Mathf.Rad2Deg)
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position + Quaternion.AngleAxis(-combatAbility.overlapCollider.clockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.boxSize.x / Mathf.Cos(combatAbility.overlapCollider.clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                }
+                else if (combatAbility.overlapCollider.clockwiseAngle > 180.0f - Mathf.Atan2(combatAbility.overlapCollider.boxSize.y, combatAbility.overlapCollider.boxSize.x) * Mathf.Rad2Deg)
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position - Quaternion.AngleAxis(-combatAbility.overlapCollider.clockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.boxSize.x / Mathf.Cos(combatAbility.overlapCollider.clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                }
+                else
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position + Quaternion.AngleAxis(-combatAbility.overlapCollider.clockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.boxSize.y / Mathf.Cos((90.0f - combatAbility.overlapCollider.clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                }
+
+                if (combatAbility.overlapCollider.counterClockwiseAngle < Mathf.Atan2(combatAbility.overlapCollider.boxSize.y, combatAbility.overlapCollider.boxSize.x) * Mathf.Rad2Deg)
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position + Quaternion.AngleAxis(combatAbility.overlapCollider.counterClockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.boxSize.x / Mathf.Cos(combatAbility.overlapCollider.counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                }
+                else if (combatAbility.overlapCollider.counterClockwiseAngle > 180.0f - Mathf.Atan2(combatAbility.overlapCollider.boxSize.y, combatAbility.overlapCollider.boxSize.x) * Mathf.Rad2Deg)
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position - Quaternion.AngleAxis(combatAbility.overlapCollider.counterClockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.boxSize.x / Mathf.Cos(combatAbility.overlapCollider.counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                }
+                else
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position + Quaternion.AngleAxis(combatAbility.overlapCollider.counterClockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.boxSize.y / Mathf.Cos((90.0f - combatAbility.overlapCollider.counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                }
+            }
+            else if (combatAbility.overlapCollider.overlapCircle)
+            {
+                Gizmos.DrawWireSphere(combatAbility.centerTransform.position, combatAbility.overlapCollider.circleRadius);
+
+                if (combatAbility.overlapCollider.limitAngle)
+                {
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position + Quaternion.AngleAxis(-combatAbility.overlapCollider.clockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.circleRadius);
+                    Gizmos.DrawLine(combatAbility.centerTransform.position, combatAbility.centerTransform.position + Quaternion.AngleAxis(combatAbility.overlapCollider.counterClockwiseAngle, combatAbility.centerTransform.forward) * combatAbility.centerTransform.right * combatAbility.overlapCollider.circleRadius);
+                }
+            }
         }
 
         Gizmos.DrawLine(transform.position, transform.position + Quaternion.AngleAxis(-shieldParryAreaClockwiseAngle, Vector3.forward) * transform.right * 8.0f);
