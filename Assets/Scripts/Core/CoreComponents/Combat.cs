@@ -20,7 +20,8 @@ public class Combat : CoreComponent
     [SerializeField] protected float rangedAttackRadius;
     [SerializeField] protected Vector2 rangedAttackSize;
 
-    [SerializeField] protected List<CombatAbilityDataWithTransform> combatAbilityDataWithTransformList;
+    [SerializeField] protected List<CombatAbilityDataWithTransform> meleeAttack;
+    [SerializeField] protected List<CombatAbilityDataWithTransform> rangedAttack;
 
     protected List<Collider2D> damagedTargets;
 
@@ -95,9 +96,25 @@ public class Combat : CoreComponent
         }
     }
 
-    public virtual void DoMeleeAttack()
+    public virtual void DoMeleeAttack(int index = 0)
     {
-        
+        Collider2D[] damageTargets = new Collider2D[0];
+        if (meleeAttack[index].overlapCollider.overlapBox)
+        {
+            damageTargets = Physics2D.OverlapBoxAll(meleeAttack[index].centerTransform.position, meleeAttack[index].overlapCollider.boxSize, 0.0f, whatIsDamageable);
+        }
+        else if (meleeAttack[index].overlapCollider.overlapCircle)
+        {
+            damageTargets = Physics2D.OverlapCircleAll(meleeAttack[index].centerTransform.position, meleeAttack[index].overlapCollider.circleRadius, whatIsDamageable);
+        }
+
+        foreach (Collider2D damageTarget in damageTargets)
+        {
+            foreach (CombatAbilityComponentData combatAbilityComponent in meleeAttack[index].combatAbilityData.combatAbilityComponents)
+            {
+                combatAbilityComponent.ApplyCombatAbility(damageTarget);
+            }
+        }
     }
 
     public virtual void DoRangedAttack()
@@ -201,6 +218,18 @@ public class Combat : CoreComponent
         else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
         {
             Gizmos.DrawWireCube(meleeAttackTransform.position, meleeAttackSize);
+        }
+
+        foreach (CombatAbilityDataWithTransform combatAbilityDataWithTransform in meleeAttack)
+        {
+            if (combatAbilityDataWithTransform.overlapCollider.overlapBox)
+            {
+                Gizmos.DrawWireCube(combatAbilityDataWithTransform.centerTransform.position, combatAbilityDataWithTransform.overlapCollider.boxSize);
+            }
+            else if (combatAbilityDataWithTransform.overlapCollider.overlapCircle)
+            {
+                Gizmos.DrawWireSphere(combatAbilityDataWithTransform.centerTransform.position, combatAbilityDataWithTransform.overlapCollider.circleRadius);
+            }
         }
     }
 }

@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface ICombatAbility
 {
-    public void CombatAbility();
+    public void ApplyCombatAbility(Collider2D target);
 }

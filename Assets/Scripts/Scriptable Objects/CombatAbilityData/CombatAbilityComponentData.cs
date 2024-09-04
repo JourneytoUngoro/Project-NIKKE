@@ -15,7 +15,7 @@ public abstract class CombatAbilityComponentData : ICombatAbility
         name = this.GetType().Name;
     }
 
-    public abstract void CombatAbility();
+    public abstract void ApplyCombatAbility(Collider2D target);
 
     public virtual void InitializeCombatAbilityData(int numberOfAttacks) { }
 }

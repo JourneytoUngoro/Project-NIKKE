@@ -6,10 +6,7 @@ using UnityEngine;
 public class CombatAbilityDataWithTransform
 {
     [HideInInspector] public string name;
-    [SerializeField] private Transform centerTransform;
-    [SerializeField] private OverlapCollider overlapCollider;
-    [SerializeField] private CombatAbilityData combatAbilityData;
-
-    public Transform CenterTransform => centerTransform;
-    public CombatAbilityData CombatAbilityData => combatAbilityData;
+    public Transform centerTransform;
+    public OverlapCollider overlapCollider;
+    public CombatAbilityData combatAbilityData;
 }

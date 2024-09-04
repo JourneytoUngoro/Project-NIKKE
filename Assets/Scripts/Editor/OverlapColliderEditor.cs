@@ -10,6 +10,10 @@ public class OverlapColliderEditor : PropertyDrawer
     private SerializedProperty overlapCircle;
     private SerializedProperty boxSize;
     private SerializedProperty circleRadius;
+    private SerializedProperty limitAngle;
+    private SerializedProperty clockwiseAngle;
+    private SerializedProperty counterClockwiseAngle;
+    private float vector2BoudaryWidth = 345.0f;
 
     private bool toggle = true;
 
@@ -22,38 +26,89 @@ public class OverlapColliderEditor : PropertyDrawer
         overlapCircle = property.FindPropertyRelative("overlapCircle");
         boxSize = property.FindPropertyRelative("boxSize");
         circleRadius = property.FindPropertyRelative("circleRadius");
+        limitAngle = property.FindPropertyRelative("limitAngle");
+        clockwiseAngle = property.FindPropertyRelative("clockwiseAngle");
+        counterClockwiseAngle = property.FindPropertyRelative("counterClockwiseAngle");
 
         Rect labelText = new Rect(position.min.x, position.min.y, position.size.x, lineHeight);
-        property.isExpanded = EditorGUI.Foldout(labelText, true, label);
+        property.isExpanded = EditorGUI.Foldout(labelText, property.isExpanded, label);
 
-        Rect boolSelection = new Rect(position.min.x, position.min.y + lineHeight, position.size.x, lineHeight);
-        EditorGUI.PropertyField(boolSelection, overlapBox, new GUIContent("OverlapBox"));
-        boolSelection = new Rect(position.min.x + position.size.x / 2.0f, position.min.y + lineHeight, position.size.x, lineHeight);
-        EditorGUI.PropertyField(boolSelection, overlapCircle, new GUIContent("OverlapCircle"));
-
-        if (overlapBox.boolValue)
+        if (property.isExpanded)
         {
-            if (toggle)
+            Rect boolSelection = new Rect(position.min.x, position.min.y + lineHeight, position.size.x, lineHeight);
+            EditorGUI.PropertyField(boolSelection, overlapBox, new GUIContent("OverlapBox"));
+            boolSelection = new Rect(position.min.x + position.size.x / 2.0f, position.min.y + lineHeight, position.size.x, lineHeight);
+            EditorGUI.PropertyField(boolSelection, overlapCircle, new GUIContent("OverlapCircle"));
+
+            if (overlapBox.boolValue)
             {
-                overlapCircle.boolValue = false;
-                toggle = false;
+                if (toggle)
+                {
+                    overlapCircle.boolValue = false;
+                    toggle = false;
+                }
+                Rect drawArea = new Rect(position.min.x, position.min.y + lineHeight * 2, position.size.x, lineHeight);
+                EditorGUI.PropertyField(drawArea, boxSize, new GUIContent("Box Size"));
             }
-            Rect drawArea = new Rect(position.min.x, position.min.y + lineHeight * 2, position.size.x, lineHeight);
-            EditorGUI.PropertyField(drawArea, boxSize, new GUIContent("Box Size"));
-        }
 
-        if (overlapCircle.boolValue)
-        {
-            toggle = true;
-            overlapBox.boolValue = false;
-            Rect drawArea = new Rect(position.min.x, position.min.y + lineHeight * 2, position.size.x, lineHeight);
-            EditorGUI.PropertyField(drawArea, circleRadius, new GUIContent("Circle Radius"));
-        }
+            if (overlapCircle.boolValue)
+            {
+                toggle = true;
+                overlapBox.boolValue = false;
+                Rect drawArea = new Rect(position.min.x, position.min.y + lineHeight * 2, position.size.x, lineHeight);
+                EditorGUI.PropertyField(drawArea, circleRadius, new GUIContent("Circle Radius"));
+            }
 
-        /*if (!overlapBox.boolValue && !overlapCircle.boolValue)
-        {
-            EditorGUILayout.HelpBox("Caution: Current Entity will always be considered as not grounded.", MessageType.Warning);
-        }*/
+            if (overlapCircle.boolValue != false || overlapBox.boolValue != false)
+            {
+                Rect limitAngleRect;
+
+                if (overlapBox.boolValue)
+                {
+                    if (EditorGUIUtility.currentViewWidth > vector2BoudaryWidth)
+                    {
+                        limitAngleRect = new Rect(position.min.x, position.min.y + lineHeight * 3.0f, position.size.x, lineHeight);
+                    }
+                    else
+                    {
+                        limitAngleRect = new Rect(position.min.x, position.min.y + lineHeight * 4.0f, position.size.x, lineHeight);
+                    }
+
+                    EditorGUI.PropertyField(limitAngleRect, limitAngle, new GUIContent("Limit Angle"));
+
+                    if (limitAngle.boolValue)
+                    {
+                        if (EditorGUIUtility.currentViewWidth > vector2BoudaryWidth)
+                        {
+                            Rect drawRect = new Rect(position.min.x, position.min.y + lineHeight * 4.0f, position.size.x, lineHeight);
+                            EditorGUI.PropertyField(drawRect, clockwiseAngle, new GUIContent("Clockwise Angle"));
+                            drawRect = new Rect(position.min.x, position.min.y + lineHeight * 5.0f, position.size.x, lineHeight);
+                            EditorGUI.PropertyField(drawRect, counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
+                        }
+                        else
+                        {
+                            Rect drawRect = new Rect(position.min.x, position.min.y + lineHeight * 5.0f, position.size.x, lineHeight);
+                            EditorGUI.PropertyField(drawRect, clockwiseAngle, new GUIContent("Clockwise Angle"));
+                            drawRect = new Rect(position.min.x, position.min.y + lineHeight * 6.0f, position.size.x, lineHeight);
+                            EditorGUI.PropertyField(drawRect, counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
+                        }
+                    }
+                }
+                else if (overlapCircle.boolValue)
+                {
+                    limitAngleRect = new Rect(position.min.x, position.min.y + lineHeight * 3.0f, position.size.x, lineHeight);
+                    EditorGUI.PropertyField(limitAngleRect, limitAngle, new GUIContent("Limit Angle"));
+
+                    if (limitAngle.boolValue)
+                    {
+                        Rect drawRect = new Rect(position.min.x, position.min.y + lineHeight * 4.0f, position.size.x, lineHeight);
+                        EditorGUI.PropertyField(drawRect, clockwiseAngle, new GUIContent("Clockwise Angle"));
+                        drawRect = new Rect(position.min.x, position.min.y + lineHeight * 5.0f, position.size.x, lineHeight);
+                        EditorGUI.PropertyField(drawRect, counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
+                    }
+                }
+            }
+        }
 
         EditorGUI.EndProperty();
     }
@@ -64,21 +119,54 @@ public class OverlapColliderEditor : PropertyDrawer
 
         overlapBox = property.FindPropertyRelative("overlapBox");
         overlapCircle = property.FindPropertyRelative("overlapCircle");
+        limitAngle = property.FindPropertyRelative("limitAngle");
 
-        if (overlapBox.boolValue)
+        if (!property.isExpanded)
         {
-            if (EditorGUIUtility.currentViewWidth > 450.0f)
+            return lineHeight;
+        }
+        else
+        {
+            if (overlapBox.boolValue)
             {
-                return lineHeight * 3.0f;
+                if (EditorGUIUtility.currentViewWidth > vector2BoudaryWidth)
+                {
+                    if (limitAngle.boolValue)
+                    {
+                        return lineHeight * 6.0f;
+                    }
+                    else
+                    {
+                        return lineHeight * 4.0f;
+                    }
+                }
+                else
+                {
+                    if (limitAngle.boolValue)
+                    {
+                        return lineHeight * 7.0f;
+                    }
+                    else
+                    {
+                        return lineHeight * 5.0f;
+                    }
+                }
             }
-            else return lineHeight * 4.0f;
+
+            if (overlapCircle.boolValue)
+            {
+                if (limitAngle.boolValue)
+                {
+                    return lineHeight * 6.0f;
+                }
+                else
+                {
+                    return lineHeight * 4.0f;
+                }
+            }
+
+            return lineHeight * 2.0f;
         }
 
-        if (overlapCircle.boolValue)
-        {
-            return lineHeight * 3.0f;
-        }
-
-        return lineHeight * 2.0f;
     }
 }

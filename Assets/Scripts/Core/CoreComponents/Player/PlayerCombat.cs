@@ -84,10 +84,8 @@ public class PlayerCombat : Combat
         base.GetPostureDamage(damage);
     }
 
-    public override void DoMeleeAttack()
+    public void DoMeleeAttack()
     {
-        base.DoMeleeAttack();
-
         Collider2D[] damageTargets = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
 
         foreach (Collider2D damageTarget in damageTargets)

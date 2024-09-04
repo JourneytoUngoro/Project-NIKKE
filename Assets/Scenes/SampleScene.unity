@@ -184,7 +184,8 @@ MonoBehaviour:
   <rangedAttackTransform>k__BackingField: {fileID: 797922578}
   rangedAttackRadius: 0
   rangedAttackSize: {x: 42, y: 12.7}
-  combatAbilityDataWithTransformList: []
+  meleeAttack: []
+  rangedAttack: []
   <midRAttackTransform>k__BackingField: {fileID: 674451400}
   midRAttackRadius: 0
   midRAttackSize: {x: 16, y: 8}
@@ -212,6 +213,9 @@ MonoBehaviour:
     overlapCircle: 0
     boxSize: {x: 4, y: 1}
     circleRadius: 0
+    limitAngle: 0
+    clockwiseAngle: 0
+    counterClockwiseAngle: 0
   ledgeCheckDistance: 8
   slopeCheckDistance: 3
   wallCheckDistance: 1
@@ -1006,8 +1010,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-      propertyPath: groundCheck.overlapBox
+      propertyPath: groundCheck.limitAngle
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: groundCheck.overlapBox
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: groundCheck.circleRadius
@@ -1015,15 +1023,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229945, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: groundCheck.overlapCircle
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: managedReferences[-2]
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: meleeAttack.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: combatAbilityList.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: meleeAttack.Array.data[0].name
+      value: Combat Ability Data
       objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: combatAbilityList.Array.data[0]
@@ -1084,7 +1100,7 @@ PrefabInstance:
     - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: combatAbilityDataWithTransformList.Array.data[0].centerTransform
       value: 
-      objectReference: {fileID: 627969337}
+      objectReference: {fileID: 0}
     - target: {fileID: 5586063367076229947, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: combatAbilityDataWithTransformList.Array.data[0].combatAbilityData
       value: 
@@ -1119,11 +1135,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
---- !u!4 &627969337 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5586063366097741291, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-  m_PrefabInstance: {fileID: 627969336}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &627969338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5586063367076229946, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
@@ -11510,10 +11521,13 @@ MonoBehaviour:
   wallCheckTransformTop: {fileID: 627969348}
   wallCheckTransformBottom: {fileID: 627969347}
   groundCheck:
-    overlapBox: 0
-    overlapCircle: 1
+    overlapBox: 1
+    overlapCircle: 0
     boxSize: {x: 0, y: 0}
     circleRadius: 1.6
+    limitAngle: 0
+    clockwiseAngle: 0
+    counterClockwiseAngle: 0
   ledgeCheckDistance: 10
   slopeCheckDistance: 3.2
   wallCheckDistance: 0.3
@@ -11578,23 +11592,19 @@ MonoBehaviour:
   <rangedAttackTransform>k__BackingField: {fileID: 627969343}
   rangedAttackRadius: 0
   rangedAttackSize: {x: 30, y: 10}
-  combatAbilityDataWithTransformList:
-  - name: PlayerMeleeAttackData
-    centerTransform: {fileID: 627969337}
-    overlapCollider:
-      overlapBox: 0
-      overlapCircle: 0
-      boxSize: {x: 0, y: 0}
-      circleRadius: 0
-    combatAbilityData: {fileID: 11400000, guid: 2ead41cf2fd9776489b8d147bff6f991, type: 2}
+  meleeAttack:
   - name: Combat Ability Data
-    centerTransform: {fileID: 627969337}
+    centerTransform: {fileID: 627969339}
     overlapCollider:
       overlapBox: 0
-      overlapCircle: 0
+      overlapCircle: 1
       boxSize: {x: 0, y: 0}
-      circleRadius: 0
-    combatAbilityData: {fileID: 0}
+      circleRadius: 8
+      limitAngle: 0
+      clockwiseAngle: 0
+      counterClockwiseAngle: 0
+    combatAbilityData: {fileID: 11400000, guid: 2ead41cf2fd9776489b8d147bff6f991, type: 2}
+  rangedAttack: []
   jumpAttackTransform: {fileID: 627969341}
   jumpAttackSize: {x: 8.3, y: 17}
   jumpFinishAttackTransform: {fileID: 627969340}

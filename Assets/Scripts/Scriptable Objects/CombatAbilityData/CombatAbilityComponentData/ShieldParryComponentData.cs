@@ -4,12 +4,9 @@ using UnityEngine;
 
 public class ShieldParryComponentData : CombatAbilityComponentData
 {
-    public OverlapCollider shieldParryCollider;
-    [SerializeField, Range(0.0f, 180.0f)] private float clockwiseShieldParryAngle;
-    [SerializeField, Range(0.0f, 180.0f)] private float counterClockwiseShieldParryAngle;
     public float parryTime;
 
-    public override void CombatAbility()
+    public override void ApplyCombatAbility(Collider2D target)
     {
         throw new System.NotImplementedException();
     }

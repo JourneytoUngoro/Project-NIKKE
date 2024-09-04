@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ReboundComponentData : CombatAbilityComponentData<ReboundComponentElementData>
 {
-    public override void CombatAbility()
+    public override void ApplyCombatAbility(Collider2D target)
     {
         throw new System.NotImplementedException();
     }

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(CombatAbilityDataWithTransform))]
+// [CustomPropertyDrawer(typeof(CombatAbilityDataWithTransform))]
 public class CombatAbilityDataWithTransformEditor : PropertyDrawer
 {
     private SerializedProperty name;
     private SerializedProperty centerTransform;
+    private SerializedProperty overlapCollider;
     private SerializedProperty combatAbilityData;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -16,6 +17,7 @@ public class CombatAbilityDataWithTransformEditor : PropertyDrawer
 
         float lineHeight = EditorGUIUtility.singleLineHeight;
         name = property.FindPropertyRelative("name");
+        overlapCollider = property.FindPropertyRelative("overlapCollider");
         centerTransform = property.FindPropertyRelative("centerTransform");
         combatAbilityData = property.FindPropertyRelative("combatAbilityData");
 
@@ -35,8 +37,11 @@ public class CombatAbilityDataWithTransformEditor : PropertyDrawer
         {
             Rect centerTransformRect = new Rect(position.min.x, position.min.y + lineHeight, position.size.x, lineHeight);
             EditorGUI.PropertyField(centerTransformRect, centerTransform, new GUIContent("Center Transform"));
+            
+            Rect overlapColliderRect = new Rect(position.min.x, position.min.y + lineHeight * 2.0f, position.size.x, lineHeight);
+            EditorGUI.PropertyField(overlapColliderRect, overlapCollider, new GUIContent("Overlap Collider"));
         
-            Rect combatAbilityDataRect = new Rect(position.min.x, position.min.y + lineHeight * 2.0f, position.size.x, lineHeight);
+            Rect combatAbilityDataRect = new Rect(position.min.x, position.min.y + EditorGUI.GetPropertyHeight(overlapCollider), position.size.x, lineHeight);
             EditorGUI.PropertyField(combatAbilityDataRect, combatAbilityData, new GUIContent("Combat Ability Data"));
         }
 
@@ -47,6 +52,6 @@ public class CombatAbilityDataWithTransformEditor : PropertyDrawer
     {
         float lineHeight = EditorGUIUtility.singleLineHeight;
 
-        return property.isExpanded ? lineHeight * 3.0f : lineHeight;
+        return property.isExpanded ? lineHeight * 7.0f : lineHeight;
     }
 }

@@ -50,7 +50,7 @@ public class EnemyCombat : Combat
         else return false;
     }
 
-    public override void DoMeleeAttack()
+    public void DoMeleeAttack()
     {
         Collider2D[] damageTargets = { };
 

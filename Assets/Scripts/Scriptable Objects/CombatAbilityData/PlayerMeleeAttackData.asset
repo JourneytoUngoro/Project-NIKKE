@@ -26,45 +26,13 @@ MonoBehaviour:
       type: {class: DamageComponentData, ns: , asm: Assembly-CSharp}
       data:
         name: DamageComponentData
-        repeatData: 0
-        elementData:
-        - name: Stroke 1
-          healthDamage: 0
-          postureDamage: 0
-          pauseTimeWhenHit: 0
-          followUpAttack: 0
-          followUpAttackTime: 0
-          followUpAttackHealthDamage: 0
-          followUpAttackPostureDamage: 0
-        - name: Stroke 2
-          healthDamage: 0
-          postureDamage: 0
-          pauseTimeWhenHit: 0
-          followUpAttack: 0
-          followUpAttackTime: 0
-          followUpAttackHealthDamage: 0
-          followUpAttackPostureDamage: 0
-        - name: Stroke 3
-          healthDamage: 0
-          postureDamage: 0
-          pauseTimeWhenHit: 0
-          followUpAttack: 0
-          followUpAttackTime: 0
-          followUpAttackHealthDamage: 0
-          followUpAttackPostureDamage: 0
+        healthDamage: 0
+        postureDamage: 0
+        pauseTimeWhenHit: 0
     - rid: 7585601578542039040
       type: {class: KnockbackComponentData, ns: , asm: Assembly-CSharp}
       data:
         name: KnockbackComponentData
-        repeatData: 1
-        elementData:
-        - name: Stroke 1
-          knockbackDirection: {x: 0, y: 0}
-          knockbackSpeed: 0
-          knockbackTime: 0
-          knockbackDirectionWhenShielded: {x: 0, y: 0}
-          knockbackSpeedWhenShielded: 0
-          knockbackTimeWhenShielded: 0
-          knockbackDirectionWhenParried: {x: 0, y: 0}
-          knockbackSpeedWhenParried: 0
-          knockbackTimeWhenParried: 0
+        knockbackDirection: {x: 0, y: 0}
+        knockbackSpeed: 0
+        knockbackTime: 0
