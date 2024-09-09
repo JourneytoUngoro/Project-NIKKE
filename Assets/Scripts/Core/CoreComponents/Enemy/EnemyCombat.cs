@@ -69,13 +69,13 @@ public class EnemyCombat : Combat
             {
                 enemy.enemyData.meleeAttackInfo.attackSubject = enemy.gameObject;
                 Debug.Log("Do damage to: " + damageTarget.gameObject.name);
-                damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemy.enemyData.meleeAttackInfo);
+                // damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemy.enemyData.meleeAttackInfo);
                 damagedTargets.Add(damageTarget);
             }
         }
     }
 
-    public override void GetDamage(AttackInfo attackInfo)
+    /*public override void GetDamage(AttackInfo attackInfo)
     {
         base.GetDamage(attackInfo);
 
@@ -84,14 +84,14 @@ public class EnemyCombat : Combat
         enemy.enemyStateMachine.currentState.gotHit = true;
         enemy.stats.health.DecreaseCurrentValue(playerAttackInfo.healthDamage);
         enemy.stats.posture.IncreaseCurrentValue(playerAttackInfo.postureDamage);
-    }
+    }*/
 
-    public override void GetPostureDamage(float postureDamage)
+    /*public override void GetPostureDamage(float postureDamage)
     {
         base.GetPostureDamage(postureDamage);
 
         enemy.enemyStateMachine.currentState.gotHit = true;
-    }
+    }*/
 
     public void FireProjectile(string objectName, Vector2 projectileFirePosition, Vector2? targetPosition, float projectileSpeed, float projectileGravityScale)
     {

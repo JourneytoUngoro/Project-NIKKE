@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public abstract class CombatAbilityComponentData : ICombatAbility
+public abstract class CombatAbilityComponent : ICombatAbility
 {
-    [SerializeField, HideInInspector] private string name;
+    [SerializeField, HideInInspector] private string name = "";
 
-    protected Entity entity;
+    public Entity entity { get; private set; }
 
-    public CombatAbilityComponentData()
+    public CombatAbilityComponent()
     {
         name = this.GetType().Name;
     }
@@ -21,7 +21,7 @@ public abstract class CombatAbilityComponentData : ICombatAbility
 }
 
 [System.Serializable]
-public abstract class CombatAbilityComponentData<T> : CombatAbilityComponentData where T : CombatAbilityComponentElementData
+public abstract class CombatAbilityComponentData<T> : CombatAbilityComponent where T : CombatAbilityComponentElementData
 {
     [SerializeField] private bool repeatData;
     [SerializeField] private T[] elementData;

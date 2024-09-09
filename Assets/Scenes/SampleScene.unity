@@ -156,7 +156,11 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1072177177}
+  - {fileID: 1857761676}
+  - {fileID: 1514936997}
+  - {fileID: 1947314685}
   m_Father: {fileID: 1597955618}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -184,7 +188,18 @@ MonoBehaviour:
   <rangedAttackTransform>k__BackingField: {fileID: 797922578}
   rangedAttackRadius: 0
   rangedAttackSize: {x: 42, y: 12.7}
-  meleeAttack: []
+  meleeAttack:
+  - name: 
+    centerTransform: {fileID: 0}
+    overlapCollider:
+      overlapBox: 0
+      overlapCircle: 0
+      boxSize: {x: 0, y: 0}
+      circleRadius: 0
+      limitAngle: 0
+      clockwiseAngle: 0
+      counterClockwiseAngle: 0
+    combatAbilityData: {fileID: 0}
   rangedAttack: []
   <midRAttackTransform>k__BackingField: {fileID: 674451400}
   midRAttackRadius: 0
@@ -997,6 +1012,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5586063366402309411, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5586063366960834995, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -1135,6 +1154,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+--- !u!4 &627969337 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5586063366402309411, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+  m_PrefabInstance: {fileID: 627969336}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &627969338 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5586063367076229946, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
@@ -10667,6 +10691,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1050199786}
   m_CullTransparentMesh: 1
+--- !u!1 &1072177176
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1072177177}
+  m_Layer: 8
+  m_Name: Movement
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1072177177
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1072177176}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 80411205}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1122811513
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1122811514}
+  m_Layer: 3
+  m_Name: ShieldParryPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1122811514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1122811513}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.5, y: 3.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 627969337}
+  m_RootOrder: 12
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1187285570
 GameObject:
   m_ObjectHideFlags: 0
@@ -11103,6 +11189,37 @@ MonoBehaviour:
     <recoveryStartTime>k__BackingField: 0
     <recoveryDuration>k__BackingField: 0
     <recoveryValue>k__BackingField: 0
+--- !u!1 &1514936996
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1514936997}
+  m_Layer: 8
+  m_Name: Stats
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1514936997
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1514936996}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 80411205}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1577152822 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3640934166029068306, guid: 4ebaafd4759529b4c9c8f729fc3962f0, type: 3}
@@ -11160,7 +11277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1597955612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11301,6 +11418,8 @@ MonoBehaviour:
   <seeker>k__BackingField: {fileID: 80411210}
   projectileGeneratePosition:
   - {fileID: 1380234643}
+  stance: 0
+  level: 0
 --- !u!70 &1597955621
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -11393,6 +11512,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1611721652}
   m_CullTransparentMesh: 1
+--- !u!1 &1857761675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1857761676}
+  m_Layer: 8
+  m_Name: Detection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1857761676
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857761675}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 80411205}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1901450317
 GameObject:
   m_ObjectHideFlags: 0
@@ -11536,6 +11686,37 @@ MonoBehaviour:
   wallCheckTransformBottomBehind: {fileID: 627969345}
   ceilingCheckSize: {x: 3, y: 0.5}
   colliderCheckOffset: {x: 0, y: 0}
+--- !u!1 &1947314684
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1947314685}
+  m_Layer: 8
+  m_Name: Combat
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1947314685
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947314684}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 80411205}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2088213610
 GameObject:
   m_ObjectHideFlags: 0
@@ -11593,7 +11774,7 @@ MonoBehaviour:
   rangedAttackRadius: 0
   rangedAttackSize: {x: 30, y: 10}
   meleeAttack:
-  - name: Combat Ability Data
+  - name: PlayerMeleeAttackData
     centerTransform: {fileID: 627969339}
     overlapCollider:
       overlapBox: 0
@@ -11611,8 +11792,20 @@ MonoBehaviour:
   jumpFinishAttackRadius: 11
   jumpFinishAttackClockwiseAngle: 120
   jumpFinishAttackCounterClockwiseAngle: 90
-  shieldParryAreaClockwiseAngle: 30
-  shieldParryAreaCounterClockwiseAngle: 90
+  shieldParryAreaClockwiseAngle: 0
+  shieldParryAreaCounterClockwiseAngle: 0
+  shieldParry:
+  - name: PlayerShieldParryData
+    centerTransform: {fileID: 1122811514}
+    overlapCollider:
+      overlapBox: 1
+      overlapCircle: 0
+      boxSize: {x: 10, y: 8}
+      circleRadius: 5
+      limitAngle: 1
+      clockwiseAngle: 90
+      counterClockwiseAngle: 150
+    combatAbilityData: {fileID: 11400000, guid: ee588395b0eb4dc43b689042f6ee9360, type: 2}
 --- !u!1001 &3640934165458688292
 PrefabInstance:
   m_ObjectHideFlags: 0

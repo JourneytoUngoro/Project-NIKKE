@@ -11,7 +11,7 @@ public class PlayerShieldParryState : PlayerAbilityState
 
     private Timer parryTimer;
 
-    private bool canReTransit;
+    private bool canTransit;
 
     public PlayerShieldParryState(Player player, string animBoolName) : base(player, animBoolName)
     {
@@ -25,6 +25,8 @@ public class PlayerShieldParryState : PlayerAbilityState
     public override void AnimationStartTrigger(int index)
     {
         base.AnimationStartTrigger(index);
+
+        canTransit = false;
     }
 
     public override void AnimationActionTrigger(int index)
@@ -36,7 +38,12 @@ public class PlayerShieldParryState : PlayerAbilityState
     {
         base.AnimationFinishTrigger(index);
 
-        isAbilityDone = true;
+        canTransit = true;
+
+        if (!shieldParryInput)
+        {
+            isAbilityDone = true;
+        }
     }
 
     public override void DoChecks()
@@ -48,9 +55,10 @@ public class PlayerShieldParryState : PlayerAbilityState
     {
         base.Enter();
 
+        shieldParryInputActive = false;
         isParrying = true;
         isParryAvail = false;
-        canReTransit = false;
+        canTransit = true;
         parryTimer.StartSingleUseTimer();
         player.movement.SetVelocityX(0.0f);
     }
@@ -76,7 +84,7 @@ public class PlayerShieldParryState : PlayerAbilityState
 
         if (!onStateExit)
         {
-            if (!isAbilityDone)
+            /*if (!isAbilityDone)
             {
                 if (isParryAvail)
                 {
@@ -92,6 +100,14 @@ public class PlayerShieldParryState : PlayerAbilityState
                         isAbilityDone = true;
                     }
                 }
+            }*/
+
+            if (!shieldParryInput)
+            {
+                if (canTransit)
+                {
+                    isAbilityDone = true;
+                }
             }
         }
 
@@ -104,11 +120,5 @@ public class PlayerShieldParryState : PlayerAbilityState
     public void GotHit()
     {
         player.animator.SetTrigger("gotHit");
-
-        if (isParrying)
-        {
-            shieldCoolDownTimer.AdjustTimeFlow(player.playerData.shieldParryCoolDownTime);
-            canReTransit = true;
-        }
     }
 }

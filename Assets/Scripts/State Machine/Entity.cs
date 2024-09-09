@@ -21,6 +21,10 @@ public class Entity : MonoBehaviour
     public Stats entityStats { get; protected set; }
     #endregion
 
+    #region Other Variables
+    
+    #endregion
+
     protected virtual void Awake()
     {
         animator = GetComponent<Animator>();

@@ -15,7 +15,7 @@ public class NeonGunFire : PooledObject
         
         foreach (Collider2D damageTarget in damageTargets)
         {
-            damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemyAttackInfo);
+            // damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemyAttackInfo);
         }
     }
 

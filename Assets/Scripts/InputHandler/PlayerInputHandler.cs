@@ -62,7 +62,7 @@ public class PlayerInputHandler : MonoBehaviour
         objectInteractionInput = controls.InGame.ObjectInteraction.WasPressedThisFrame();
         doorInteractionInput = controls.InGame.DoorInteraction.WasPressedThisFrame();
         dodgeInputActive = controls.InGame.Dodge.WasPressedThisFrame();
-        shieldParryInputActive = controls.InGame.ShieldParry.WasPressedThisFrame();
+        // shieldParryInputActive = controls.InGame.ShieldParry.WasPressedThisFrame();
         menuInput = controls.InGame.Menu.WasPressedThisFrame();
         mapInput = controls.InGame.Map.WasPressedThisFrame();
     }
@@ -108,6 +108,7 @@ public class PlayerInputHandler : MonoBehaviour
         if (context.started)
         {
             shieldParryInput = true;
+            shieldParryInputActive = true;
         }
 
         if (context.canceled)

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem.XR.Haptics;
 
 public class EnemyState : State
 {
@@ -14,8 +13,6 @@ public class EnemyState : State
 
     #region Other Variables
     protected bool isAbilityDone;
-
-    public bool gotHit;
     #endregion
 
     #region Shared Detection

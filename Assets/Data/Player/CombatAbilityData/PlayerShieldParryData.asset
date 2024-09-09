@@ -13,23 +13,17 @@ MonoBehaviour:
   m_Name: PlayerShieldParryData
   m_EditorClassIdentifier: 
   <combatAbilityIcon>k__BackingField: {fileID: 0}
-  <combatAbilityName>k__BackingField: Player Shield/Parry
+  <combatAbilityName>k__BackingField: Player Shield&Parry
   <numberOfStrokes>k__BackingField: 1
-  <combatAbilityDescription>k__BackingField: Default Player Shield/Parry
+  <combatAbilityDescription>k__BackingField: Default Player Shield&Parry
+  <ignoreRigidity>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
-  - rid: 7585601589865349120
+  - rid: 103809495632707587
   references:
     version: 2
     RefIds:
-    - rid: 7585601589865349120
-      type: {class: ShieldParryComponentData, ns: , asm: Assembly-CSharp}
+    - rid: 103809495632707587
+      type: {class: ShieldParryComponent, ns: , asm: Assembly-CSharp}
       data:
-        name: ShieldParryComponentData
-        shieldParryCollider:
-          overlapBox: 1
-          overlapCircle: 0
-          boxSize: {x: 0, y: 0}
-          circleRadius: 0
-        clockwiseShieldParryAngle: 0
-        counterClockwiseShieldParryAngle: 0
+        name: ShieldParryComponent
         parryTime: 0

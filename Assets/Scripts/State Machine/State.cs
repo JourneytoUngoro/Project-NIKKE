@@ -25,6 +25,8 @@ public class State
     protected Vector2 workSpace;
 
     protected float epsilon = 0.001f;
+
+    public bool gotHit;
     #endregion
 
     public float startTime {  get; protected set; }

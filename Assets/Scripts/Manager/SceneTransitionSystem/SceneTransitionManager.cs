@@ -112,7 +112,6 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         loadingBar.gameObject.SetActive(false);
         fadeInOutImage.color = currentColor;
         isFadingIn = true;
-        Debug.Log("isFadingIn: " + isFadingIn);
     }
 
     // called on scene transition
@@ -255,7 +254,6 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         Debug.Log($"Adjacent Scene of {currentActiveScene.SceneName}");
         foreach (SceneField sceneField in adjacentScene[currentActiveScene])
         {
-            Debug.Log(sceneField.SceneName);
             if (!IsLoadingScene(sceneField.SceneName))
             {
                 Debug.Log($"Load scene: {sceneField.SceneName}");

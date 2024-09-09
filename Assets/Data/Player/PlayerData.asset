@@ -48,7 +48,7 @@ MonoBehaviour:
   crouchMoveSpeed: 5
   standColliderSize: {x: 1, y: 1.5}
   crouchColliderSize: {x: 1, y: 1.2}
-  shieldParryCoolDownTime: 1
+  shieldParryCoolDownTime: 0.3
   parryTime: 0.5
   landingTime: 0.5
   maxAmmo: 40

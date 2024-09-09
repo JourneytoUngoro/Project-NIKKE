@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-// [CustomPropertyDrawer(typeof(CombatAbilityDataWithTransform))]
-public class CombatAbilityDataWithTransformEditor : PropertyDrawer
+[CustomPropertyDrawer(typeof(CombatAbilityWithTransform))]
+public class CombatAbilityWithTransformEditor : PropertyDrawer
 {
     private SerializedProperty name;
     private SerializedProperty centerTransform;
@@ -41,7 +41,7 @@ public class CombatAbilityDataWithTransformEditor : PropertyDrawer
             Rect overlapColliderRect = new Rect(position.min.x, position.min.y + lineHeight * 2.0f, position.size.x, lineHeight);
             EditorGUI.PropertyField(overlapColliderRect, overlapCollider, new GUIContent("Overlap Collider"));
         
-            Rect combatAbilityDataRect = new Rect(position.min.x, position.min.y + EditorGUI.GetPropertyHeight(overlapCollider), position.size.x, lineHeight);
+            Rect combatAbilityDataRect = new Rect(position.min.x, position.min.y + EditorGUI.GetPropertyHeight(overlapCollider) + lineHeight * 2.0f, position.size.x, lineHeight);
             EditorGUI.PropertyField(combatAbilityDataRect, combatAbilityData, new GUIContent("Combat Ability Data"));
         }
 
@@ -51,7 +51,15 @@ public class CombatAbilityDataWithTransformEditor : PropertyDrawer
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         float lineHeight = EditorGUIUtility.singleLineHeight;
+        overlapCollider = property.FindPropertyRelative("overlapCollider");
 
-        return property.isExpanded ? lineHeight * 7.0f : lineHeight;
+        if (property.isExpanded)
+        {
+            return EditorGUI.GetPropertyHeight(overlapCollider) + lineHeight * 3.0f;
+        }
+        else
+        {
+            return lineHeight;
+        }
     }
 }

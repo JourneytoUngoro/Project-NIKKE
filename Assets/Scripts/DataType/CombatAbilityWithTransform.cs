@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class CombatAbilityDataWithTransform
+public class CombatAbilityWithTransform
 {
     [HideInInspector] public string name;
     public Transform centerTransform;
     public OverlapCollider overlapCollider;
-    public CombatAbilityData combatAbilityData;
+    public CombatAbility combatAbilityData;
 }

@@ -83,7 +83,7 @@ public class Player : Entity
         crouchIdleState = new PlayerCrouchIdleState(this, "crouch");
         crouchMoveState = new PlayerCrouchMoveState(this, "crouch");
         reloadState = new PlayerReloadState(this, "reload");
-        shieldParryState = new PlayerShieldParryState(this, "blockParry");
+        shieldParryState = new PlayerShieldParryState(this, "shieldParry");
         knockbackState = new PlayerKnockbackState(this, "knockback");
         cureState = new PlayerCureState(this, "cure");
 
@@ -117,6 +117,11 @@ public class Player : Entity
     private void FixedUpdate()
     {
         playerStateMachine.currentState.PhysicsUpdate();
+    }
+
+    private void LateUpdate()
+    {
+        playerStateMachine.currentState.LateLogicUpdate();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

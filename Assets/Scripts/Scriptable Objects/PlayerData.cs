@@ -79,6 +79,6 @@ public class PlayerData : ScriptableObject
     public AttackInfo playerJumpAttackInfo;
     public AttackInfo playerUltimateAttackInfo;
     public AttackInfo playerEscapeAttackInfo;
-    public CombatAbilityData meleeAttackData;
+    public CombatAbility meleeAttackData;
     public float attackStrokeResetTime = 1.5f;
 }

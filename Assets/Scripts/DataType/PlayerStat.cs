@@ -9,5 +9,5 @@ public struct PlayerStat
     public float maxHealth;
     public float attack;
     public float defense;
-    public float poise;
+    public float posture;
 }

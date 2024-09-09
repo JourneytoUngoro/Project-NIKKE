@@ -10,26 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36ad1eeb35ef68d448baecd66369689d, type: 3}
-  m_Name: PlayerMeleeAttackData
+  m_Name: NeonMeleeAttack
   m_EditorClassIdentifier: 
   <combatAbilityIcon>k__BackingField: {fileID: 0}
-  <combatAbilityName>k__BackingField: Player Melee Attack
-  <numberOfStrokes>k__BackingField: 3
-  <combatAbilityDescription>k__BackingField: Default Player Melee Attack
+  <combatAbilityName>k__BackingField: Neon Melee Attack
+  <numberOfStrokes>k__BackingField: 1
+  <combatAbilityDescription>k__BackingField: Default Combat Ability Description
   <combatAbilityComponents>k__BackingField:
-  - rid: 7585601549739753479
-  - rid: 7585601578542039040
+  - rid: 103809455835578368
+  - rid: 103809455835578369
   references:
     version: 2
     RefIds:
-    - rid: 7585601549739753479
+    - rid: 103809455835578368
       type: {class: DamageComponentData, ns: , asm: Assembly-CSharp}
       data:
         name: DamageComponentData
         healthDamage: 0
         postureDamage: 0
         pauseTimeWhenHit: 0
-    - rid: 7585601578542039040
+        canBeBlocked: 0
+        healthDamageWhenShielded: 0
+        postureDamageWhenShielded: 0
+        pauseTimeWhenShielded: 0
+        healthDamageWhenParried: 0
+        postureDamageWhenParried: 0
+        pauseTimeWhenParried: 0
+    - rid: 103809455835578369
       type: {class: KnockbackComponentData, ns: , asm: Assembly-CSharp}
       data:
         name: KnockbackComponentData

@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36ad1eeb35ef68d448baecd66369689d, type: 3}
+  m_Name: PlayerMeleeAttackData
+  m_EditorClassIdentifier: 
+  <combatAbilityIcon>k__BackingField: {fileID: 0}
+  <combatAbilityName>k__BackingField: Player Melee Attack
+  <numberOfStrokes>k__BackingField: 3
+  <combatAbilityDescription>k__BackingField: Default Player Melee Attack
+  <ignoreRigidity>k__BackingField: 0
+  <combatAbilityComponents>k__BackingField:
+  - rid: 103809487534555136
+  - rid: 103809487534555139
+  references:
+    version: 2
+    RefIds:
+    - rid: 103809487534555136
+      type: {class: DamageComponent, ns: , asm: Assembly-CSharp}
+      data:
+        name: DamageComponent
+        baseHealthDamage: 0
+        basePostureDamage: 0
+        healthDamageIncreaseByLevel: 0
+        postureDamageIncreaseByLevel: 0
+        pauseTimeWhenHit: 0
+        canBeShielded: 1
+        healthDamageShieldRate: 1
+        postureDamageShieldRate: 0.5
+        pauseTimeWhenShielded: 0
+        canBeParried: 1
+        healthDamageParryRate: 1
+        postureDamageParryRate: 0.7
+        healthCounterDamageRate: 0
+        postureCounterDamageRate: 0.8
+        pauseTimeWhenParried: 0
+    - rid: 103809487534555139
+      type: {class: KnockbackComponent, ns: , asm: Assembly-CSharp}
+      data:
+        name: KnockbackComponent
+        knockbackLevel: 0
+        knockbackDirection: {x: 0, y: 0}
+        knockbackSpeed: 0
+        knockbackTime: 0
+        easeFunction: 0
+        canBeShielded: 1
+        knockbackDirectionWhenShielded: {x: 0, y: 0}
+        knockbackSpeedWhenShielded: 0
+        knockbackTimeWhenShielded: 0
+        easeFunctionWhenShielded: 0
+        canBeParried: 1
+        knockbackDirectionWhenParried: {x: 0, y: 0}
+        knockbackSpeedWhenParried: 0
+        knockbackTimeWhenParried: 0
+        easeFunctionWhenParried: 0
+        counterKnockbackDirectionWhenParried: {x: 0, y: 0}
+        counterKnockbackSpeedWhenParried: 0
+        counterKnockbackTimeWhenParried: 0
+        counterEaseFunctionWhenParried: 0

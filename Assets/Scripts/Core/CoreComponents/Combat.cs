@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using DG.Tweening;
+using System.Reflection;
 
 /* Incomplete */
 /* Needs to be optimized and improved */
@@ -20,8 +21,8 @@ public class Combat : CoreComponent
     [SerializeField] protected float rangedAttackRadius;
     [SerializeField] protected Vector2 rangedAttackSize;
 
-    [SerializeField] protected List<CombatAbilityDataWithTransform> meleeAttack;
-    [SerializeField] protected List<CombatAbilityDataWithTransform> rangedAttack;
+    [SerializeField] protected List<CombatAbilityWithTransform> meleeAttack;
+    [SerializeField] protected List<CombatAbilityWithTransform> rangedAttack;
 
     protected List<Collider2D> damagedTargets;
 
@@ -32,73 +33,89 @@ public class Combat : CoreComponent
         damagedTargets = new List<Collider2D>();
     }
 
-    public virtual void GetDamage(AttackInfo attackInfo)
+    public virtual void GetDamage(DamageComponent damageComponent)
     {
-
+        GetHealthDamage(damageComponent);
+        GetPostureDamage(damageComponent);
     }
 
-    public virtual void GetHealthDamage(float healthDamage)
+    public virtual void GetHealthDamage(DamageComponent damageComponent)
     {
+        // entity.entityStats.health.DecreaseCurrentValue(healthDamage);
         if (player != null)
         {
-            player.stats.health.DecreaseCurrentValue(healthDamage);
+            if (player.playerStateMachine.currentState.Equals(player.shieldParryState))
+            {
+                if (damageComponent.canBeParried)
+                {
+                    if (player.shieldParryState.isParrying)
+                    {
+                        player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *   damageComponent.healthDamageParryRate);
+                        damageComponent.entity.entityStats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *     damageComponent.healthCounterDamageRate);
+                    }
+                }
+                else if (damageComponent.canBeShielded)
+                {
+                    player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *   damageComponent.healthDamageShieldRate);
+                }
+                else
+                {
+                    player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level));
+                }
+            }
+            else
+            {
+                player.stats.health.DecreaseCurrentValue(damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level);
+            }
         }
         else if (enemy != null)
         {
-            enemy.stats.health.DecreaseCurrentValue(healthDamage);
+            if (entity.GetType().Equals(typeof(Player)))
+            {
+                enemy.stats.health.DecreaseCurrentValue(damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * Manager.Instance.dataManager.gameData.attackLevel);
+            }
+            else if (entity.GetType().Equals(typeof(Enemy)))
+            {
+                enemy.stats.health.DecreaseCurrentValue(damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level);
+            }
         }
     }
 
-    public virtual void GetPostureDamage(float postureDamage)
+    public virtual void GetPostureDamage(DamageComponent damageComponent)
     {
+        // entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
         if (player != null)
         {
-            player.stats.posture.IncreaseCurrentValue(postureDamage);
+
         }
         else if (enemy != null)
         {
-            enemy.stats.posture.IncreaseCurrentValue(postureDamage);
+
         }
     }
 
     /// <summary>
     /// Knockback time of 0 means that the knockback will be done when the entity hits the ground.
     /// </summary>
-    public virtual void GetKnockback(Vector2 knockbackVelocity, float knockbackTime, bool constantVelocity, Ease? easeFunction, bool transitToKnockbackState)
+    public virtual void GetKnockback(KnockbackComponent knockbackComponent)
     {
         if (player != null)
         {
-            if (transitToKnockbackState)
-            {
-                player.knockbackState.SetKnockback(knockbackTime);//, knockbackVelocity);
-                player.playerStateMachine.ChangeState(player.knockbackState);
-            }
-
-            player.shieldParryState.GotHit();
-
-            if (constantVelocity)
-            {
-                player.movement.SetVelocity(knockbackVelocity);
-            }
-            else
-            {
-                player.movement.SetVelocityXChangeOverTime(knockbackVelocity.x, knockbackTime, easeFunction.Value, true);
-                player.movement.SetVelocityY(knockbackVelocity.y);
-            }
+            
         }
         else if (enemy != null)
         {
-            if (transitToKnockbackState)
+            if (!enemy.stance)
             {
                 enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
             }
-            
         }
     }
 
     public virtual void DoMeleeAttack(int index = 0)
     {
         Collider2D[] damageTargets = new Collider2D[0];
+
         if (meleeAttack[index].overlapCollider.overlapBox)
         {
             damageTargets = Physics2D.OverlapBoxAll(meleeAttack[index].centerTransform.position, meleeAttack[index].overlapCollider.boxSize, 0.0f, whatIsDamageable);
@@ -110,7 +127,7 @@ public class Combat : CoreComponent
 
         foreach (Collider2D damageTarget in damageTargets)
         {
-            foreach (CombatAbilityComponentData combatAbilityComponent in meleeAttack[index].combatAbilityData.combatAbilityComponents)
+            foreach (CombatAbilityComponent combatAbilityComponent in meleeAttack[index].combatAbilityData.combatAbilityComponents)
             {
                 combatAbilityComponent.ApplyCombatAbility(damageTarget);
             }
@@ -125,7 +142,6 @@ public class Combat : CoreComponent
     public bool CheckWithinAngle(Vector2 baseVector, Vector2 targetVector, float counterClockwiseAngle, float clockwiseAngle)
     {
         float angleBetweenVectors = -Vector2.SignedAngle(baseVector, targetVector);
-        Debug.Log($"Angle between {baseVector} and {targetVector} is: {angleBetweenVectors}");
         return -counterClockwiseAngle <= angleBetweenVectors && angleBetweenVectors <= clockwiseAngle;
     }
 
@@ -220,15 +236,15 @@ public class Combat : CoreComponent
             Gizmos.DrawWireCube(meleeAttackTransform.position, meleeAttackSize);
         }
 
-        foreach (CombatAbilityDataWithTransform combatAbilityDataWithTransform in meleeAttack)
+        foreach (CombatAbilityWithTransform combatAbilityWithTransform in meleeAttack)
         {
-            if (combatAbilityDataWithTransform.overlapCollider.overlapBox)
+            if (combatAbilityWithTransform.overlapCollider.overlapBox)
             {
-                Gizmos.DrawWireCube(combatAbilityDataWithTransform.centerTransform.position, combatAbilityDataWithTransform.overlapCollider.boxSize);
+                Gizmos.DrawWireCube(combatAbilityWithTransform.centerTransform.position, combatAbilityWithTransform.overlapCollider.boxSize);
             }
-            else if (combatAbilityDataWithTransform.overlapCollider.overlapCircle)
+            else if (combatAbilityWithTransform.overlapCollider.overlapCircle)
             {
-                Gizmos.DrawWireSphere(combatAbilityDataWithTransform.centerTransform.position, combatAbilityDataWithTransform.overlapCollider.circleRadius);
+                Gizmos.DrawWireSphere(combatAbilityWithTransform.centerTransform.position, combatAbilityWithTransform.overlapCollider.circleRadius);
             }
         }
     }

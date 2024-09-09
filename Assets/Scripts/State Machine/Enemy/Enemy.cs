@@ -36,6 +36,10 @@ public class Enemy : Entity
     [field: SerializeField] public Transform[] projectileGeneratePosition;
 
     protected bool isDead;
+
+    public bool stance;
+
+    public int level;
     #endregion
 
     protected override void Awake()

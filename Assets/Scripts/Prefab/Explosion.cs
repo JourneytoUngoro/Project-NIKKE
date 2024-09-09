@@ -35,7 +35,7 @@ public class Explosion : AggressiveObject
         {
             if(!damagedTargets.Contains(damageTarget))
             {
-                damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemyAttackInfo);
+                // damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemyAttackInfo);
 
             }
         }

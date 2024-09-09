@@ -34,6 +34,10 @@ public class PlayerState : State
     protected bool cureInput;
     #endregion
 
+    #region Other Variables
+    
+    #endregion
+
     public PlayerState(Player player, string animBoolName)
     {
         this.player = player;
@@ -83,6 +87,11 @@ public class PlayerState : State
         DoChecks();
         SetInputVariables();
         SetMovementVariables();
+    }
+
+    public virtual void LateLogicUpdate()
+    {
+        gotHit = false;
     }
 
     protected void SetInputVariables()
