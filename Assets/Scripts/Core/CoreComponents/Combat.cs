@@ -31,6 +31,21 @@ public class Combat : CoreComponent
         base.Awake();
 
         damagedTargets = new List<Collider2D>();
+
+        var combatAbilityFields = this.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(field => field.FieldType == typeof(List<CombatAbilityWithTransform>));
+
+        foreach (var field in combatAbilityFields)
+        {
+            var combatAbilityList = field.GetValue(this) as List<CombatAbilityWithTransform>;
+
+            foreach (CombatAbilityWithTransform combatAbility in combatAbilityList)
+            {
+                foreach (CombatAbilityComponent combatAbilityComponent in combatAbility.combatAbilityData.combatAbilityComponents)
+                {
+                    combatAbilityComponent.entity = entity;
+                }
+            }
+        }
     }
 
     public virtual void GetDamage(DamageComponent damageComponent)
@@ -50,8 +65,10 @@ public class Combat : CoreComponent
                 {
                     if (player.shieldParryState.isParrying)
                     {
+                        // if (damageComponent.entity.transform.position)
                         player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *   damageComponent.healthDamageParryRate);
-                        damageComponent.entity.entityStats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *     damageComponent.healthCounterDamageRate);
+                        damageComponent.entity.entityStats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) * damageComponent.healthCounterDamageRate);
+                        // (entity as Enemy).enemyStateMachine.ChangeState(enemyGetParriedState);
                     }
                 }
                 else if (damageComponent.canBeShielded)

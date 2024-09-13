@@ -28,7 +28,7 @@ public class Movement : CoreComponent
 
     private void Start()
     {
-        facingDirection = transform.rotation.y == 0 ? 1 : -1;
+        facingDirection = transform.parent.rotation.y == 0 ? 1 : -1;
     }
 
     private void FixedUpdate()

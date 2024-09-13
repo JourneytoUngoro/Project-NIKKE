@@ -27,6 +27,7 @@ MonoBehaviour:
       type: {class: DamageComponent, ns: , asm: Assembly-CSharp}
       data:
         name: DamageComponent
+        entity: {fileID: 0}
         baseHealthDamage: 0
         basePostureDamage: 0
         healthDamageIncreaseByLevel: 0
@@ -46,6 +47,7 @@ MonoBehaviour:
       type: {class: KnockbackComponent, ns: , asm: Assembly-CSharp}
       data:
         name: KnockbackComponent
+        entity: {fileID: 0}
         knockbackLevel: 0
         knockbackDirection: {x: 0, y: 0}
         knockbackSpeed: 0
