@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(OverlapCollider))]
 public class OverlapColliderEditor : PropertyDrawer
 {
+    private SerializedProperty centerTransform;
     private SerializedProperty overlapBox;
     private SerializedProperty overlapCircle;
     private SerializedProperty boxSize;
@@ -21,24 +23,26 @@ public class OverlapColliderEditor : PropertyDrawer
     {
         EditorGUI.BeginProperty(position, label, property);
 
-        float lineHeight = EditorGUIUtility.singleLineHeight;
-        overlapBox = property.FindPropertyRelative("overlapBox");
-        overlapCircle = property.FindPropertyRelative("overlapCircle");
-        boxSize = property.FindPropertyRelative("boxSize");
-        circleRadius = property.FindPropertyRelative("circleRadius");
-        limitAngle = property.FindPropertyRelative("limitAngle");
-        clockwiseAngle = property.FindPropertyRelative("clockwiseAngle");
-        counterClockwiseAngle = property.FindPropertyRelative("counterClockwiseAngle");
+        float singlelineHeight = EditorGUIUtility.singleLineHeight;
+        float newLineHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        centerTransform = property.FindPropertyRelative("<centerTransform>k__BackingField");
+        overlapBox = property.FindPropertyRelative("<overlapBox>k__BackingField");
+        overlapCircle = property.FindPropertyRelative("<overlapCircle>k__BackingField");
+        boxSize = property.FindPropertyRelative("<boxSize>k__BackingField");
+        circleRadius = property.FindPropertyRelative("<circleRadius>k__BackingField");
+        limitAngle = property.FindPropertyRelative("<limitAngle>k__BackingField");
+        clockwiseAngle = property.FindPropertyRelative("<clockwiseAngle>k__BackingField");
+        counterClockwiseAngle = property.FindPropertyRelative("<counterClockwiseAngle>k__BackingField");
 
-        Rect labelText = new Rect(position.min.x, position.min.y, position.size.x, lineHeight);
-        property.isExpanded = EditorGUI.Foldout(labelText, property.isExpanded, label);
+        property.isExpanded = EditorGUI.Foldout(new Rect(position.x, position.y, position.size.x, singlelineHeight), property.isExpanded, label);
 
         if (property.isExpanded)
         {
-            Rect boolSelection = new Rect(position.min.x, position.min.y + lineHeight, position.size.x, lineHeight);
-            EditorGUI.PropertyField(boolSelection, overlapBox, new GUIContent("OverlapBox"));
-            boolSelection = new Rect(position.min.x + position.size.x / 2.0f, position.min.y + lineHeight, position.size.x, lineHeight);
-            EditorGUI.PropertyField(boolSelection, overlapCircle, new GUIContent("OverlapCircle"));
+            position.y += newLineHeight;
+            EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), centerTransform, new GUIContent("Center Transform"));
+            position.y += newLineHeight;
+            EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), overlapBox, new GUIContent("OverlapBox"));
+            EditorGUI.PropertyField(new Rect(position.x + position.size.x / 2.0f, position.y, position.size.x, singlelineHeight), overlapCircle, new GUIContent("OverlapCircle"));
 
             if (overlapBox.boolValue)
             {
@@ -47,64 +51,63 @@ public class OverlapColliderEditor : PropertyDrawer
                     overlapCircle.boolValue = false;
                     toggle = false;
                 }
-                Rect drawArea = new Rect(position.min.x, position.min.y + lineHeight * 2, position.size.x, lineHeight);
-                EditorGUI.PropertyField(drawArea, boxSize, new GUIContent("Box Size"));
+                position.y += newLineHeight;
+                EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), boxSize, new GUIContent("Box Size"));
             }
 
             if (overlapCircle.boolValue)
             {
                 toggle = true;
                 overlapBox.boolValue = false;
-                Rect drawArea = new Rect(position.min.x, position.min.y + lineHeight * 2, position.size.x, lineHeight);
-                EditorGUI.PropertyField(drawArea, circleRadius, new GUIContent("Circle Radius"));
+                position.y += newLineHeight;
+                EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), circleRadius, new GUIContent("Circle Radius"));
             }
 
             if (overlapCircle.boolValue != false || overlapBox.boolValue != false)
             {
-                Rect limitAngleRect;
 
                 if (overlapBox.boolValue)
                 {
                     if (EditorGUIUtility.currentViewWidth > vector2BoudaryWidth)
                     {
-                        limitAngleRect = new Rect(position.min.x, position.min.y + lineHeight * 3.0f, position.size.x, lineHeight);
+                        position.y += newLineHeight;
                     }
                     else
                     {
-                        limitAngleRect = new Rect(position.min.x, position.min.y + lineHeight * 4.0f, position.size.x, lineHeight);
+                        position.y += newLineHeight * 2.0f;
                     }
 
-                    EditorGUI.PropertyField(limitAngleRect, limitAngle, new GUIContent("Limit Angle"));
+                    EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), limitAngle, new GUIContent("Limit Angle"));
 
                     if (limitAngle.boolValue)
                     {
                         if (EditorGUIUtility.currentViewWidth > vector2BoudaryWidth)
                         {
-                            Rect drawRect = new Rect(position.min.x, position.min.y + lineHeight * 4.0f, position.size.x, lineHeight);
-                            EditorGUI.PropertyField(drawRect, clockwiseAngle, new GUIContent("Clockwise Angle"));
-                            drawRect = new Rect(position.min.x, position.min.y + lineHeight * 5.0f, position.size.x, lineHeight);
-                            EditorGUI.PropertyField(drawRect, counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
+                            position.y += newLineHeight;
+                            EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), clockwiseAngle, new GUIContent("Clockwise Angle"));
+                            position.y += newLineHeight;
+                            EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
                         }
                         else
                         {
-                            Rect drawRect = new Rect(position.min.x, position.min.y + lineHeight * 5.0f, position.size.x, lineHeight);
-                            EditorGUI.PropertyField(drawRect, clockwiseAngle, new GUIContent("Clockwise Angle"));
-                            drawRect = new Rect(position.min.x, position.min.y + lineHeight * 6.0f, position.size.x, lineHeight);
-                            EditorGUI.PropertyField(drawRect, counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
+                            position.y += newLineHeight;
+                            EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), clockwiseAngle, new GUIContent("Clockwise Angle"));
+                            position.y += newLineHeight;
+                            EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
                         }
                     }
                 }
                 else if (overlapCircle.boolValue)
                 {
-                    limitAngleRect = new Rect(position.min.x, position.min.y + lineHeight * 3.0f, position.size.x, lineHeight);
-                    EditorGUI.PropertyField(limitAngleRect, limitAngle, new GUIContent("Limit Angle"));
+                    position.y += newLineHeight;
+                    EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), limitAngle, new GUIContent("Limit Angle"));
 
                     if (limitAngle.boolValue)
                     {
-                        Rect drawRect = new Rect(position.min.x, position.min.y + lineHeight * 4.0f, position.size.x, lineHeight);
-                        EditorGUI.PropertyField(drawRect, clockwiseAngle, new GUIContent("Clockwise Angle"));
-                        drawRect = new Rect(position.min.x, position.min.y + lineHeight * 5.0f, position.size.x, lineHeight);
-                        EditorGUI.PropertyField(drawRect, counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
+                        position.y += newLineHeight;
+                        EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), clockwiseAngle, new GUIContent("Clockwise Angle"));
+                        position.y += newLineHeight;
+                        EditorGUI.PropertyField(new Rect(position.x, position.y, position.size.x, singlelineHeight), counterClockwiseAngle, new GUIContent("Counter Clockwise Angle"));
                     }
                 }
             }
@@ -115,15 +118,15 @@ public class OverlapColliderEditor : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        float lineHeight = EditorGUIUtility.singleLineHeight;
+        float newLineHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
 
-        overlapBox = property.FindPropertyRelative("overlapBox");
-        overlapCircle = property.FindPropertyRelative("overlapCircle");
-        limitAngle = property.FindPropertyRelative("limitAngle");
+        overlapBox = property.FindPropertyRelative("<overlapBox>k__BackingField");
+        overlapCircle = property.FindPropertyRelative("<overlapCircle>k__BackingField");
+        limitAngle = property.FindPropertyRelative("<limitAngle>k__BackingField");
 
         if (!property.isExpanded)
         {
-            return lineHeight;
+            return newLineHeight;
         }
         else
         {
@@ -133,22 +136,22 @@ public class OverlapColliderEditor : PropertyDrawer
                 {
                     if (limitAngle.boolValue)
                     {
-                        return lineHeight * 6.0f;
+                        return newLineHeight * 7.0f;
                     }
                     else
                     {
-                        return lineHeight * 4.0f;
+                        return newLineHeight * 5.0f;
                     }
                 }
                 else
                 {
                     if (limitAngle.boolValue)
                     {
-                        return lineHeight * 7.0f;
+                        return newLineHeight * 8.0f;
                     }
                     else
                     {
-                        return lineHeight * 5.0f;
+                        return newLineHeight * 6.0f;
                     }
                 }
             }
@@ -157,16 +160,15 @@ public class OverlapColliderEditor : PropertyDrawer
             {
                 if (limitAngle.boolValue)
                 {
-                    return lineHeight * 6.0f;
+                    return newLineHeight * 7.0f;
                 }
                 else
                 {
-                    return lineHeight * 4.0f;
+                    return newLineHeight * 5.0f;
                 }
             }
 
-            return lineHeight * 2.0f;
+            return newLineHeight * 3.0f;
         }
-
     }
 }

@@ -7,96 +7,81 @@ using UnityEngine;
 
 public class EnemyCombat : Combat
 {
-    [field: SerializeField] public Transform midRAttackTransform { get; private set; }
-    [SerializeField] private float midRAttackRadius;
-    [SerializeField] private Vector2 midRAttackSize;
+    public int currentMeleeAttackStroke { get; private set; }
+    public int currentRangedAttackStroke { get; private set; }
+    public int currentMidRangedAttackStroke { get; private set; }
+    [field: SerializeField] public List<CombatAbilityWithTransforms> midRangedAttacks { get; protected set; }
+
+    private Enemy enemy;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        enemy = entity as Enemy;
+    }
 
     public bool isTargetInMeleeAttackRange()
     {
-        if (meleeAttackRadius > epsilon)
+        bool targetInMeleeAttackRange = false;
+
+        foreach (OverlapCollider overlapCollider in meleeAttacks[enemy.meleeAttackState.currentAttackStroke].overlapColliders)
         {
-            return Physics2D.OverlapCircle(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
+            if (overlapCollider.overlapBox)
+            {
+                targetInMeleeAttackRange |= Physics2D.OverlapBox(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable);
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                targetInMeleeAttackRange |= Physics2D.OverlapCircle(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable);
+            }
         }
-        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
-        {
-            return Physics2D.OverlapBox(meleeAttackTransform.position, meleeAttackSize, 0.0f, whatIsDamageable);
-        }
-        else return false;
+
+        return targetInMeleeAttackRange;
     }
 
     public bool isTargetInMidRAttackRange()
     {
-        if (midRAttackRadius > epsilon)
+        bool targetInMidRangeAttackRange = false;
+
+        foreach (OverlapCollider overlapCollider in midRangedAttacks[enemy.meleeAttackState.currentAttackStroke].overlapColliders)
         {
-            return Physics2D.OverlapCircle(midRAttackTransform.position, midRAttackRadius, whatIsDamageable);
+            if (overlapCollider.overlapBox)
+            {
+                targetInMidRangeAttackRange |= Physics2D.OverlapBox(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable);
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                targetInMidRangeAttackRange |= Physics2D.OverlapCircle(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable);
+            }
         }
-        else if (midRAttackSize.x > epsilon && midRAttackSize.y > epsilon)
-        {
-            return Physics2D.OverlapBox(midRAttackTransform.position, midRAttackSize, 0.0f, whatIsDamageable);
-        }
-        else return false;
+
+        return targetInMidRangeAttackRange;
     }
 
     public bool isTargetInRangedAttackRange()
     {
-        if (rangedAttackRadius > epsilon)
-        {
-            return Physics2D.OverlapCircle(rangedAttackTransform.position, rangedAttackRadius, whatIsDamageable);
-        }
-        else if (rangedAttackSize.x > epsilon && rangedAttackSize.y > epsilon)
-        {
-            return Physics2D.OverlapBox(rangedAttackTransform.position, rangedAttackSize, 0.0f, whatIsDamageable);
-        }
-        else return false;
-    }
+        bool targetInRangedAttackRange = false;
 
-    public void DoMeleeAttack()
-    {
-        Collider2D[] damageTargets = { };
-
-        if (meleeAttackRadius > epsilon)
+        foreach (OverlapCollider overlapCollider in rangedAttacks[enemy.meleeAttackState.currentAttackStroke].overlapColliders)
         {
-            damageTargets = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
-        }
-        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
-        {
-            damageTargets = Physics2D.OverlapBoxAll(meleeAttackTransform.position, meleeAttackSize, 0.0f, whatIsDamageable);
-        }
-
-        foreach(Collider2D damageTarget in damageTargets)
-        {
-            if (!damagedTargets.Contains(damageTarget))
+            if (overlapCollider.overlapBox)
             {
-                enemy.enemyData.meleeAttackInfo.attackSubject = enemy.gameObject;
-                Debug.Log("Do damage to: " + damageTarget.gameObject.name);
-                // damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemy.enemyData.meleeAttackInfo);
-                damagedTargets.Add(damageTarget);
+                targetInRangedAttackRange |= Physics2D.OverlapBox(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable);
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                targetInRangedAttackRange |= Physics2D.OverlapCircle(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable);
             }
         }
+
+        return targetInRangedAttackRange;
     }
-
-    /*public override void GetDamage(AttackInfo attackInfo)
-    {
-        base.GetDamage(attackInfo);
-
-        PlayerAttackInfo playerAttackInfo = attackInfo as PlayerAttackInfo;
-
-        enemy.enemyStateMachine.currentState.gotHit = true;
-        enemy.stats.health.DecreaseCurrentValue(playerAttackInfo.healthDamage);
-        enemy.stats.posture.IncreaseCurrentValue(playerAttackInfo.postureDamage);
-    }*/
-
-    /*public override void GetPostureDamage(float postureDamage)
-    {
-        base.GetPostureDamage(postureDamage);
-
-        enemy.enemyStateMachine.currentState.gotHit = true;
-    }*/
 
     public void FireProjectile(string objectName, Vector2 projectileFirePosition, Vector2? targetPosition, float projectileSpeed, float projectileGravityScale)
     {
         GameObject projectile = Manager.Instance.objectPoolingManager.GetGameObject(objectName);
-        projectile.GetComponent<Explosion>().SetAttackSubject(gameObject);
+        // projectile.GetComponent<Explosion>().SetAttackSubject(gameObject);
         Rigidbody2D projectileRigidbody = projectile.GetComponent<Rigidbody2D>();
 
         if (projectile == null)
@@ -130,19 +115,40 @@ public class EnemyCombat : Combat
         }
     }
 
+    public override void GetHealthDamage(DamageComponent damageComponent)
+    {
+
+    }
+
+    public override void GetPostureDamage(DamageComponent damageComponent)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void GetKnockback(KnockbackComponent knockbackComponent)
+    {
+        throw new NotImplementedException();
+    }
+
     protected override void OnDrawGizmos()
     {
         base.OnDrawGizmos();
 
         Gizmos.color = Color.red;
 
-        if (midRAttackRadius > epsilon)
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransform in midRangedAttacks)
         {
-            Gizmos.DrawWireSphere(midRAttackTransform.position, midRAttackRadius);
-        }
-        else if (midRAttackSize.x > epsilon && midRAttackSize.y > epsilon)
-        {
-            Gizmos.DrawWireCube(midRAttackTransform.position, midRAttackSize);
+            foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
+            {
+                if (overlapCollider.overlapCircle)
+                {
+                    Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
+                }
+                else if (overlapCollider.overlapBox)
+                {
+                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
+                }
+            }
         }
     }
 }

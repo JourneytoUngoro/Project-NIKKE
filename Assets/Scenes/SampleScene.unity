@@ -182,28 +182,18 @@ MonoBehaviour:
   whatIsDamageable:
     serializedVersion: 2
     m_Bits: 648
-  <meleeAttackTransform>k__BackingField: {fileID: 1494458689}
-  meleeAttackRadius: 0
-  meleeAttackSize: {x: 3.95, y: 11.78}
-  <rangedAttackTransform>k__BackingField: {fileID: 797922578}
-  rangedAttackRadius: 0
-  rangedAttackSize: {x: 42, y: 12.7}
-  meleeAttack:
-  - name: 
-    centerTransform: {fileID: 0}
-    overlapCollider:
-      overlapBox: 0
-      overlapCircle: 0
-      boxSize: {x: 0, y: 0}
-      circleRadius: 0
-      limitAngle: 0
-      clockwiseAngle: 0
-      counterClockwiseAngle: 0
-    combatAbilityData: {fileID: 0}
-  rangedAttack: []
-  <midRAttackTransform>k__BackingField: {fileID: 674451400}
-  midRAttackRadius: 0
-  midRAttackSize: {x: 16, y: 8}
+  parryLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  shieldLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  <shieldParry>k__BackingField:
+    <overlapColliders>k__BackingField: []
+    <combatAbilityData>k__BackingField: {fileID: 0}
+  <meleeAttacks>k__BackingField: []
+  <rangedAttacks>k__BackingField: []
+  <midRangedAttacks>k__BackingField: []
 --- !u!114 &80411207
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,13 +214,14 @@ MonoBehaviour:
   wallCheckTransformTop: {fileID: 1039131755}
   wallCheckTransformBottom: {fileID: 336084727}
   groundCheck:
-    overlapBox: 1
-    overlapCircle: 0
-    boxSize: {x: 4, y: 1}
-    circleRadius: 0
-    limitAngle: 0
-    clockwiseAngle: 0
-    counterClockwiseAngle: 0
+    <centerTransform>k__BackingField: {fileID: 0}
+    <overlapBox>k__BackingField: 0
+    <overlapCircle>k__BackingField: 0
+    <boxSize>k__BackingField: {x: 0, y: 0}
+    <circleRadius>k__BackingField: 0
+    <limitAngle>k__BackingField: 0
+    <clockwiseAngle>k__BackingField: 0
+    <counterClockwiseAngle>k__BackingField: 0
   ledgeCheckDistance: 8
   slopeCheckDistance: 3
   wallCheckDistance: 1
@@ -528,6 +519,34 @@ Transform:
   m_Father: {fileID: 1187285571}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &358095477 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5586063367542306882, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+  m_PrefabInstance: {fileID: 627969336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &358095479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 358095477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ComponentVersion: 1
+  m_AssetsPPU: 5
+  m_RefResolutionX: 640
+  m_RefResolutionY: 360
+  m_CropFrame: 0
+  m_GridSnapping: 0
+  m_UpscaleRT: 0
+  m_PixelSnapping: 0
+  m_CropFrameX: 0
+  m_CropFrameY: 0
+  m_StretchFill: 0
 --- !u!1 &376160428
 GameObject:
   m_ObjectHideFlags: 0
@@ -544,7 +563,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &376160429
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1128,6 +1147,10 @@ PrefabInstance:
       propertyPath: combatAbilityDataWithTransformList.Array.data[1].combatAbilityData
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5586063367542306881, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
+      propertyPath: orthographic size
+      value: 36
+      objectReference: {fileID: 0}
     - target: {fileID: 5586063367542307006, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5
@@ -1168,11 +1191,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5586063367076229946, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
   m_PrefabInstance: {fileID: 627969336}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &627969339 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5586063367642827401, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-  m_PrefabInstance: {fileID: 627969336}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &627969340 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5586063366345375725, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
@@ -1186,11 +1204,6 @@ Transform:
 --- !u!4 &627969342 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5586063366312410581, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
-  m_PrefabInstance: {fileID: 627969336}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &627969343 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5586063366579925883, guid: 93ecb72d3b6f9f54abb65c5ae4349b3a, type: 3}
   m_PrefabInstance: {fileID: 627969336}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &627969344 stripped
@@ -10233,7 +10246,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &806448463
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10736,7 +10749,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1122811514}
   - component: {fileID: 1122811515}
-  m_Layer: 3
+  m_Layer: 9
   m_Name: ShieldParryPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10768,7 +10781,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -11702,13 +11715,14 @@ MonoBehaviour:
   wallCheckTransformTop: {fileID: 627969348}
   wallCheckTransformBottom: {fileID: 627969347}
   groundCheck:
-    overlapBox: 0
-    overlapCircle: 1
-    boxSize: {x: 0, y: 0}
-    circleRadius: 1.6
-    limitAngle: 0
-    clockwiseAngle: 0
-    counterClockwiseAngle: 0
+    <centerTransform>k__BackingField: {fileID: 627969349}
+    <overlapBox>k__BackingField: 0
+    <overlapCircle>k__BackingField: 1
+    <boxSize>k__BackingField: {x: 0, y: 0}
+    <circleRadius>k__BackingField: 1.6
+    <limitAngle>k__BackingField: 0
+    <clockwiseAngle>k__BackingField: 0
+    <counterClockwiseAngle>k__BackingField: 0
   ledgeCheckDistance: 10
   slopeCheckDistance: 3.2
   wallCheckDistance: 0.3
@@ -11798,25 +11812,37 @@ MonoBehaviour:
   whatIsDamageable:
     serializedVersion: 2
     m_Bits: 256
-  <meleeAttackTransform>k__BackingField: {fileID: 627969339}
-  meleeAttackRadius: 8
-  meleeAttackSize: {x: 0, y: 0}
-  <rangedAttackTransform>k__BackingField: {fileID: 627969343}
-  rangedAttackRadius: 0
-  rangedAttackSize: {x: 30, y: 10}
-  meleeAttack:
-  - name: PlayerMeleeAttackData
-    centerTransform: {fileID: 627969339}
-    overlapCollider:
-      overlapBox: 0
-      overlapCircle: 1
-      boxSize: {x: 0, y: 0}
-      circleRadius: 8
-      limitAngle: 0
-      clockwiseAngle: 0
-      counterClockwiseAngle: 0
-    combatAbilityData: {fileID: 11400000, guid: 2ead41cf2fd9776489b8d147bff6f991, type: 2}
-  rangedAttack: []
+  parryLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  shieldLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  <shieldParry>k__BackingField:
+    <overlapColliders>k__BackingField: []
+    <combatAbilityData>k__BackingField: {fileID: 0}
+  <meleeAttacks>k__BackingField:
+  - <overlapColliders>k__BackingField:
+    - <centerTransform>k__BackingField: {fileID: 0}
+      <overlapBox>k__BackingField: 0
+      <overlapCircle>k__BackingField: 0
+      <boxSize>k__BackingField: {x: 0, y: 0}
+      <circleRadius>k__BackingField: 0
+      <limitAngle>k__BackingField: 0
+      <clockwiseAngle>k__BackingField: 0
+      <counterClockwiseAngle>k__BackingField: 0
+    <combatAbilityData>k__BackingField: {fileID: 11400000, guid: 2ead41cf2fd9776489b8d147bff6f991, type: 2}
+  <rangedAttacks>k__BackingField:
+  - <overlapColliders>k__BackingField:
+    - <centerTransform>k__BackingField: {fileID: 0}
+      <overlapBox>k__BackingField: 0
+      <overlapCircle>k__BackingField: 0
+      <boxSize>k__BackingField: {x: 0, y: 0}
+      <circleRadius>k__BackingField: 0
+      <limitAngle>k__BackingField: 0
+      <clockwiseAngle>k__BackingField: 0
+      <counterClockwiseAngle>k__BackingField: 0
+    <combatAbilityData>k__BackingField: {fileID: 0}
   jumpAttackTransform: {fileID: 627969341}
   jumpAttackSize: {x: 8.3, y: 17}
   jumpFinishAttackTransform: {fileID: 627969340}
@@ -11825,18 +11851,6 @@ MonoBehaviour:
   jumpFinishAttackCounterClockwiseAngle: 90
   shieldParryAreaClockwiseAngle: 0
   shieldParryAreaCounterClockwiseAngle: 0
-  shieldParry:
-  - name: PlayerShieldParryData
-    centerTransform: {fileID: 1122811514}
-    overlapCollider:
-      overlapBox: 1
-      overlapCircle: 0
-      boxSize: {x: 10, y: 8}
-      circleRadius: 5
-      limitAngle: 1
-      clockwiseAngle: 90
-      counterClockwiseAngle: 150
-    combatAbilityData: {fileID: 11400000, guid: ee588395b0eb4dc43b689042f6ee9360, type: 2}
 --- !u!1001 &3640934165458688292
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
 
-public class BazierProjectile : MonoBehaviour
+public class BazierProjectile : Projectile
 {
-    [SerializeField] private float projectileSpeed;
-
-    private Rigidbody2D rigidBody;
     private Vector2 targetPosition;
     private Vector2 startPosition;
 
@@ -16,24 +13,17 @@ public class BazierProjectile : MonoBehaviour
     private Vector2 prevPosition;
     private Vector2 currentPosition;
 
-    private float distance;
-    private float xDifference;
     private float transferTime;
     private float time;
     private float maxSpeed;
-
-    private void Awake()
-    {
-        rigidBody = GetComponent<Rigidbody2D>();
-    }
 
     private void Start()
     {
         startPosition = transform.position;
         targetPosition = FindObjectOfType<Player>().transform.position;
 
-        distance = Vector2.Distance(transform.position, targetPosition);
-        xDifference = targetPosition.x - transform.position.x;
+        float distance = Vector2.Distance(transform.position, targetPosition);
+        float xDifference = targetPosition.x - transform.position.x;
 
         if (xDifference < 0)
         {

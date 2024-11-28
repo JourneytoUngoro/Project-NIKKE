@@ -8,6 +8,7 @@ public class EnemyAttackState : EnemyState
     public Timer attackCoolDownTimer;
     public bool isAttacking { get; private set; }
     public bool canAttack { get; private set; }
+    public int currentAttackStroke { get; private set; }
 
     private float elapsedTime;
 

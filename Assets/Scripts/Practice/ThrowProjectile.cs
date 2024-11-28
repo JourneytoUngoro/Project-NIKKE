@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ColliderSet
+public class ThrowProjectile : Projectile
 {
-    new Collider[] colliders;
+    
 }

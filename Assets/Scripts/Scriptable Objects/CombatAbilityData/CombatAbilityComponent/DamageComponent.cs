@@ -4,29 +4,31 @@ using UnityEngine;
 
 public class DamageComponent : CombatAbilityComponent
 {
-    public float baseHealthDamage;
-    public float basePostureDamage;
-    public float healthDamageIncreaseByLevel;
-    public float postureDamageIncreaseByLevel;
-    public float pauseTimeWhenHit;
+    [field: SerializeField] public float baseHealthDamage { get; private set; }
+    [field: SerializeField] public float basePostureDamage { get; private set; }
+    [field: SerializeField] public float healthDamageIncreaseByLevel { get; private set; }
+    [field: SerializeField] public float postureDamageIncreaseByLevel { get; private set; }
+    [field: SerializeField] public float pauseTimeWhenHit { get; private set; }
 
-    public bool canBeShielded = true;
-    [Range(0.0f, 1.0f)] public float healthDamageShieldRate = 1.0f;
-    [Range(0.0f, 1.0f)] public float postureDamageShieldRate = 0.5f;
-    public float pauseTimeWhenShielded;
+    [field: SerializeField] public bool canBeShielded { get; private set; } = true;
+    [field: SerializeField, Range(0.0f, 1.0f)] public float healthDamageShieldRate { get; private set; } = 1.0f;
+    [field: SerializeField, Range(0.0f, 1.0f)] public float postureDamageShieldRate { get; private set; } = 0.5f;
+    [field: SerializeField]  public float pauseTimeWhenShielded { get; private set; }
 
-    public bool canBeParried = true;
-    [Range(0.0f, 1.0f)] public float healthDamageParryRate = 1.0f;
-    [Range(0.0f, 1.0f)] public float postureDamageParryRate = 0.7f;
-    [Range(0.0f, 1.0f)] public float healthCounterDamageRate = 0.0f;
-    [Range(0.0f, 1.0f)] public float postureCounterDamageRate = 0.8f;
-    public float pauseTimeWhenParried;
+    [field: SerializeField] public bool canBeParried { get; private set; } = true;
+    [field: SerializeField, Range(0.0f, 1.0f)] public float healthDamageParryRate { get; private set; } = 1.0f;
+    [field: SerializeField, Range(0.0f, 1.0f)] public float postureDamageParryRate { get; private set; } = 0.7f;
+    [field: SerializeField, Range(0.0f, 1.0f)] public float healthCounterDamageRate { get; private set; } = 0.0f;
+    [field: SerializeField, Range(0.0f, 1.0f)] public float postureCounterDamageRate { get; private set; } = 0.8f;
+    [field: SerializeField] public float pauseTimeWhenParried { get; private set; }
 
-    public override void ApplyCombatAbility(Collider2D target)
+    public override void ApplyCombatAbility(params object[] variables)
     {
+        Entity target = (variables[0] as Collider2D).GetComponentInParent<Entity>();
+
+        target.SendMessage("GetDamage", this);
         // target.SendMessage("GetHealthDamage", this);
         // target.SendMessage("GetPostureDamage", this);
         // target.SendMessage("GetDamage", this);
-        target.GetComponentInChildren<Combat>().GetDamage(this);
     }
 }

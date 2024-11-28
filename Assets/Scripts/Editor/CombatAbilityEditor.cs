@@ -25,12 +25,12 @@ public class CombatAbilityEditor : Editor
     {
         base.OnInspectorGUI();
 
-        DamageComponent damageComponent = combatAbilityData.combatAbilityComponents.FirstOrDefault(type => type.GetType().Equals(typeof(DamageComponent))) as DamageComponent;
+        /*DamageComponent damageComponent = combatAbilityData.combatAbilityComponents.FirstOrDefault(type => type.GetType().Equals(typeof(DamageComponent))) as DamageComponent;
         KnockbackComponent knockbackComponent = combatAbilityData.combatAbilityComponents.FirstOrDefault(type => type.GetType().Equals(typeof(KnockbackComponent))) as KnockbackComponent;
         if ((damageComponent != null && knockbackComponent != null) && !((damageComponent.canBeShielded == knockbackComponent.canBeShielded) && (damageComponent.canBeParried == knockbackComponent.canBeParried)))
         {
             EditorGUILayout.HelpBox("Caution: Shield & Parry difference between Damage Component and Knockback Component", MessageType.Warning);
-        }
+        }*/
 
         showAddCombatAbilityComponentsButtons = EditorGUILayout.Foldout(showAddCombatAbilityComponentsButtons, "Add Combat Ability Components");
 
@@ -41,6 +41,7 @@ public class CombatAbilityEditor : Editor
                 if (GUILayout.Button(combatAbilityComponentType.Name))
                 {
                     CombatAbilityComponent combatAbilityComponent = Activator.CreateInstance(combatAbilityComponentType) as CombatAbilityComponent;
+                    combatAbilityComponent.combatAbility = combatAbilityData;
 
                     if (combatAbilityComponent == null)
                     {
@@ -48,22 +49,11 @@ public class CombatAbilityEditor : Editor
                     }
                     else
                     {
-                        combatAbilityComponent.InitializeCombatAbilityData(combatAbilityData.numberOfStrokes);
-
                         combatAbilityData.AddComponent(combatAbilityComponent);
 
                         EditorUtility.SetDirty(combatAbilityData);
                     }
                 }
-            }
-        }
-
-        
-        if (GUILayout.Button("Set Number of Strokes"))
-        {
-            foreach (CombatAbilityComponent attackComponent in combatAbilityData.combatAbilityComponents)
-            {
-                attackComponent.InitializeCombatAbilityData(combatAbilityData.numberOfStrokes);
             }
         }
     }

@@ -5,12 +5,19 @@ using UnityEngine;
 
 public class ReboundComponent : CombatAbilityComponent
 {
-    public Vector2 reboundDirection;
-    public float reboundVelocity;
-    public float reboundTime;
-    public Ease reboundEaseFunction;
+    [Header("On Ground Rebound")]
+    public Vector2 onGroundReboundDirection;
+    public float onGroundReboundVelocity;
+    public float onGroundReboundTime;
+    public Ease onGroundReboundEaseFunction;
 
-    public override void ApplyCombatAbility(Collider2D target)
+    [Header("In Air Rebound")]
+    public Vector2 inAirReboundDirection;
+    public float inAirReboundVelocity;
+    public float inAirReboundTime;
+    public Ease inAirReboundEaseFunction;
+
+    public override void ApplyCombatAbility(params object[] variables)
     {
         throw new System.NotImplementedException();
     }

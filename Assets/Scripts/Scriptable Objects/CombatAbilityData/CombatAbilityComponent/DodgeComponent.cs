@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DodgeComponent : CombatAbilityComponent
 {
-    public override void ApplyCombatAbility(Collider2D target)
+    public override void ApplyCombatAbility(params object[] variables)
     {
         throw new System.NotImplementedException();
     }

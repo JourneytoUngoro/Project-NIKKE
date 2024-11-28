@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerAttackState : PlayerAbilityState
 {
+    public int currentAttackStroke { get; protected set; }
+
     public PlayerAttackState(Player player, string animBoolName) : base(player, animBoolName)
     {
     }

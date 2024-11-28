@@ -3,23 +3,22 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(CombatAbilityWithTransform))]
+// [CustomPropertyDrawer(typeof(CombatAbilityWithTransform))]
 public class CombatAbilityWithTransformEditor : PropertyDrawer
 {
     private SerializedProperty name;
-    private SerializedProperty centerTransform;
-    private SerializedProperty overlapCollider;
+    private SerializedProperty overlapColliders;
     private SerializedProperty combatAbilityData;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         EditorGUI.BeginProperty(position, label, property);
 
-        float lineHeight = EditorGUIUtility.singleLineHeight;
+        float singleLineHeight = EditorGUIUtility.singleLineHeight;
+        float newLineHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
         name = property.FindPropertyRelative("name");
-        overlapCollider = property.FindPropertyRelative("overlapCollider");
-        centerTransform = property.FindPropertyRelative("centerTransform");
-        combatAbilityData = property.FindPropertyRelative("combatAbilityData");
+        overlapColliders = property.FindPropertyRelative("<overlapColliders>k__BackingField");
+        combatAbilityData = property.FindPropertyRelative("<combatAbilityData>k__BackingField");
 
         if (combatAbilityData.objectReferenceValue != null)
         {
@@ -30,19 +29,15 @@ public class CombatAbilityWithTransformEditor : PropertyDrawer
             name.stringValue = "Combat Ability Data";
         }
 
-        Rect labelRect = new Rect(position.min.x, position.min.y, position.size.x, lineHeight);
-        property.isExpanded = EditorGUI.Foldout(labelRect, property.isExpanded, new GUIContent(name.stringValue));
+        property.isExpanded = EditorGUI.Foldout(new Rect(position.x, position.y, position.width, singleLineHeight), property.isExpanded, new GUIContent(name.stringValue));
 
         if (property.isExpanded)
         {
-            Rect centerTransformRect = new Rect(position.min.x, position.min.y + lineHeight, position.size.x, lineHeight);
-            EditorGUI.PropertyField(centerTransformRect, centerTransform, new GUIContent("Center Transform"));
-            
-            Rect overlapColliderRect = new Rect(position.min.x, position.min.y + lineHeight * 2.0f, position.size.x, lineHeight);
-            EditorGUI.PropertyField(overlapColliderRect, overlapCollider, new GUIContent("Overlap Collider"));
-        
-            Rect combatAbilityDataRect = new Rect(position.min.x, position.min.y + EditorGUI.GetPropertyHeight(overlapCollider) + lineHeight * 2.0f, position.size.x, lineHeight);
-            EditorGUI.PropertyField(combatAbilityDataRect, combatAbilityData, new GUIContent("Combat Ability Data"));
+            position.y += newLineHeight;
+            EditorGUI.PropertyField(new Rect(position.x, position.y, position.width, singleLineHeight), overlapColliders, new GUIContent("Overlap Collider"));
+
+            position.y += newLineHeight;
+            EditorGUI.PropertyField(new Rect(position.x, position.y, position.width, singleLineHeight), combatAbilityData, new GUIContent("Combat Ability Data"));
         }
 
         EditorGUI.EndProperty();
@@ -50,16 +45,16 @@ public class CombatAbilityWithTransformEditor : PropertyDrawer
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
-        float lineHeight = EditorGUIUtility.singleLineHeight;
-        overlapCollider = property.FindPropertyRelative("overlapCollider");
+        float newLineHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+        overlapColliders = property.FindPropertyRelative("overlapColliders");
 
         if (property.isExpanded)
         {
-            return EditorGUI.GetPropertyHeight(overlapCollider) + lineHeight * 3.0f;
+            return EditorGUI.GetPropertyHeight(overlapColliders) + newLineHeight * 3.0f;
         }
         else
         {
-            return lineHeight;
+            return newLineHeight;
         }
     }
 }

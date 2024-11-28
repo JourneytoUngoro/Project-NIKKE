@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum VelocityType { PlayerInput, Knockback, Platform }
+
 public class Movement : CoreComponent
 {
     public event Action synchronizeValues;
@@ -17,6 +19,10 @@ public class Movement : CoreComponent
     private bool isOnSlope;
     private bool isGrounded;
 
+    private Vector2 playerInputVelocity;
+    private Vector2 knockbackVelocity;
+    private Vector2 platformVelocity;
+
     public int facingDirection { get; private set; }
 
     protected override void Awake()
@@ -28,7 +34,7 @@ public class Movement : CoreComponent
 
     private void Start()
     {
-        facingDirection = transform.parent.rotation.y == 0 ? 1 : -1;
+        facingDirection = entity.transform.rotation.y == 0 ? 1 : -1;
     }
 
     private void FixedUpdate()
@@ -94,11 +100,18 @@ public class Movement : CoreComponent
     public void AddVelocityX(float velocity)
     {
         rigidBody.velocity = new Vector2(rigidBody.velocity.x + velocity, rigidBody.velocity.y);
+        synchronizeValues?.Invoke();
+    }
+
+    public void AddVelocityXChangeByTime(float velocity, float moveTime, Ease easeFunction)
+    {
+
     }
 
     public void MultiplyVelocity(float multiplier)
     {
         rigidBody.velocity = multiplier * rigidBody.velocity;
+        synchronizeValues?.Invoke();
     }
 
     public void SetVelocityWithDirection(Vector2 angleVector, int direction, float speed)
@@ -113,24 +126,23 @@ public class Movement : CoreComponent
         workSpace = Vector2.zero;
         rigidBody.velocity = workSpace;
         synchronizeValues?.Invoke();
-        // player.playerStateMachine.currentState.SetMovementVariables();
     }
 
     public void SetPositionX(float xPos)
     {
         workSpace.Set(xPos, transform.position.y);
-        transform.parent.position = workSpace;
+        entity.transform.position = workSpace;
     }
 
     public void SetPositionY(float yPos)
     {
         workSpace.Set(transform.position.x, yPos);
-        transform.parent.position = workSpace;
+        entity.transform.position = workSpace;
     }
 
     public void SetPosition(Vector2 position)
     {
-        transform.parent.position = position;
+        entity.transform.position = position;
     }
 
     public void MovePosition(Vector2 angleVector, float direction, float distance)
@@ -150,7 +162,7 @@ public class Movement : CoreComponent
     public void Flip()
     {
         facingDirection *= -1;
-        transform.parent.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
+        entity.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
         synchronizeValues?.Invoke();
     }
 
@@ -209,7 +221,7 @@ public class Movement : CoreComponent
             else
             {
                 SetVelocityMultiplier(Vector2.one);
-                player.rigidBody.gravityScale = 9.5f;
+                entity.rigidBody.gravityScale = 9.5f;
 
                 if (limitYVelocity)
                 {
@@ -241,6 +253,15 @@ public class Movement : CoreComponent
         velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
     }
 
+    public void AddVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    {
+        if (velocityChangeOverTimeCoroutine != null)
+        {
+            StopCoroutine(velocityChangeOverTimeCoroutine);
+        }
+        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
+    }
+
     public void StopVelocityXChangeOverTime()
     {
         StopCoroutine(velocityChangeOverTimeCoroutine);
@@ -251,6 +272,11 @@ public class Movement : CoreComponent
         workSpace.Set(x, y);
         workSpace += baseVelocity;
         workSpace *= velocityMultiplier;
+    }
+
+    private void SetFinalVelocity()
+    {
+        rigidBody.velocity = velocityMultiplier * (playerInputVelocity + knockbackVelocity + platformVelocity);
     }
 
     private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)

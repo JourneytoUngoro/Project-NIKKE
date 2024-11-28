@@ -34,7 +34,15 @@ public class EnemyDetection : Detection
 
     #region Other Variables
     public GameObject target { get; private set; }
+    private Enemy enemy;
     #endregion
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        enemy = entity as Enemy;
+    }
 
     public bool isDetectingWall()
     {

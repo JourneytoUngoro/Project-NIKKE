@@ -2,27 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using DG.Tweening;
 using System.Reflection;
 
 /* Incomplete */
 /* Needs to be optimized and improved */
 
-public class Combat : CoreComponent
+public abstract class Combat : CoreComponent
 {
     [SerializeField] protected LayerMask whatIsGround;
     [SerializeField] protected LayerMask whatIsDamageable;
-    
-    [field: SerializeField] public Transform meleeAttackTransform { get; protected set; }
-    [SerializeField] protected float meleeAttackRadius;
-    [SerializeField] protected Vector2 meleeAttackSize;
-    
-    [field: SerializeField] public Transform rangedAttackTransform { get; protected set; }
-    [SerializeField] protected float rangedAttackRadius;
-    [SerializeField] protected Vector2 rangedAttackSize;
+    [SerializeField] protected LayerMask parryLayer;
+    [SerializeField] protected LayerMask shieldLayer;
 
-    [SerializeField] protected List<CombatAbilityWithTransform> meleeAttack;
-    [SerializeField] protected List<CombatAbilityWithTransform> rangedAttack;
+    [field: SerializeField] public CombatAbilityWithTransforms shieldParry { get; protected set; }
+    [field: SerializeField] public List<CombatAbilityWithTransforms> meleeAttacks { get; protected set; }
+    [field: SerializeField] public List<CombatAbilityWithTransforms> rangedAttacks { get; protected set; }
 
     protected List<Collider2D> damagedTargets;
 
@@ -32,15 +26,17 @@ public class Combat : CoreComponent
 
         damagedTargets = new List<Collider2D>();
 
-        var combatAbilityFields = this.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(field => field.FieldType == typeof(List<CombatAbilityWithTransform>));
+        var combatAbilityFields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(field => field.FieldType == typeof(List<CombatAbilityWithTransforms>));
 
         foreach (var field in combatAbilityFields)
         {
-            var combatAbilityList = field.GetValue(this) as List<CombatAbilityWithTransform>;
+            var combatAbilityList = field.GetValue(this) as List<CombatAbilityWithTransforms>;
 
-            foreach (CombatAbilityWithTransform combatAbility in combatAbilityList)
+            foreach (CombatAbilityWithTransforms combatAbilityWithTransform in combatAbilityList)
             {
-                foreach (CombatAbilityComponent combatAbilityComponent in combatAbility.combatAbilityData.combatAbilityComponents)
+                combatAbilityWithTransform.combatAbilityData.entity = entity;
+
+                foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransform.combatAbilityData.combatAbilityComponents)
                 {
                     combatAbilityComponent.entity = entity;
                 }
@@ -48,112 +44,85 @@ public class Combat : CoreComponent
         }
     }
 
-    public virtual void GetDamage(DamageComponent damageComponent)
+    public void GetDamage(DamageComponent damageComponent)
     {
         GetHealthDamage(damageComponent);
         GetPostureDamage(damageComponent);
     }
 
-    public virtual void GetHealthDamage(DamageComponent damageComponent)
-    {
-        // entity.entityStats.health.DecreaseCurrentValue(healthDamage);
-        if (player != null)
-        {
-            if (player.playerStateMachine.currentState.Equals(player.shieldParryState))
-            {
-                if (damageComponent.canBeParried)
-                {
-                    if (player.shieldParryState.isParrying)
-                    {
-                        // if (damageComponent.entity.transform.position)
-                        player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *   damageComponent.healthDamageParryRate);
-                        damageComponent.entity.entityStats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) * damageComponent.healthCounterDamageRate);
-                        // (entity as Enemy).enemyStateMachine.ChangeState(enemyGetParriedState);
-                    }
-                }
-                else if (damageComponent.canBeShielded)
-                {
-                    player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level) *   damageComponent.healthDamageShieldRate);
-                }
-                else
-                {
-                    player.stats.health.DecreaseCurrentValue((damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level));
-                }
-            }
-            else
-            {
-                player.stats.health.DecreaseCurrentValue(damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level);
-            }
-        }
-        else if (enemy != null)
-        {
-            if (entity.GetType().Equals(typeof(Player)))
-            {
-                enemy.stats.health.DecreaseCurrentValue(damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * Manager.Instance.dataManager.gameData.attackLevel);
-            }
-            else if (entity.GetType().Equals(typeof(Enemy)))
-            {
-                enemy.stats.health.DecreaseCurrentValue(damageComponent.baseHealthDamage + damageComponent.healthDamageIncreaseByLevel * (entity as Enemy).level);
-            }
-        }
-    }
+    public abstract void GetHealthDamage(DamageComponent damageComponent);
 
-    public virtual void GetPostureDamage(DamageComponent damageComponent)
-    {
-        // entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
-        if (player != null)
-        {
-
-        }
-        else if (enemy != null)
-        {
-
-        }
-    }
+    public abstract void GetPostureDamage(DamageComponent damageComponent);
 
     /// <summary>
     /// Knockback time of 0 means that the knockback will be done when the entity hits the ground.
     /// </summary>
     public virtual void GetKnockback(KnockbackComponent knockbackComponent)
     {
-        if (player != null)
-        {
-            
-        }
-        else if (enemy != null)
-        {
-            if (!enemy.stance)
-            {
-                enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
-            }
-        }
+        
     }
 
-    public virtual void DoMeleeAttack(int index = 0)
+    public virtual bool DoAttack(CombatAbilityWithTransforms combatAbilityWithTransforms)
     {
-        Collider2D[] damageTargets = new Collider2D[0];
+        bool foundTarget = false;
 
-        if (meleeAttack[index].overlapCollider.overlapBox)
+        List<Collider2D> damageTargets = new List<Collider2D>();
+
+        foreach (OverlapCollider overlapCollider in combatAbilityWithTransforms.overlapColliders)
         {
-            damageTargets = Physics2D.OverlapBoxAll(meleeAttack[index].centerTransform.position, meleeAttack[index].overlapCollider.boxSize, 0.0f, whatIsDamageable);
+            if (overlapCollider.overlapBox)
+            {
+                damageTargets.Union(Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable)).ToList();
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                damageTargets.Union(Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable)).ToList();
+            }
         }
-        else if (meleeAttack[index].overlapCollider.overlapCircle)
+
+        damageTargets.Remove(entity.entityCollider);
+
+        foundTarget = damageTargets.Count() > 0;
+
+        foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransforms.combatAbilityData.combatAbilityComponents)
         {
-            damageTargets = Physics2D.OverlapCircleAll(meleeAttack[index].centerTransform.position, meleeAttack[index].overlapCollider.circleRadius, whatIsDamageable);
+            switch (combatAbilityComponent)
+            {
+                case ReboundComponent reboundComponent:
+                    reboundComponent.ApplyCombatAbility();
+                    break;
+                case DodgeComponent dodgeComponent:
+                    dodgeComponent.ApplyCombatAbility();
+                    break;
+                case ShieldParryComponent shieldParryComponent:
+                    shieldParryComponent.ApplyCombatAbility(combatAbilityWithTransforms.overlapColliders);
+                    break;
+                case ProjectileComponent projectileComponent:
+                    projectileComponent.ApplyCombatAbility(damageTargets, combatAbilityWithTransforms.overlapColliders);
+                    break;
+            }
         }
 
         foreach (Collider2D damageTarget in damageTargets)
         {
-            foreach (CombatAbilityComponent combatAbilityComponent in meleeAttack[index].combatAbilityData.combatAbilityComponents)
+            foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransforms.combatAbilityData.combatAbilityComponents)
             {
-                combatAbilityComponent.ApplyCombatAbility(damageTarget);
+                switch (combatAbilityComponent)
+                {
+                    case DamageComponent damageComponent:
+                        damageComponent.ApplyCombatAbility(damageTarget);
+                        break;
+                    case KnockbackComponent knockbackComponent:
+                        knockbackComponent.ApplyCombatAbility(damageTarget);
+                        break;
+                    case StatusEffectComponent statusEffectComponent:
+                        statusEffectComponent.ApplyCombatAbility(damageTarget);
+                        break;
+                }
             }
         }
-    }
 
-    public virtual void DoRangedAttack()
-    {
-        
+        return foundTarget;
     }
 
     public bool CheckWithinAngle(Vector2 baseVector, Vector2 targetVector, float counterClockwiseAngle, float clockwiseAngle)
@@ -236,32 +205,32 @@ public class Combat : CoreComponent
     {
         Gizmos.color = Color.red;
 
-        if (rangedAttackRadius > epsilon)
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransform in meleeAttacks)
         {
-            Gizmos.DrawWireSphere(rangedAttackTransform.position, rangedAttackRadius);
-        }
-        else if (rangedAttackSize.x > epsilon && rangedAttackSize.y > epsilon)
-        {
-            Gizmos.DrawWireCube(rangedAttackTransform.position, rangedAttackSize);
-        }
-        if (meleeAttackRadius > epsilon)
-        {
-            Gizmos.DrawWireSphere(meleeAttackTransform.position, meleeAttackRadius);
-        }
-        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
-        {
-            Gizmos.DrawWireCube(meleeAttackTransform.position, meleeAttackSize);
-        }
-
-        foreach (CombatAbilityWithTransform combatAbilityWithTransform in meleeAttack)
-        {
-            if (combatAbilityWithTransform.overlapCollider.overlapBox)
+            foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
             {
-                Gizmos.DrawWireCube(combatAbilityWithTransform.centerTransform.position, combatAbilityWithTransform.overlapCollider.boxSize);
+                if (overlapCollider.overlapCircle)
+                {
+                    Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
+                }
+                else if (overlapCollider.overlapBox)
+                {
+                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
+                }
             }
-            else if (combatAbilityWithTransform.overlapCollider.overlapCircle)
+        }
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransform in rangedAttacks)
+        {
+            foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
             {
-                Gizmos.DrawWireSphere(combatAbilityWithTransform.centerTransform.position, combatAbilityWithTransform.overlapCollider.circleRadius);
+                if (overlapCollider.overlapCircle)
+                {
+                    Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
+                }
+                else if (overlapCollider.overlapBox)
+                {
+                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
+                }
             }
         }
     }

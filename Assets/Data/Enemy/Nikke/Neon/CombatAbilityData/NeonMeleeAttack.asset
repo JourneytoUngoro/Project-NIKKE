@@ -16,30 +16,28 @@ MonoBehaviour:
   <combatAbilityName>k__BackingField: Neon Melee Attack
   <numberOfStrokes>k__BackingField: 1
   <combatAbilityDescription>k__BackingField: Default Combat Ability Description
+  <ignoreRigidity>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
-  - rid: 103809455835578368
-  - rid: 103809455835578369
+  - rid: 4117704567959584768
   references:
     version: 2
     RefIds:
-    - rid: 103809455835578368
-      type: {class: DamageComponentData, ns: , asm: Assembly-CSharp}
+    - rid: 4117704567959584768
+      type: {class: DamageComponent, ns: , asm: Assembly-CSharp}
       data:
-        name: DamageComponentData
-        healthDamage: 0
-        postureDamage: 0
-        pauseTimeWhenHit: 0
-        canBeBlocked: 0
-        healthDamageWhenShielded: 0
-        postureDamageWhenShielded: 0
-        pauseTimeWhenShielded: 0
-        healthDamageWhenParried: 0
-        postureDamageWhenParried: 0
-        pauseTimeWhenParried: 0
-    - rid: 103809455835578369
-      type: {class: KnockbackComponentData, ns: , asm: Assembly-CSharp}
-      data:
-        name: KnockbackComponentData
-        knockbackDirection: {x: 0, y: 0}
-        knockbackSpeed: 0
-        knockbackTime: 0
+        name: DamageComponent
+        <baseHealthDamage>k__BackingField: 0
+        <basePostureDamage>k__BackingField: 0
+        <healthDamageIncreaseByLevel>k__BackingField: 0
+        <postureDamageIncreaseByLevel>k__BackingField: 0
+        <pauseTimeWhenHit>k__BackingField: 0
+        <canBeShielded>k__BackingField: 1
+        <healthDamageShieldRate>k__BackingField: 1
+        <postureDamageShieldRate>k__BackingField: 0.5
+        <pauseTimeWhenShielded>k__BackingField: 0
+        <canBeParried>k__BackingField: 1
+        <healthDamageParryRate>k__BackingField: 1
+        <postureDamageParryRate>k__BackingField: 0.7
+        <healthCounterDamageRate>k__BackingField: 0
+        <postureCounterDamageRate>k__BackingField: 0.8
+        <pauseTimeWhenParried>k__BackingField: 0

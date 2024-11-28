@@ -1,66 +1,84 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class Explosion : AggressiveObject
+public class Explosion : PooledObject
 {
     [SerializeField] private LayerMask whatIsDamageable;
-    [SerializeField] private Transform damageRangeTransform;
-    [SerializeField] private float damageRadius;
-    [SerializeField] private Vector2 damageSize;
+    [SerializeField] protected CombatAbilityWithTransforms combatAbilityWithTransform;
 
     private List<Collider2D> damagedTargets;
 
     protected float epsilon = 0.001f;
 
-    public void DisableGameObject()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void DoDamage()
-    {
-        Collider2D[] damageTargets = { };
-
-        if (damageRadius > epsilon)
-        {
-            damageTargets = Physics2D.OverlapCircleAll(damageRangeTransform.position, damageRadius, whatIsDamageable);
-        }
-        else if (damageSize.x > epsilon && damageSize.y > epsilon)
-        {
-            damageTargets = Physics2D.OverlapBoxAll(damageRangeTransform.position, damageSize, 0.0f, whatIsDamageable);
-        }
-          
-        foreach (Collider2D damageTarget in damageTargets)
-        {
-            if(!damagedTargets.Contains(damageTarget))
-            {
-                // damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemyAttackInfo);
-
-            }
-        }
-    }
-
-    private void Awake()
-    {
-        damagedTargets = new List<Collider2D>();
-    }
-
-    private void OnEnable()
-    {
-        enemyAttackInfo.attackSubject = gameObject;
-    }
-
-    private void OnDisable()
+    protected void OnEnable()
     {
         damagedTargets.Clear();
+    }
+
+    public override void ReleaseObject()
+    {
+        base.ReleaseObject();
+        damagedTargets.Clear();
+    }
+
+    public void Explode()
+    {
+        Collider2D[] damageTargets = new Collider2D[0];
+
+        foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
+        {
+            if (overlapCollider.overlapBox)
+            {
+                damageTargets.Union(Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable)).ToArray();
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                damageTargets.Union(Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable)).ToArray();
+            }
+        }
+
+        foreach (Collider2D damageTarget in damageTargets)
+        {
+            if (damagedTargets.Contains(damageTarget)) continue;
+
+            foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransform.combatAbilityData.combatAbilityComponents)
+            {
+                combatAbilityComponent.ApplyCombatAbility(damageTarget);
+                damagedTargets.Add(damageTarget);
+            }
+        }
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
 
-        Gizmos.DrawWireCube(damageRangeTransform.position, damageSize);
-        Gizmos.DrawWireSphere(damageRangeTransform.position, damageRadius);
+        foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
+        {
+            if (overlapCollider.overlapBox)
+            {
+                if (overlapCollider.centerTransform != null)
+                {
+                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
+                }
+                else
+                {
+                    Gizmos.DrawWireCube(transform.position, overlapCollider.boxSize);
+                }
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                if (overlapCollider.centerTransform != null)
+                {
+                    Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
+                }
+                else
+                {
+                    Gizmos.DrawWireSphere(transform.position, overlapCollider.circleRadius);
+                }
+            }
+        }
     }
 }

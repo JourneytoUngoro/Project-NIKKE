@@ -5,13 +5,14 @@ using UnityEngine;
 [System.Serializable]
 public struct OverlapCollider
 {
-    public bool overlapBox;
-    public bool overlapCircle;
+    [field: SerializeField] public Transform centerTransform { get; private set; }
+    [field: SerializeField] public bool overlapBox { get; private set; }
+    [field: SerializeField] public bool overlapCircle { get; private set; }
     
-    public Vector2 boxSize;
-    public float circleRadius;
+    [field: SerializeField] public Vector2 boxSize { get; private set; }
+    [field: SerializeField] public float circleRadius { get; private set; }
 
-    public bool limitAngle;
-    [Range(0.0f, 180.0f)] public float clockwiseAngle;
-    [Range(0.0f, 180.0f)] public float counterClockwiseAngle;
+    [field: SerializeField] public bool limitAngle { get; private set; }
+    [field: SerializeField, Range(0.0f, 180.0f)] public float clockwiseAngle { get; private set; }
+    [field: SerializeField, Range(0.0f, 180.0f)] public float counterClockwiseAngle { get; private set; }
 }

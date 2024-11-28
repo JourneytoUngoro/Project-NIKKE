@@ -25,6 +25,10 @@ public class DoorTriggerInteraction : TriggerInteractBase
     public override void Interact()
     {
         if (doorToSpawnAt == DoorToSpawnAt.None) return;
-        Manager.Instance.sceneTransitionManager.SceneTransition(targetScene, doorToSpawnAt, true);
+
+        if (!Manager.Instance.sceneTransitionManager.IsSceneLoading())
+        {
+            Manager.Instance.sceneTransitionManager.SceneTransition(targetScene, doorToSpawnAt, true);
+        }
     }
 }

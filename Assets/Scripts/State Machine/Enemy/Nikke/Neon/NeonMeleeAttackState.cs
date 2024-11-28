@@ -24,7 +24,7 @@ public class NeonMeleeAttackState : EnemyAttackState
     {
         base.AnimationActionTrigger(index);
 
-        neon.combat.DoMeleeAttack();
+        neon.combat.DoAttack(neon.combat.meleeAttacks[currentAttackStroke]);
     }
 
     public override void PhysicsUpdate()

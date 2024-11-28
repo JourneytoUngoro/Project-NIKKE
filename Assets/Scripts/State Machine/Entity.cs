@@ -22,7 +22,7 @@ public class Entity : MonoBehaviour
     #endregion
 
     #region Other Variables
-    
+    public int entityLevel { get; protected set; }
     #endregion
 
     protected virtual void Awake()

@@ -6,7 +6,7 @@ public class ShieldParryComponent : CombatAbilityComponent
 {
     public float parryTime;
 
-    public override void ApplyCombatAbility(Collider2D target)
+    public override void ApplyCombatAbility(params object[] variables)
     {
         throw new System.NotImplementedException();
     }

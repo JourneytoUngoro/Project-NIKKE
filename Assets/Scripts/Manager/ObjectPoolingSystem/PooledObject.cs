@@ -7,7 +7,7 @@ public class PooledObject : MonoBehaviour
 {
     public IObjectPool<GameObject> objectPool;
 
-    public void ReleaseObject()
+    public virtual void ReleaseObject()
     {
         objectPool.Release(gameObject);
     }

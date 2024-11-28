@@ -72,7 +72,7 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
             }
             else
             {
-                loadingBarText.text = "Game Tips | " + RandomFunction.GetRandom<List<string>, string>(loadingText);
+                loadingBarText.text = "Game Tips | " + UtilityFunctions.GetRandom<List<string>, string>(loadingText);
                 isFadingOut = false;
                 elapsedTime = 0.0f;
             }
@@ -251,7 +251,7 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     // below function loads the scene that is adjacent to target scene
     private void LoadScene()
     {
-        Debug.Log($"Adjacent Scene of {currentActiveScene.SceneName}");
+        Debug.Log($"Adjacent Scenes of {currentActiveScene.SceneName} are as below:");
         foreach (SceneField sceneField in adjacentScene[currentActiveScene])
         {
             if (!IsLoadingScene(sceneField.SceneName))
@@ -377,6 +377,11 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         {
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(currentActiveScene.SceneName));
         }
+    }
+
+    public bool IsSceneLoading()
+    {
+        return isFadingIn || isFadingOut;
     }
 
     public async void LoadingBar(string loadingScene)
