@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = System.Random;
 
@@ -38,12 +39,12 @@ public class Projectile : PooledObject
     [SerializeField] private float timeToMaxStep;
 
     [Header("Straight Projectile")]
-    [SerializeField] private StraightProjectileDirection projectileDirection;
+    [SerializeField] private StraightProjectileDirection straightProjectileDirection;
     [SerializeField, Tooltip("Lose Speed Time of zero means that the projectile won't lose its speed forever.")] private float loseSpeedTime;
 
     [Header("Throw Projectile")]
     [SerializeField] private float timeStepValue = 0.1f;
-    [SerializeField] private float speedStepCount = 5.0f;
+    [SerializeField] private float speedStepValue = 5.0f;
     [SerializeField, Range(0.0f, 1.0f)] private float targetingSuccessDistance = 5.0f;
 
     #region Shared Variables
@@ -65,11 +66,14 @@ public class Projectile : PooledObject
 
     protected virtual void OnEnable()
     {
+        Invoke("ReleaseObject", autoDestroyTime);
+    }
+
+    protected virtual void OnDisable()
+    {
         elapsedTime = 0.0f;
         isTouchedGround = false;
         isTouchedTarget = false;
-
-        Invoke("ReleaseObject", autoDestroyTime);
     }
 
     protected IEnumerator FireProjectileCoroutine()
@@ -180,97 +184,130 @@ public class Projectile : PooledObject
         }
     }
 
-    public void FireProjectile(Entity sourceEntity, Entity targetEntity, Vector2? manualDestinationPosition = null, bool parried = false)
+    public void FireProjectile(Entity sourceEntity, Entity[] targetEntities, bool checkProjectileRoute, Vector2? manualDirectionVector = null, bool parried = false)
     {
         if (projectileCoroutine != null)
         {
             StopCoroutine(projectileCoroutine);
         }
 
-        ProjectileType projectileType = parried ? this.projectileTypeWhenParried : this.projectileType;
+        ProjectileType projectileType;
+        if (parried)
+        {
+            if (targetEntities[0].isDead)
+            {
+                projectileType = ProjectileType.Straight;
+                // direction to forward
+            }
+            else
+            {
+                projectileType = projectileTypeWhenParried;
+            }
+        }
+        else
+        {
+            projectileType = this.projectileType;
+        }
 
         if (sourceEntity == null)
         {
             Debug.LogError($"Source Entity: {sourceEntity} is null.");
             ReleaseObject();
         }
-        
-        if (targetEntity == null && !manualDestinationPosition.HasValue)
+
+        if ((projectileType == ProjectileType.Bazier || projectileType == ProjectileType.Throw || (projectileType == ProjectileType.Straight && straightProjectileDirection == StraightProjectileDirection.Toward)) && (targetEntities == null || targetEntities.Count() == 0))
         {
-            Debug.LogError($"Target Entity: {targetEntity} is null and manual destination does not exist.");
+            Debug.LogError($"{gameObject.name}: Projectile type of {projectileType} needs target entity which is null or does not exist.");
             ReleaseObject();
         }
 
+        bool fireProjectile = true;
         this.sourceEntity = sourceEntity;
-        this.targetEntity = targetEntity;
         initialPosition = transform.position;
-        destinationPosition = manualDestinationPosition.HasValue ? manualDestinationPosition.Value : targetEntity.transform.position;
 
-        switch (projectileType)
+        foreach (Entity entity in targetEntities)
         {
-            case ProjectileType.Bazier:
-                float distance = Vector2.Distance(transform.position, destinationPosition);
-                float xDifference = destinationPosition.x - transform.position.x;
+            this.targetEntity = entity;
+            destinationPosition = targetEntity.transform.position;
 
-                if (xDifference < 0)
-                {
-                    transform.rotation = Quaternion.Euler(0.0f, 0.0f, -180.0f);
-                }
+            switch (projectileType)
+            {
+                case ProjectileType.Bazier:
+                    float distance = Vector2.Distance(transform.position, destinationPosition);
+                    float xDifference = destinationPosition.x - transform.position.x;
 
-                Random rand = new Random();
-                float pointAXOffset = -(float)rand.NextDouble() * xDifference / 4.0f - xDifference / 4.0f;
-                float pointAYOffset = (float)rand.NextDouble() * distance / 4.0f + distance / 4.0f;
-                pointA = new Vector2(pointAXOffset + transform.position.x, pointAYOffset + Mathf.Max(transform.position.y, destinationPosition.y));
-                float pointBXOffset = (float)rand.NextDouble() * xDifference / 2.0f + xDifference / 4.0f;
-                float pointBYOffset = ((float)rand.NextDouble() - 0.5f) * pointAYOffset + distance / 4.0f;
-                pointB = new Vector2(pointBXOffset + pointA.x, pointBYOffset + pointA.y);
-                
-                transferTime = distance / projectileSpeed;
-                currentPosition = transform.position;
-                break;
+                    if (xDifference < 0)
+                    {
+                        transform.rotation = Quaternion.Euler(0.0f, 0.0f, -180.0f);
+                    }
 
-            case ProjectileType.Straight:
-                switch (projectileDirection)
-                {
-                    case StraightProjectileDirection.Forward:
-                        transform.rotation = sourceEntity.transform.rotation;
-                        break;
+                    Random rand = new Random();
+                    float pointAXOffset = -(float)rand.NextDouble() * xDifference / 4.0f - xDifference / 4.0f;
+                    float pointAYOffset = (float)rand.NextDouble() * distance / 4.0f + distance / 4.0f;
+                    pointA = new Vector2(pointAXOffset + transform.position.x, pointAYOffset + Mathf.Max(transform.position.y, destinationPosition.y));
+                    float pointBXOffset = (float)rand.NextDouble() * xDifference / 2.0f + xDifference / 4.0f;
+                    float pointBYOffset = ((float)rand.NextDouble() - 0.5f) * pointAYOffset + distance / 4.0f;
+                    pointB = new Vector2(pointBXOffset + pointA.x, pointBYOffset + pointA.y);
 
-                    case StraightProjectileDirection.Toward:
-                        Vector2 targetDirection = targetEntity.transform.position - transform.position;
-                        float targetAngle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
-                        transform.rotation = Quaternion.AngleAxis(targetAngle, Vector3.forward);
-                        break;
+                    transferTime = distance / projectileSpeed;
+                    currentPosition = transform.position;
+                    break;
 
-                    case StraightProjectileDirection.Manual:
-                        Vector2 manualDirection = manualDestinationPosition.Value;
-                        float manualAngle = Mathf.Atan2(manualDirection.y, manualDirection.x) * Mathf.Rad2Deg;
-                        transform.rotation = Quaternion.AngleAxis(manualAngle, Vector3.forward);
-                        break;
+                case ProjectileType.Straight:
+                    switch (straightProjectileDirection)
+                    {
+                        case StraightProjectileDirection.Forward:
+                            transform.rotation = sourceEntity.transform.rotation;
+                            break;
 
-                    default:
-                        break;
-                }
-                break;
+                        case StraightProjectileDirection.Toward:
+                            Quaternion? rotation = CheckProjectileRoute(transform.position, targetEntity.transform.position, checkProjectileRoute);
 
-            case ProjectileType.Throw:
-                Vector2? projectileVelocity = CalculateProjectileVelocity(transform.position, destinationPosition);
+                            if (rotation.HasValue)
+                            {
+                                transform.rotation = rotation.Value;
+                            }
+                            else
+                            {
+                                fireProjectile = false;
+                            }
+                            break;
 
-                if (projectileVelocity.HasValue)
-                {
-                    rigidBody.velocity = projectileVelocity.Value;
-                }
-                else
-                {
-                    ReleaseObject();
-                }
-                break;
+                        case StraightProjectileDirection.Manual:
+                            Vector2 manualDirection = manualDirectionVector.Value;
+                            float manualAngle = Mathf.Atan2(manualDirection.y, manualDirection.x) * Mathf.Rad2Deg;
+                            transform.rotation = Quaternion.AngleAxis(manualAngle, Vector3.forward);
+                            break;
 
-            default:
-                break;
+                        default:
+                            break;
+                    }
+                    break;
+
+                case ProjectileType.Throw:
+                    Vector2? projectileVelocity = CalculateProjectileVelocity(transform.position, destinationPosition, checkProjectileRoute);
+
+                    if (projectileVelocity.HasValue)
+                    {
+                        rigidBody.velocity = projectileVelocity.Value;
+                    }
+                    else
+                    {
+                        fireProjectile = false;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (fireProjectile) break;
         }
 
-        projectileCoroutine = StartCoroutine(FireProjectileCoroutine());
+        if (fireProjectile)
+        {
+            projectileCoroutine = StartCoroutine(FireProjectileCoroutine());
+        }
     }
 
     protected virtual void OnCollision()
@@ -300,25 +337,17 @@ public class Projectile : PooledObject
             this.projectileSpeed = projectileSpeed.Value;
         }
 
-        if (sourceEntity.isDead)
-        {
-
-        }
-        else
-        {
-            projectileType = projectileTypeWhenParried;
-            FireProjectile(targetEntity, sourceEntity);
-        }
+        FireProjectile(targetEntity, new Entity[1] { sourceEntity }, false, null, true);
     }
 
-    public Vector2? CalculateProjectileVelocity(Vector2 projectileFirePosition, Vector2 targetPosition)
+    public Vector2? CalculateProjectileVelocity(Vector2 projectileFirePosition, Vector2 targetPosition, bool checkProjectileRoute)
     {
         float distance = Vector2.Distance(projectileFirePosition, targetPosition);
         List<Tuple<Vector2, bool>> availableVelocities = new List<Tuple<Vector2, bool>>();
         float gravityAccelaration = Mathf.Abs(Physics2D.gravity.y * rigidBody.gravityScale);
         float xDifference = targetPosition.x - projectileFirePosition.x;
         float yDifference = targetPosition.y - projectileFirePosition.y;
-        float currentSpeed = projectileSpeed / speedStepCount;
+        float currentSpeed = speedStepValue;
 
         while (currentSpeed <= projectileSpeed)
         {
@@ -332,17 +361,25 @@ public class Projectile : PooledObject
                 Vector2 highAngleVector = new Vector2(Mathf.Cos(highAngle), Mathf.Sin(highAngle));
                 Vector2 lowAngleVector = new Vector2(Mathf.Cos(lowAngle), Mathf.Sin(lowAngle));
 
-                if (CheckProjectileRoute(projectileFirePosition, targetPosition, currentSpeed * lowAngleVector))
+                if (checkProjectileRoute)
+                {
+                    if (CheckProjectileRoute(projectileFirePosition, targetPosition, currentSpeed * lowAngleVector))
+                    {
+                        availableVelocities.Add(new Tuple<Vector2, bool>(lowAngleVector * currentSpeed, true));
+                    }
+                    else if (CheckProjectileRoute(projectileFirePosition, targetPosition, currentSpeed * highAngleVector))
+                    {
+                        availableVelocities.Add(new Tuple<Vector2, bool>(highAngleVector * currentSpeed, false));
+                    }
+                }
+                else
                 {
                     availableVelocities.Add(new Tuple<Vector2, bool>(lowAngleVector * currentSpeed, true));
-                }
-                else if (CheckProjectileRoute(projectileFirePosition, targetPosition, currentSpeed * highAngleVector))
-                {
                     availableVelocities.Add(new Tuple<Vector2, bool>(highAngleVector * currentSpeed, false));
                 }
             }
 
-            currentSpeed += speedStepCount;
+            currentSpeed += speedStepValue;
         }
 
         Tuple<Vector2, bool> bestVelocity = null;
@@ -381,7 +418,7 @@ public class Projectile : PooledObject
 
     private bool CheckProjectileRoute(Vector2 projectileFirePosition, Vector2 targetPosition, Vector2 projectileVelocity)
     {
-        float distance = Vector2.Distance(projectileFirePosition, targetPosition);
+        // float distance = Vector2.Distance(projectileFirePosition, targetPosition);
         float xDifference = targetPosition.x - projectileFirePosition.x;
         float expectedTravelDuration = xDifference / projectileVelocity.x;
         float timeStep = Mathf.Min(timeStepValue, expectedTravelDuration / 5.0f);
@@ -416,6 +453,28 @@ public class Projectile : PooledObject
         return true;
     }
 
+    private Quaternion? CheckProjectileRoute(Vector2 projectileFirePosition, Vector2 targetPosition, bool checkProjectileRoute)
+    {
+        Vector2 targetDirection = targetEntity.transform.position - transform.position;
+        float targetAngle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
+
+        if (checkProjectileRoute)
+        {
+            if (Physics2D.Raycast(projectileFirePosition, targetDirection, Vector2.Distance(projectileFirePosition, targetPosition), whatIsGround))
+            {
+                return null;
+            }
+            else
+            {
+                return Quaternion.AngleAxis(targetAngle, Vector3.forward);
+            }
+        }
+        else
+        {
+            return Quaternion.AngleAxis(targetAngle, Vector3.forward);
+        }
+    }
+
     private Vector2 BezierCurve(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, float rate)
     {
         Vector2 a = Vector2.Lerp(p1, p2, rate);
@@ -431,5 +490,5 @@ public class Projectile : PooledObject
     }
 
     public ProjectileType GetProjectileType() => projectileType;
-    public StraightProjectileDirection GetStraightProjectileDirection() => projectileDirection;
+    public StraightProjectileDirection GetStraightProjectileDirection() => straightProjectileDirection;
 }

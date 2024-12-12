@@ -242,7 +242,7 @@ public abstract class Combat : CoreComponent
                 case ProjectileComponent projectileComponent:
                     Transform[] projectileFireTransforms = combatAbilityWithTransforms.overlapColliders.Where(overlapCollider => !overlapCollider.overlapBox && !overlapCollider.overlapCircle).Select(overlapCollider => overlapCollider.centerTransform).ToArray();
 
-                    if (projectileComponent.rotateIdentical)
+                    if (projectileComponent.rotateTransform)
                     {
 
                     }
