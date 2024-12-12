@@ -9,6 +9,7 @@ public class PooledObject : MonoBehaviour
 
     public virtual void ReleaseObject()
     {
+        gameObject.transform.SetParent(Manager.Instance.objectPoolingManager.transform);
         objectPool.Release(gameObject);
     }
 }

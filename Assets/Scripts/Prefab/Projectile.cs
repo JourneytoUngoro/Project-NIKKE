@@ -9,7 +9,7 @@ public enum ProjectileType { Straight, Throw, Bazier, Targeting }
 [RequireComponent(typeof(Collider2D), typeof(Rigidbody2D))]
 public class Projectile : PooledObject
 {
-    private enum StraightProjectileDirection { Forward, Toward };
+    private enum StraightProjectileDirection { Forward, Toward, Manual };
 
     public Entity sourceEntity { get; protected set; }
     public Entity targetEntity { get; protected set; }
@@ -165,6 +165,10 @@ public class Projectile : PooledObject
             rigidBody.velocity *= 0.8f;
             OnCollision();
         }
+        else if (collision.gameObject.layer == LayerMask.NameToLayer("Parry"))
+        {
+            // Check within angle range
+        }
     }
 
     protected virtual void OnCollisionStay2D(Collision2D collision)
@@ -191,9 +195,9 @@ public class Projectile : PooledObject
             ReleaseObject();
         }
         
-        if (targetEntity == null)
+        if (targetEntity == null && !manualDestinationPosition.HasValue)
         {
-            Debug.LogError($"Target Entity: {targetEntity} is null.");
+            Debug.LogError($"Target Entity: {targetEntity} is null and manual destination does not exist.");
             ReleaseObject();
         }
 
@@ -236,6 +240,12 @@ public class Projectile : PooledObject
                         Vector2 targetDirection = targetEntity.transform.position - transform.position;
                         float targetAngle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
                         transform.rotation = Quaternion.AngleAxis(targetAngle, Vector3.forward);
+                        break;
+
+                    case StraightProjectileDirection.Manual:
+                        Vector2 manualDirection = manualDestinationPosition.Value;
+                        float manualAngle = Mathf.Atan2(manualDirection.y, manualDirection.x) * Mathf.Rad2Deg;
+                        transform.rotation = Quaternion.AngleAxis(manualAngle, Vector3.forward);
                         break;
 
                     default:

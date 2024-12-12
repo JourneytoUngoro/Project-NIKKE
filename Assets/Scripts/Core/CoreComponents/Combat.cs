@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Reflection;
+using DG.Tweening;
 
 /* Incomplete */
 /* Needs to be optimized and improved */
@@ -11,12 +12,11 @@ public abstract class Combat : CoreComponent
 {
     [SerializeField] protected LayerMask whatIsGround;
     [SerializeField] protected LayerMask whatIsDamageable;
-    [SerializeField] protected LayerMask parryLayer;
-    [SerializeField] protected LayerMask shieldLayer;
 
-    [field: SerializeField] public CombatAbilityWithTransforms shieldParry { get; protected set; }
     [field: SerializeField] public List<CombatAbilityWithTransforms> meleeAttacks { get; protected set; }
     [field: SerializeField] public List<CombatAbilityWithTransforms> rangedAttacks { get; protected set; }
+    [field: SerializeField] public CombatAbilityWithTransforms parryArea { get; protected set; }
+    [field: SerializeField] public Transform parryAreaTransform { get; protected set; }
 
     protected List<Collider2D> damagedTargets;
 
@@ -34,7 +34,7 @@ public abstract class Combat : CoreComponent
 
             foreach (CombatAbilityWithTransforms combatAbilityWithTransform in combatAbilityList)
             {
-                combatAbilityWithTransform.combatAbilityData.entity = entity;
+                combatAbilityWithTransform.combatAbilityData.sourceEntity = entity;
 
                 foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransform.combatAbilityData.combatAbilityComponents)
                 {
@@ -44,22 +44,164 @@ public abstract class Combat : CoreComponent
         }
     }
 
-    public void GetDamage(DamageComponent damageComponent)
+    public virtual void GetDamage(DamageComponent damageComponent, OverlapCollider[] overlapColliders)
     {
-        GetHealthDamage(damageComponent);
-        GetPostureDamage(damageComponent);
+        Entity sourceEntity = damageComponent.pertainedCombatAbility.sourceEntity;
+        bool isParrying = IsParrying(sourceEntity, overlapColliders);
+        bool isShielding = IsShielding(sourceEntity, overlapColliders);
+
+        GetHealthDamage(damageComponent, isParrying, isShielding);
+        GetPostureDamage(damageComponent, isParrying, isShielding);
     }
 
-    public abstract void GetHealthDamage(DamageComponent damageComponent);
+    public virtual void GetHealthDamage(DamageComponent damageComponent, bool isParrying, bool isShielding)
+    {
+        Entity sourceEntity = damageComponent.pertainedCombatAbility.sourceEntity;
 
-    public abstract void GetPostureDamage(DamageComponent damageComponent);
+        float healthDamage = damageComponent.baseHealthDamage + sourceEntity.entityLevel * damageComponent.healthDamageIncreaseByLevel;
+
+        if (damageComponent.canBeParried)
+        {
+            if (isParrying)
+            {
+                entity.entityStats.health.DecreaseCurrentValue(healthDamage * (1.0f - damageComponent.healthDamageParryRate));
+                sourceEntity.entityStats.health.DecreaseCurrentValue(healthDamage * damageComponent.healthCounterDamageRate);
+                return;
+            }
+            else
+            {
+                entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+                return;
+            }
+        }
+
+        if (damageComponent.canBeShielded)
+        {
+            if (isParrying || isShielding)
+            {
+                entity.entityStats.health.DecreaseCurrentValue(healthDamage * (1.0f - damageComponent.healthDamageShieldRate));
+                return;
+            }
+            else
+            {
+                entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+                return;
+            }
+        }
+
+        entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+    }
+
+    public virtual void GetPostureDamage(DamageComponent damageComponent, bool isParrying, bool isShielding)
+    {
+        Entity sourceEntity = damageComponent.pertainedCombatAbility.sourceEntity;
+
+        float postureDamage = damageComponent.basePostureDamage + sourceEntity.entityLevel * damageComponent.postureDamageIncreaseByLevel;
+
+        if (damageComponent.canBeParried)
+        {
+            if (isParrying)
+            {
+                entity.entityStats.posture.IncreaseCurrentValue(postureDamage * (1.0f - damageComponent.postureDamageParryRate), false);
+                sourceEntity.entityStats.posture.IncreaseCurrentValue(postureDamage * damageComponent.postureCounterDamageRate, !sourceEntity.GetType().Equals(typeof(Player)));
+                return;
+            }
+            else
+            {
+                entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+                return;
+            }
+        }
+
+        if (damageComponent.canBeShielded)
+        {
+            if (isParrying || isShielding)
+            {
+                entity.entityStats.posture.IncreaseCurrentValue(postureDamage * (1.0f - damageComponent.postureDamageShieldRate));
+                return;
+            }
+            else
+            {
+                entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+                return;
+            }
+        }
+
+        entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+    }
 
     /// <summary>
     /// Knockback time of 0 means that the knockback will be done when the entity hits the ground.
     /// </summary>
     public virtual void GetKnockback(KnockbackComponent knockbackComponent)
     {
-        
+        if (knockbackComponent.easeFunction == Ease.Unset)
+        {
+            entity.entityMovement.SetVelocity(knockbackComponent.knockbackDirection.normalized * knockbackComponent.knockbackSpeed);
+        }
+        else
+        {
+            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+        }
+    }
+
+    private bool IsParrying(Entity sourceEntity, OverlapCollider[] overlapColliders)
+    {
+        bool isParrying = false;
+
+        foreach (OverlapCollider overlapCollider in overlapColliders)
+        {
+            if (overlapCollider.overlapBox)
+            {
+                ShieldParryPrefab parryDetection = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, LayerMask.NameToLayer("ParryLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
+                if (parryDetection != null && parryDetection.overlapCollider.overlapCircle)
+                {
+                    isParrying = CheckWithinAngle(new Vector2(Mathf.Cos(parryDetection.overlapCollider.boxRotation + parryDetection.overlapCollider.centerRotation), Mathf.Sin(parryDetection.overlapCollider.boxRotation + parryDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, parryDetection.overlapCollider.counterClockwiseAngle, parryDetection.overlapCollider.clockwiseAngle);
+                }
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                ShieldParryPrefab parryDetection = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, LayerMask.NameToLayer("ParryLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
+                if (parryDetection != null && parryDetection.overlapCollider.overlapCircle)
+                {
+                    isParrying = CheckWithinAngle(new Vector2(Mathf.Cos(parryDetection.overlapCollider.centerRotation), Mathf.Sin(parryDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, parryDetection.overlapCollider.counterClockwiseAngle, parryDetection.overlapCollider.clockwiseAngle);
+                }
+            }
+
+            if (isParrying) return true;
+        }
+
+        return isParrying;
+    }
+
+    private bool IsShielding(Entity sourceEntity, OverlapCollider[] overlapColliders)
+    {
+        bool isShielding = false;
+
+        foreach (OverlapCollider overlapCollider in overlapColliders)
+        {
+            if (overlapCollider.overlapBox)
+            {
+                ShieldParryPrefab shieldDetection = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, LayerMask.NameToLayer("ShieldLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
+                if (shieldDetection != null && shieldDetection.overlapCollider.overlapCircle)
+                {
+                    isShielding = CheckWithinAngle(new Vector2(Mathf.Cos(shieldDetection.overlapCollider.boxRotation + shieldDetection.overlapCollider.centerRotation), Mathf.Sin(shieldDetection.overlapCollider.boxRotation + shieldDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, shieldDetection.overlapCollider.counterClockwiseAngle, shieldDetection.overlapCollider.clockwiseAngle);
+                }
+            }
+            else if (overlapCollider.overlapCircle)
+            {
+                ShieldParryPrefab shieldDetection = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, LayerMask.NameToLayer("ShieldLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
+                if (shieldDetection != null && shieldDetection.overlapCollider.overlapCircle)
+                {
+                    isShielding = CheckWithinAngle(new Vector2(Mathf.Cos(shieldDetection.overlapCollider.centerRotation), Mathf.Sin(shieldDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, shieldDetection.overlapCollider.counterClockwiseAngle, shieldDetection.overlapCollider.clockwiseAngle);
+                }
+            }
+
+            if (isShielding) return true;
+        }
+
+        return isShielding;
     }
 
     public virtual bool DoAttack(CombatAbilityWithTransforms combatAbilityWithTransforms)
@@ -110,13 +252,13 @@ public abstract class Combat : CoreComponent
                 switch (combatAbilityComponent)
                 {
                     case DamageComponent damageComponent:
-                        damageComponent.ApplyCombatAbility(damageTarget);
+                        damageComponent.ApplyCombatAbility(damageTarget, combatAbilityWithTransforms.overlapColliders);
                         break;
                     case KnockbackComponent knockbackComponent:
-                        knockbackComponent.ApplyCombatAbility(damageTarget);
+                        knockbackComponent.ApplyCombatAbility(damageTarget, combatAbilityWithTransforms.overlapColliders);
                         break;
                     case StatusEffectComponent statusEffectComponent:
-                        statusEffectComponent.ApplyCombatAbility(damageTarget);
+                        statusEffectComponent.ApplyCombatAbility(damageTarget, combatAbilityWithTransforms.overlapColliders);
                         break;
                 }
             }
@@ -203,33 +345,369 @@ public abstract class Combat : CoreComponent
 
     protected virtual void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.blue;
 
-        foreach (CombatAbilityWithTransforms combatAbilityWithTransform in meleeAttacks)
+        IEnumerable<PropertyInfo> combatAbilityWithTransformsProperties = GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => property.PropertyType.Equals(typeof(CombatAbilityWithTransforms)));
+
+        foreach (PropertyInfo property in combatAbilityWithTransformsProperties)
         {
-            foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
+            CombatAbilityWithTransforms combatAbilityWithTransforms = property.GetValue(this) as CombatAbilityWithTransforms;
+
+            if (!combatAbilityWithTransforms.visualize) continue;
+
+            OverlapCollider[] overlapColliders = combatAbilityWithTransforms.overlapColliders;
+
+            foreach (OverlapCollider overlapCollider in overlapColliders)
             {
-                if (overlapCollider.overlapCircle)
+                if (overlapCollider.overlapBox)
+                {
+                    float angle = Mathf.Atan2(overlapCollider.boxSize.y, overlapCollider.boxSize.x) * Mathf.Rad2Deg;
+
+                    #region Draw Box
+                    Vector3 topRightPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((angle + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((angle + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                    Vector3 topLeftPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((180.0f - angle + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((180.0f - angle + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                    Vector3 bottomLeftPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((angle - 180.0f + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((angle - 180.0f + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                    Vector3 bottomRightPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((-angle + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((-angle + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                    Vector3 topMidPosition = (topRightPosition + topLeftPosition) / 2.0f;
+                    Vector3 bottomMidPosition = (bottomRightPosition + bottomLeftPosition) / 2.0f;
+                    Vector3 leftMidPosition = (topLeftPosition + bottomLeftPosition) / 2.0f;
+                    Vector3 rightMidPosition = (topRightPosition + bottomRightPosition) / 2.0f;
+
+                    Gizmos.DrawLine(topLeftPosition, topRightPosition);
+                    Gizmos.DrawLine(topRightPosition, bottomRightPosition);
+                    Gizmos.DrawLine(bottomRightPosition, bottomLeftPosition);
+                    Gizmos.DrawLine(bottomLeftPosition, topLeftPosition);
+                    Gizmos.DrawLine(topMidPosition, bottomMidPosition);
+                    Gizmos.DrawLine(leftMidPosition, rightMidPosition);
+                    #endregion
+
+                    if (overlapCollider.limitAngle)
+                    {
+                        #region Draw Center Line
+                        if (overlapCollider.centerRotation > 0.0f)
+                        {
+                            if (overlapCollider.centerRotation < angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (overlapCollider.centerRotation > 180.0f - angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - overlapCollider.centerRotation) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                        }
+                        else
+                        {
+                            if (overlapCollider.centerRotation > -angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (overlapCollider.centerRotation < angle - 180.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + overlapCollider.centerRotation) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                        }
+                        #endregion
+
+                        #region Draw Clockwise Line
+                        float clockwiseAngle = overlapCollider.centerRotation - overlapCollider.clockwiseAngle;
+                        if (clockwiseAngle > 0.0f)
+                        {
+                            if (clockwiseAngle < angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (clockwiseAngle > 180.0f - angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                        }
+                        else
+                        {
+                            if (clockwiseAngle > -angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (clockwiseAngle > angle - 180.0F)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (clockwiseAngle >= -180.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (clockwiseAngle > -180.0f - angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (clockwiseAngle > angle - 360.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (clockwiseAngle >= -360.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                        }
+                        #endregion
+
+                        #region Draw Counterclockwise Line
+                        float counterClockwiseAngle = overlapCollider.centerRotation + overlapCollider.counterClockwiseAngle;
+                        if (counterClockwiseAngle > 0.0f)
+                        {
+                            if (counterClockwiseAngle < angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (counterClockwiseAngle < 180.0f - angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (counterClockwiseAngle <= 180.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (counterClockwiseAngle < 180.0f + angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (counterClockwiseAngle < 360.0f - angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (counterClockwiseAngle <= 360.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                        }
+                        else
+                        {
+                            if (counterClockwiseAngle > -angle)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else if (counterClockwiseAngle < angle - 180.0f)
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                            }
+                            else
+                            {
+                                Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                            }
+                        }
+                        #endregion
+                    }
+                }
+                else if (overlapCollider.overlapCircle)
                 {
                     Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
-                }
-                else if (overlapCollider.overlapBox)
-                {
-                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
+
+                    if (overlapCollider.limitAngle)
+                    {
+                        Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+
+                        Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+                        Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(-overlapCollider.clockwiseAngle + overlapCollider.centerRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+                        Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.counterClockwiseAngle + overlapCollider.centerRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+                    }
                 }
             }
         }
-        foreach (CombatAbilityWithTransforms combatAbilityWithTransform in rangedAttacks)
+
+        Gizmos.color = Color.red;
+
+        IEnumerable<PropertyInfo> combatAbilityWithTransformsListProperties = GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => property.PropertyType.Equals(typeof(List<CombatAbilityWithTransforms>)));
+
+        foreach (PropertyInfo property in  combatAbilityWithTransformsListProperties)
         {
-            foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
+            List<CombatAbilityWithTransforms> combatAbilityWithTransformsList = property.GetValue(this) as List<CombatAbilityWithTransforms>;
+            
+            foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in combatAbilityWithTransformsList)
             {
-                if (overlapCollider.overlapCircle)
+                if (!combatAbilityWithTransforms.visualize) continue;
+
+                OverlapCollider[] overlapColliders = combatAbilityWithTransforms.overlapColliders;
+
+                foreach (OverlapCollider overlapCollider in overlapColliders)
                 {
-                    Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
-                }
-                else if (overlapCollider.overlapBox)
-                {
-                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
+                    if (overlapCollider.overlapBox)
+                    {
+                        float angle = Mathf.Atan2(overlapCollider.boxSize.y, overlapCollider.boxSize.x) * Mathf.Rad2Deg;
+
+                        #region Draw Box
+                        Vector3 topRightPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((angle + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((angle + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                        Vector3 topLeftPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((180.0f - angle + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((180.0f - angle + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                        Vector3 bottomLeftPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((angle - 180.0f + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((angle - 180.0f + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                        Vector3 bottomRightPosition = overlapCollider.centerTransform.position + overlapCollider.boxSize.magnitude * new Vector3(Mathf.Cos((-angle + overlapCollider.boxRotation) * Mathf.Deg2Rad), Mathf.Sin((-angle + overlapCollider.boxRotation) * Mathf.Deg2Rad)) / 2.0f;
+                        Vector3 topMidPosition = (topRightPosition + topLeftPosition) / 2.0f;
+                        Vector3 bottomMidPosition = (bottomRightPosition + bottomLeftPosition) / 2.0f;
+                        Vector3 leftMidPosition = (topLeftPosition + bottomLeftPosition) / 2.0f;
+                        Vector3 rightMidPosition = (topRightPosition + bottomRightPosition) / 2.0f;
+                        
+                        Gizmos.DrawLine(topLeftPosition, topRightPosition);
+                        Gizmos.DrawLine(topRightPosition, bottomRightPosition);
+                        Gizmos.DrawLine(bottomRightPosition, bottomLeftPosition);
+                        Gizmos.DrawLine(bottomLeftPosition, topLeftPosition);
+                        Gizmos.DrawLine(topMidPosition, bottomMidPosition);
+                        Gizmos.DrawLine(leftMidPosition, rightMidPosition);
+                        #endregion
+
+                        if (overlapCollider.limitAngle)
+                        {
+                            #region Draw Center Line
+                            if (overlapCollider.centerRotation > 0.0f)
+                            {
+                                if (overlapCollider.centerRotation < angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (overlapCollider.centerRotation > 180.0f - angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - overlapCollider.centerRotation) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                            }
+                            else
+                            {
+                                if (overlapCollider.centerRotation > -angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (overlapCollider.centerRotation < angle - 180.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(overlapCollider.centerRotation * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + overlapCollider.centerRotation) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                            }
+                            #endregion
+
+                            #region Draw Clockwise Line
+                            float clockwiseAngle = overlapCollider.centerRotation - overlapCollider.clockwiseAngle;
+                            if (clockwiseAngle > 0.0f)
+                            {
+                                if (clockwiseAngle < angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (clockwiseAngle > 180.0f - angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                            }
+                            else
+                            {
+                                if (clockwiseAngle > -angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (clockwiseAngle > angle - 180.0F)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (clockwiseAngle >= -180.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (clockwiseAngle > -180.0f - angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (clockwiseAngle > angle - 360.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + clockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (clockwiseAngle >= -360.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(clockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(clockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                            }
+                            #endregion
+
+                            #region Draw Counterclockwise Line
+                            float counterClockwiseAngle = overlapCollider.centerRotation + overlapCollider.counterClockwiseAngle;
+                            if (counterClockwiseAngle > 0.0f)
+                            {
+                                if (counterClockwiseAngle < angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (counterClockwiseAngle < 180.0f - angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (counterClockwiseAngle <= 180.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (counterClockwiseAngle < 180.0f + angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (counterClockwiseAngle < 360.0f - angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f - counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (counterClockwiseAngle <= 360.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                            }
+                            else
+                            {
+                                if (counterClockwiseAngle > -angle)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else if (counterClockwiseAngle < angle - 180.0f)
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position - Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.x / Mathf.Cos(counterClockwiseAngle * Mathf.Deg2Rad) / 2.0f);
+                                }
+                                else
+                                {
+                                    Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(counterClockwiseAngle + overlapCollider.boxRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.boxSize.y / Mathf.Cos((90.0f + counterClockwiseAngle) * Mathf.Deg2Rad) / 2.0f);
+                                }
+                            }
+                            #endregion
+                        }
+                    }
+                    else if (overlapCollider.overlapCircle)
+                    {
+                        Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
+
+                        if (overlapCollider.limitAngle)
+                        {
+                            Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.centerRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+
+                            Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+                            Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(-overlapCollider.clockwiseAngle + overlapCollider.centerRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+                            Gizmos.DrawLine(overlapCollider.centerTransform.position, overlapCollider.centerTransform.position + Quaternion.AngleAxis(overlapCollider.counterClockwiseAngle + overlapCollider.centerRotation, overlapCollider.centerTransform.forward) * overlapCollider.centerTransform.right * overlapCollider.circleRadius);
+                        }
+                    }
                 }
             }
         }

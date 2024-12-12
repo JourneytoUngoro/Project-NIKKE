@@ -8,28 +8,25 @@ public class ProjectileComponent : CombatAbilityComponent
 {
     private enum TargetType { None, Nearest, Farthest, LowestHealth, HighestHealth, Random }
 
-    [SerializeField] private List<Tuple<GameObject, int>> projectilePrefabs;
+    [SerializeField] private List<GameObject> projectilePrefabs;
+    [SerializeField] private ProjectileType projectileTypeWhenParried;
 
     public override void ApplyCombatAbility(params object[] variables)
     {
-        Entity[] targetEntities = (variables[0] as List<Collider2D>).Select(collider => collider.GetComponentInParent<Entity>()).ToArray();
+        Entity targetEntity = (variables[0] as List<Collider2D>).OrderBy(collider => Vector2.Distance(pertainedCombatAbility.sourceEntity.transform.position, collider.transform.position)).Select(collider => collider.GetComponentInParent<Entity>()).FirstOrDefault();
         OverlapCollider[] overlapColliders = (variables[1] as OverlapCollider[]);
 
         int index = 0;
-        /*for (int count = 0; count < entity.entityCombat.rangedAttacks[attackStroke].overlapColliders.Length; count++)
+        foreach (OverlapCollider overlapCollider in overlapColliders)
         {
-            GameObject projectileGameObject = Manager.Instance.objectPoolingManager.GetGameObject(projectilePrefabs[index].Item1.name);
-            Projectile projectile = projectileGameObject.GetComponent<Projectile>();
-            projectileGameObject.transform.position = overlapCollider.centerTransform.position;
-            projectile.FireProjectile(entity, targetEntity)
+            if (!overlapCollider.overlapBox && !overlapCollider.overlapCircle)
+            {
+                GameObject projectileGameObject = Manager.Instance.objectPoolingManager.GetGameObject(projectilePrefabs[index].name);
+                Projectile projectile = projectileGameObject.GetComponent<Projectile>();
+                projectileGameObject.transform.position = overlapCollider.centerTransform.position;
+                projectile.FireProjectile(pertainedCombatAbility.sourceEntity, targetEntity);
+                index += 1;
+            }
         }
-
-        foreach (OverlapCollider overlapCollider in entity.entityCombat.rangedAttacks[entity.entityCombat.currentAttackStroke].overlapColliders)
-        {
-            GameObject projectileGameObject = Manager.Instance.objectPoolingManager.GetGameObject(projectilePrefab.name);
-            Projectile projectile = projectileGameObject.GetComponent<Projectile>();
-            projectileGameObject.transform.position = overlapCollider.centerTransform.position;
-            projectile.FireProjectile(entity, targetEntity)
-        }*/
     }
 }

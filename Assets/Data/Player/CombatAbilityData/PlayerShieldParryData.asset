@@ -26,4 +26,4 @@ MonoBehaviour:
       type: {class: ShieldParryComponent, ns: , asm: Assembly-CSharp}
       data:
         name: ShieldParryComponent
-        parryTime: 0
+        <parryTime>k__BackingField: 0

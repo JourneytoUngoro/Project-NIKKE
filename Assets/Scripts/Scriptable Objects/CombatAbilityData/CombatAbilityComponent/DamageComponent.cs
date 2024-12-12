@@ -25,10 +25,8 @@ public class DamageComponent : CombatAbilityComponent
     public override void ApplyCombatAbility(params object[] variables)
     {
         Entity target = (variables[0] as Collider2D).GetComponentInParent<Entity>();
+        OverlapCollider[] overlapColliders = (variables[1] as OverlapCollider[]);
 
-        target.SendMessage("GetDamage", this);
-        // target.SendMessage("GetHealthDamage", this);
-        // target.SendMessage("GetPostureDamage", this);
-        // target.SendMessage("GetDamage", this);
+        target.entityCombat.GetDamage(this, overlapColliders);
     }
 }

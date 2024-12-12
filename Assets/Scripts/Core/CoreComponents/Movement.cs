@@ -4,8 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum VelocityType { PlayerInput, Knockback, Platform }
-
 public class Movement : CoreComponent
 {
     public event Action synchronizeValues;
@@ -18,10 +16,6 @@ public class Movement : CoreComponent
 
     private bool isOnSlope;
     private bool isGrounded;
-
-    private Vector2 playerInputVelocity;
-    private Vector2 knockbackVelocity;
-    private Vector2 platformVelocity;
 
     public int facingDirection { get; private set; }
 
@@ -253,15 +247,6 @@ public class Movement : CoreComponent
         velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
     }
 
-    public void AddVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
-    {
-        if (velocityChangeOverTimeCoroutine != null)
-        {
-            StopCoroutine(velocityChangeOverTimeCoroutine);
-        }
-        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
-    }
-
     public void StopVelocityXChangeOverTime()
     {
         StopCoroutine(velocityChangeOverTimeCoroutine);
@@ -274,11 +259,6 @@ public class Movement : CoreComponent
         workSpace *= velocityMultiplier;
     }
 
-    private void SetFinalVelocity()
-    {
-        rigidBody.velocity = velocityMultiplier * (playerInputVelocity + knockbackVelocity + platformVelocity);
-    }
-
     private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
     {
         float coroutineElapsedTime = 0.0f;
@@ -286,13 +266,24 @@ public class Movement : CoreComponent
 
         while (true)
         {
-            float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
-
-            SetVelocityX(velocityMultiplierOverTime * velocity, true);
+            if (easeFunction == Ease.Unset)
+            {
+                float velocityMultiplierOverTime = 1.0f;
+                SetVelocityX(velocityMultiplierOverTime * velocity, true);
+            }
+            else
+            {
+                float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
+                SetVelocityX(velocityMultiplierOverTime * velocity, true);
+            }
 
 
             if (coroutineElapsedTime > moveTime)
             {
+                if (easeFunction == Ease.Unset)
+                {
+                    SetVelocityX(0.0f, true);
+                }
                 yield break;
             }
             else

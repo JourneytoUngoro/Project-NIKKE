@@ -5,10 +5,11 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-public class Stat
+public class StatComponent
 {
-    public event Action OnCurrentValueZero;
-
+    public string name;
+    public Entity entity;
+    public event Action OnCurrentValueMin;
     public event Action OnCurrentValueMax;
 
     [SerializeField] private Slider slider;
@@ -78,7 +79,7 @@ public class Stat
 
         if (currentValue == 0.0f)
         {
-            OnCurrentValueZero?.Invoke();
+            OnCurrentValueMin?.Invoke();
         }
     }
 

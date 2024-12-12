@@ -2609,6 +2609,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <health>k__BackingField:
+    name: 
+    entity: {fileID: 0}
     slider: {fileID: 5586063366221347908}
     <maxValue>k__BackingField: 100
     <minValue>k__BackingField: 0
@@ -2617,6 +2619,63 @@ MonoBehaviour:
     <recoveryDuration>k__BackingField: -1
     <recoveryValue>k__BackingField: 0
   <posture>k__BackingField:
+    name: 
+    entity: {fileID: 0}
+    slider: {fileID: 0}
+    <maxValue>k__BackingField: 0
+    <minValue>k__BackingField: 0
+    <currentValue>k__BackingField: 0
+    <recoveryStartTime>k__BackingField: 0
+    <recoveryDuration>k__BackingField: 0
+    <recoveryValue>k__BackingField: 0
+  <statusEffects>k__BackingField:
+  - name: 
+    entity: {fileID: 0}
+    slider: {fileID: 0}
+    <maxValue>k__BackingField: 0
+    <minValue>k__BackingField: 0
+    <currentValue>k__BackingField: 0
+    <recoveryStartTime>k__BackingField: 0
+    <recoveryDuration>k__BackingField: 0
+    <recoveryValue>k__BackingField: 0
+  - name: Horror
+    entity: {fileID: 0}
+    slider: {fileID: 0}
+    <maxValue>k__BackingField: 0
+    <minValue>k__BackingField: 0
+    <currentValue>k__BackingField: 0
+    <recoveryStartTime>k__BackingField: 0
+    <recoveryDuration>k__BackingField: 0
+    <recoveryValue>k__BackingField: 0
+  - name: Poison
+    entity: {fileID: 0}
+    slider: {fileID: 0}
+    <maxValue>k__BackingField: 0
+    <minValue>k__BackingField: 0
+    <currentValue>k__BackingField: 0
+    <recoveryStartTime>k__BackingField: 0
+    <recoveryDuration>k__BackingField: 0
+    <recoveryValue>k__BackingField: 0
+  - name: 
+    entity: {fileID: 0}
+    slider: {fileID: 0}
+    <maxValue>k__BackingField: 0
+    <minValue>k__BackingField: 0
+    <currentValue>k__BackingField: 0
+    <recoveryStartTime>k__BackingField: 0
+    <recoveryDuration>k__BackingField: 0
+    <recoveryValue>k__BackingField: 0
+  - name: Burn
+    entity: {fileID: 0}
+    slider: {fileID: 0}
+    <maxValue>k__BackingField: 0
+    <minValue>k__BackingField: 0
+    <currentValue>k__BackingField: 0
+    <recoveryStartTime>k__BackingField: 0
+    <recoveryDuration>k__BackingField: 0
+    <recoveryValue>k__BackingField: 0
+  - name: 
+    entity: {fileID: 0}
     slider: {fileID: 0}
     <maxValue>k__BackingField: 0
     <minValue>k__BackingField: 0
@@ -2625,6 +2684,8 @@ MonoBehaviour:
     <recoveryDuration>k__BackingField: 0
     <recoveryValue>k__BackingField: 0
   <energy>k__BackingField:
+    name: 
+    entity: {fileID: 0}
     slider: {fileID: 5586063367071228370}
     <maxValue>k__BackingField: 100
     <minValue>k__BackingField: 0
@@ -2652,13 +2713,16 @@ MonoBehaviour:
   wallCheckTransformTop: {fileID: 5586063366128955649}
   wallCheckTransformBottom: {fileID: 5586063367923872190}
   groundCheck:
-    overlapBox: 0
-    overlapCircle: 0
-    boxSize: {x: 0, y: 0}
-    circleRadius: 0
-    limitAngle: 0
-    clockwiseAngle: 0
-    counterClockwiseAngle: 0
+    <centerTransform>k__BackingField: {fileID: 0}
+    <overlapBox>k__BackingField: 0
+    <overlapCircle>k__BackingField: 0
+    <boxSize>k__BackingField: {x: 0, y: 0}
+    <boxRotation>k__BackingField: 0
+    <circleRadius>k__BackingField: 0
+    <limitAngle>k__BackingField: 0
+    <centerRotation>k__BackingField: 0
+    <clockwiseAngle>k__BackingField: 0
+    <counterClockwiseAngle>k__BackingField: 0
   ledgeCheckDistance: 10
   slopeCheckDistance: 3.2
   wallCheckDistance: 0.3
@@ -2685,14 +2749,17 @@ MonoBehaviour:
   whatIsDamageable:
     serializedVersion: 2
     m_Bits: 256
-  <meleeAttackTransform>k__BackingField: {fileID: 5586063367642827401}
-  meleeAttackRadius: 8
-  meleeAttackSize: {x: 0, y: 0}
-  <rangedAttackTransform>k__BackingField: {fileID: 5586063366579925883}
-  rangedAttackRadius: 0
-  rangedAttackSize: {x: 30, y: 10}
-  meleeAttack: []
-  rangedAttack: []
+  parryLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  shieldLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  <shieldParry>k__BackingField:
+    <overlapColliders>k__BackingField: []
+    <combatAbilityData>k__BackingField: {fileID: 0}
+  <meleeAttacks>k__BackingField: []
+  <rangedAttacks>k__BackingField: []
   jumpAttackTransform: {fileID: 5586063366158206351}
   jumpAttackSize: {x: 8.3, y: 17}
   jumpFinishAttackTransform: {fileID: 5586063366345375725}
@@ -2808,64 +2875,6 @@ Transform:
   m_Father: {fileID: 5586063366402309411}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &5586063367125760892
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5586063367125760893}
-  - component: {fileID: 5586063367125760890}
-  m_Layer: 3
-  m_Name: ParryArea
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5586063367125760893
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5586063367125760892}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5586063367825474133}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &5586063367125760890
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5586063367125760892}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 1.3, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 5, y: 16}
-  m_EdgeRadius: 0
 --- !u!1 &5586063367148612517
 GameObject:
   m_ObjectHideFlags: 0
@@ -3846,7 +3855,6 @@ Transform:
   - {fileID: 5586063366076298971}
   - {fileID: 5586063367076229946}
   - {fileID: 5586063366402309411}
-  - {fileID: 5586063367125760893}
   m_Father: {fileID: 2428256609074333778}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

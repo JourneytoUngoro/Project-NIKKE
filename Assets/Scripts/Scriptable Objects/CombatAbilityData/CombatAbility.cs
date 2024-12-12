@@ -12,21 +12,13 @@ public class CombatAbility : ScriptableObject
     [field: SerializeField, TextArea] public string combatAbilityDescription { get; private set; } = "Default Combat Ability Description";
     [field: SerializeField] public bool ignoreRigidity { get; private set; }
     [field: SerializeReference] public List<CombatAbilityComponent> combatAbilityComponents { get; private set; }
-    public Entity entity { get; set; }
+    public Entity sourceEntity { get; set; }
 
     public void AddComponent(CombatAbilityComponent componentData)
     {
         if (combatAbilityComponents.FirstOrDefault(type => type.GetType().Equals(componentData.GetType())) == null)
         {
             combatAbilityComponents.Add(componentData);
-        }
-    }
-
-    public void ApplyCombatAbility(Collider2D target)
-    {
-        foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityComponents)
-        {
-            combatAbilityComponent.ApplyCombatAbility(target);
         }
     }
 }

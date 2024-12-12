@@ -16,8 +16,8 @@ TagManager:
   - Ground
   - PlayerDodge
   - Damageable
-  - Parry
-  - 
+  - ParryLayer
+  - ShieldLayer
   - 
   - 
   - 

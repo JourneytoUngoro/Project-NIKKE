@@ -41,7 +41,7 @@ public class CombatAbilityEditor : Editor
                 if (GUILayout.Button(combatAbilityComponentType.Name))
                 {
                     CombatAbilityComponent combatAbilityComponent = Activator.CreateInstance(combatAbilityComponentType) as CombatAbilityComponent;
-                    combatAbilityComponent.combatAbility = combatAbilityData;
+                    combatAbilityComponent.pertainedCombatAbility = combatAbilityData;
 
                     if (combatAbilityComponent == null)
                     {

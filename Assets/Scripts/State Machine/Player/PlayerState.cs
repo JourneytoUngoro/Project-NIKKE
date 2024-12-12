@@ -120,7 +120,7 @@ public class PlayerState : State
 
     private void TickPublicTimers()
     {
-        afterImageTimer.Tick(player.moveState.isDashing);
+        afterImageTimer.Tick(player.moveState.isDashing, true);
         player.dodgeState.dodgeCoolDownTimer.Tick(player.detection.isGrounded());
         player.wallJumpState.preventInputXTimer.Tick();
         player.escapeState.escapeCoolDownTimer.Tick();

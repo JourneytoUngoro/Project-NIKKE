@@ -115,40 +115,15 @@ public class EnemyCombat : Combat
         }
     }
 
-    public override void GetHealthDamage(DamageComponent damageComponent)
+    /*public override void GetHealthDamage(DamageComponent damageComponent)
     {
 
-    }
-
-    public override void GetPostureDamage(DamageComponent damageComponent)
-    {
-        throw new NotImplementedException();
-    }
+    }*/
 
     public override void GetKnockback(KnockbackComponent knockbackComponent)
     {
-        throw new NotImplementedException();
-    }
+        base.GetKnockback(knockbackComponent);
 
-    protected override void OnDrawGizmos()
-    {
-        base.OnDrawGizmos();
-
-        Gizmos.color = Color.red;
-
-        foreach (CombatAbilityWithTransforms combatAbilityWithTransform in midRangedAttacks)
-        {
-            foreach (OverlapCollider overlapCollider in combatAbilityWithTransform.overlapColliders)
-            {
-                if (overlapCollider.overlapCircle)
-                {
-                    Gizmos.DrawWireSphere(overlapCollider.centerTransform.position, overlapCollider.circleRadius);
-                }
-                else if (overlapCollider.overlapBox)
-                {
-                    Gizmos.DrawWireCube(overlapCollider.centerTransform.position, overlapCollider.boxSize);
-                }
-            }
-        }
+        enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
     }
 }

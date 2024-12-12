@@ -9,7 +9,7 @@ public abstract class CombatAbilityComponent : ICombatAbility
     [SerializeField, HideInInspector] private string name = "";
 
     public Entity entity { get; set; }
-    public CombatAbility combatAbility { get; set; }
+    public CombatAbility pertainedCombatAbility { get; set; }
 
     public CombatAbilityComponent()
     {
