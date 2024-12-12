@@ -8,25 +8,32 @@ public class ProjectileComponent : CombatAbilityComponent
 {
     private enum TargetType { None, Nearest, Farthest, LowestHealth, HighestHealth, Random }
 
-    [SerializeField] private List<GameObject> projectilePrefabs;
-    [SerializeField] private ProjectileType projectileTypeWhenParried;
+    [field: SerializeField] public GameObject projectileExplosionPrefab { get; private set; }
+    [field: SerializeField] public bool rotateIdentical { get; private set; }
+    [field: SerializeField] public bool rotateIndependent { get; private set; }
+    [field: SerializeField] public Vector2[] manualDirectionVector { get; private set; }
 
     public override void ApplyCombatAbility(params object[] variables)
     {
-        Entity targetEntity = (variables[0] as List<Collider2D>).OrderBy(collider => Vector2.Distance(pertainedCombatAbility.sourceEntity.transform.position, collider.transform.position)).Select(collider => collider.GetComponentInParent<Entity>()).FirstOrDefault();
-        OverlapCollider[] overlapColliders = (variables[1] as OverlapCollider[]);
+        Entity[] targetEntities = (variables[0] as List<Collider2D>).OrderBy(collider => Vector2.Distance(pertainedCombatAbility.sourceEntity.transform.position, collider.transform.position)).Select(collider => collider.GetComponentInParent<Entity>()).ToArray();
+        Transform[] projectileFireTransforms = (variables[1] as Transform[]);
 
-        int index = 0;
-        foreach (OverlapCollider overlapCollider in overlapColliders)
+        foreach (Transform projectileFireTransform in projectileFireTransforms)
         {
-            if (!overlapCollider.overlapBox && !overlapCollider.overlapCircle)
+            GameObject projectileGameObject = Manager.Instance.objectPoolingManager.GetGameObject(projectileExplosionPrefab.name);
+            projectileGameObject.transform.position = projectileFireTransform.position;
+
+            Projectile projectile = projectileGameObject.GetComponent<Projectile>();
+
+
+            /*if (projectile != null)
             {
-                GameObject projectileGameObject = Manager.Instance.objectPoolingManager.GetGameObject(projectilePrefabs[index].name);
-                Projectile projectile = projectileGameObject.GetComponent<Projectile>();
-                projectileGameObject.transform.position = overlapCollider.centerTransform.position;
                 projectile.FireProjectile(pertainedCombatAbility.sourceEntity, targetEntity);
-                index += 1;
             }
+            else if (explosion != null)
+            {
+
+            }*/
         }
     }
 }

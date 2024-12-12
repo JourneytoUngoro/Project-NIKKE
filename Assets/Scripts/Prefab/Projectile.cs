@@ -5,23 +5,21 @@ using UnityEngine;
 using Random = System.Random;
 
 public enum ProjectileType { Straight, Throw, Bazier, Targeting }
+public enum StraightProjectileDirection { Forward, Toward, Manual };
 
 [RequireComponent(typeof(Collider2D), typeof(Rigidbody2D))]
 public class Projectile : PooledObject
 {
-    private enum StraightProjectileDirection { Forward, Toward, Manual };
-
     public Entity sourceEntity { get; protected set; }
     public Entity targetEntity { get; protected set; }
 
+    [SerializeField] protected ProjectileType projectileType;
+    [SerializeField] protected ProjectileType projectileTypeWhenParried;
     [SerializeField] protected LayerMask whatIsGround;
     [SerializeField] protected LayerMask whatIsTarget;
-    [SerializeField] protected ProjectileType projectileType;
     [SerializeField] protected float projectileSpeed;
-    [SerializeField] protected bool explodeImmediately = true;
-    [SerializeField] protected float explosionDurationTime;
-    [SerializeField] protected bool canBeDeflected = true;
-    [SerializeField] protected int maximumRelay = 3;
+    [SerializeField] protected float explosionDurationTime = 0.0f;
+    [SerializeField] protected int maximumDeflection = 1;
     [SerializeField] protected float autoDestroyTime = 30.0f;
 
     [Header("Bazier Projectile")]
@@ -182,12 +180,14 @@ public class Projectile : PooledObject
         }
     }
 
-    public void FireProjectile(Entity sourceEntity, Entity targetEntity, Vector2? manualDestinationPosition = null)
+    public void FireProjectile(Entity sourceEntity, Entity targetEntity, Vector2? manualDestinationPosition = null, bool parried = false)
     {
         if (projectileCoroutine != null)
         {
             StopCoroutine(projectileCoroutine);
         }
+
+        ProjectileType projectileType = parried ? this.projectileTypeWhenParried : this.projectileType;
 
         if (sourceEntity == null)
         {
@@ -275,7 +275,7 @@ public class Projectile : PooledObject
 
     protected virtual void OnCollision()
     {
-        if (explodeImmediately)
+        if (explosionDurationTime == 0.0f)
         {
             Explode();
         }
@@ -300,11 +300,15 @@ public class Projectile : PooledObject
             this.projectileSpeed = projectileSpeed.Value;
         }
 
-        /*if (sourceEntity.isDead)
+        if (sourceEntity.isDead)
         {
 
-        }*/
-        FireProjectile(targetEntity, sourceEntity);
+        }
+        else
+        {
+            projectileType = projectileTypeWhenParried;
+            FireProjectile(targetEntity, sourceEntity);
+        }
     }
 
     public Vector2? CalculateProjectileVelocity(Vector2 projectileFirePosition, Vector2 targetPosition)
@@ -425,4 +429,7 @@ public class Projectile : PooledObject
 
         return f;
     }
+
+    public ProjectileType GetProjectileType() => projectileType;
+    public StraightProjectileDirection GetStraightProjectileDirection() => projectileDirection;
 }

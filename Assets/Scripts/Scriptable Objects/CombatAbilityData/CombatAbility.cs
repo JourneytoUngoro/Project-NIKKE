@@ -16,7 +16,11 @@ public class CombatAbility : ScriptableObject
 
     public void AddComponent(CombatAbilityComponent componentData)
     {
-        if (combatAbilityComponents.FirstOrDefault(type => type.GetType().Equals(componentData.GetType())) == null)
+        if (componentData.GetType().Equals(typeof(ProjectileComponent)))
+        {
+            combatAbilityComponents.Add(componentData);
+        }
+        else if (combatAbilityComponents.FirstOrDefault(type => type.GetType().Equals(componentData.GetType())) == null)
         {
             combatAbilityComponents.Add(componentData);
         }

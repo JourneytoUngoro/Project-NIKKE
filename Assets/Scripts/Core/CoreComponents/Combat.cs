@@ -240,7 +240,16 @@ public abstract class Combat : CoreComponent
                     shieldParryComponent.ApplyCombatAbility(combatAbilityWithTransforms.overlapColliders);
                     break;
                 case ProjectileComponent projectileComponent:
-                    projectileComponent.ApplyCombatAbility(damageTargets, combatAbilityWithTransforms.overlapColliders);
+                    Transform[] projectileFireTransforms = combatAbilityWithTransforms.overlapColliders.Where(overlapCollider => !overlapCollider.overlapBox && !overlapCollider.overlapCircle).Select(overlapCollider => overlapCollider.centerTransform).ToArray();
+
+                    if (projectileComponent.rotateIdentical)
+                    {
+
+                    }
+                    else
+                    {
+                        projectileComponent.ApplyCombatAbility(damageTargets, projectileFireTransforms, null);
+                    }
                     break;
             }
         }

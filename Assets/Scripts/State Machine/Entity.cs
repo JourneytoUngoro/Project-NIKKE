@@ -23,6 +23,7 @@ public class Entity : MonoBehaviour
 
     #region Other Variables
     public int entityLevel { get; protected set; }
+    public bool isDead { get; protected set; }
     #endregion
 
     protected virtual void Awake()
