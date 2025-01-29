@@ -10,20 +10,24 @@ public class PlayerJumpState : PlayerAbilityState
     {
     }
 
-    public override void DoChecks()
-    {
-        base.DoChecks();
-    }
-
     public override void Enter()
     {
         base.Enter();
 
-        Manager.Instance.dialogueManager.SendDialogue("Default Dialogue");
-        jumpCount += 1;
-        player.movement.SetVelocityY(playerData.jumpSpeed);
-        player.inAirState.InavailCoyoteTime();
-        player.inAirState.SetVariableJumpHeightAvail();
+        // Manager.Instance.dialogueManager.SendDialogue("Default Dialogue");
+
+        if (isGrounded && player.detection.currentPlatform != null && player.detection.currentPlatform.CompareTag("OneWayPlatform") && inputY == -1)
+        {
+            player.detection.currentPlatform.GetComponent<OneWayPlatform>().DisableCollision(player);
+        }
+        else
+        {
+            jumpCount += 1;
+            player.movement.SetVelocityY(playerData.jumpSpeed);
+            player.inAirState.InavailCoyoteTime();
+            player.inAirState.SetVariableJumpHeightAvail();
+        }
+
         player.inputHandler.InactiveJumpInput();
         player.animator.SetFloat("yVelocity", currentVelocity.y);
         isAbilityDone = true;

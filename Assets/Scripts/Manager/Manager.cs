@@ -12,6 +12,7 @@ public class Manager : MonoBehaviour
     public SceneTransitionManager sceneTransitionManager { get; private set; }
     public ObjectPoolingManager objectPoolingManager { get; private set; }
     public DialogueManager dialogueManager { get; private set; }
+    public SoundFXManager soundFXManager { get; private set; }
 
     private void Awake()
     {
@@ -23,5 +24,6 @@ public class Manager : MonoBehaviour
         sceneTransitionManager = GetComponentInChildren<SceneTransitionManager>();
         objectPoolingManager = GetComponentInChildren<ObjectPoolingManager>();
         dialogueManager = GetComponentInChildren<DialogueManager>();
+        soundFXManager = GetComponentInChildren<SoundFXManager>();
     }
 }

@@ -26,7 +26,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6311392388180043335}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 10, y: 20, z: 1}
   m_ConstrainProportionsScale: 0
@@ -125,11 +125,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01717c78ad9cd51428c8ff742100c462, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  doorToSpawnAt: 0
-  sceneToLoad:
-    m_SceneAsset: {fileID: 0}
-    m_SceneName: SampleScene
-  currentDoorPosition: 0
+  interactionType: 1
+  doorToSpawnAt: 1
+  targetScene:
+    m_SceneAsset: {fileID: 102900000, guid: 72f70e4219bf7cd4b95585806a49752c, type: 3}
+    m_SceneName: SampleScene3
+  currentDoorIndex: 1
 --- !u!1 &6311392389354627431
 GameObject:
   m_ObjectHideFlags: 0
@@ -196,8 +197,8 @@ MonoBehaviour:
   m_ShadowVolumeIntensityEnabled: 0
   m_ShadowVolumeIntensity: 0.75
   m_LocalBounds:
-    m_Center: {x: 0.003850013, y: 0.0023500323, z: 0}
-    m_Extent: {x: 0.99525, y: 1.0041499, z: 0}
+    m_Center: {x: -0.0012999773, y: -0.005400002, z: 0}
+    m_Extent: {x: 1.0044, y: 1.0039, z: 0}
   m_PointLightInnerAngle: 360
   m_PointLightOuterAngle: 360
   m_PointLightInnerRadius: 0

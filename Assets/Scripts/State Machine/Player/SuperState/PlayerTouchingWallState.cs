@@ -26,7 +26,7 @@ public class PlayerTouchingWallState : PlayerState
         base.DoChecks();
 
         isGrounded = player.detection.isGrounded();
-        isTouchingWall = player.detection.isTouchingWall();
+        isTouchingWall = player.detection.isDetectingWall(CheckPositionHorizontal.Front, CheckPositionVertical.Top);
     }
 
     public override void Enter()
@@ -65,7 +65,7 @@ public class PlayerTouchingWallState : PlayerState
         {
             stateMachine.ChangeState(player.inAirState);
         }
-        else if (dashAttackInput && player.dashAttackState.IsDashAttackAvail())
+        else if (skillAttackInput && player.dashAttackState.IsDashAttackAvail())
         {
             stateMachine.ChangeState(player.dashAttackState);
         }

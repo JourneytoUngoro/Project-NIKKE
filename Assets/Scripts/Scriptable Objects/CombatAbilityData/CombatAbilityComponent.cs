@@ -7,7 +7,6 @@ using UnityEngine;
 public abstract class CombatAbilityComponent : ICombatAbility
 {
     [SerializeField, HideInInspector] private string name = "";
-
     public Entity entity { get; set; }
     public CombatAbility pertainedCombatAbility { get; set; }
 

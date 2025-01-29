@@ -326,16 +326,13 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     private void ChangePosition(SceneConnectorInteraction.Direction direction)
     {
         if (direction.Equals(SceneConnectorInteraction.Direction.None)) return;
-        Debug.Log("Target direction: " + direction);
         Vector2 targetPosition = Manager.Instance.gameManager.player.transform.position;
 
         switch (direction)
         {
             case SceneConnectorInteraction.Direction.Up:
-                Debug.Log("Target correction: " + Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.up);
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.up; break;
             case SceneConnectorInteraction.Direction.Down:
-                Debug.Log("Target correction: " + Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.down);
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.down; break;
             case SceneConnectorInteraction.Direction.Left:
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.x * Vector2.left; break;

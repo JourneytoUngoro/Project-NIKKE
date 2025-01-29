@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class Stats : CoreComponent
 {
+    [field: SerializeField] public StatComponent level { get; protected set; }
     [field: SerializeField] public StatComponent health { get; protected set; }
     [field: SerializeField] public StatComponent posture { get; protected set; }
     [field: SerializeField, PreventAdd, Tooltip("Warning: Status effects system is based on enum. You should NEVER change the order of the list!!!!!!")] public List<StatComponent> statusEffects { get; protected set; }

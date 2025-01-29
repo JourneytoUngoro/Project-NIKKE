@@ -1,24 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Burst.Intrinsics.Arm;
 
 public class EnemyIdleState : EnemyState
 {
-    protected System.Random random;
-    
     protected float waitForSeconds;
-    protected bool isPlayerInDetectionRange;
 
     public EnemyIdleState(Enemy entity, string animBoolName) : base(entity, animBoolName)
     {
-        random = new System.Random();
-    }
-
-    public override void DoChecks()
-    {
-        base.DoChecks();
-
-        isPlayerInDetectionRange = enemy.detection.isTargetInDetectionRange();
     }
 
     public override void Enter()
@@ -30,7 +20,8 @@ public class EnemyIdleState : EnemyState
         {
             enemy.movement.SetVelocityY(0.0f);
         }
-        waitForSeconds = (float)random.NextDouble() * (enemyData.maxWaitTime - enemyData.minWaitTime) + enemyData.minWaitTime;
+
+        waitForSeconds = UtilityFunctions.RandomFloat(enemyData.minWaitTime, enemyData.maxWaitTime);
     }
 
     public override void Exit()
@@ -44,11 +35,11 @@ public class EnemyIdleState : EnemyState
 
         if (!onStateExit)
         {
-            if (isPlayerInDetectionRange)
+            if (isTargetInDetectionRange && enemy.detection.currentPlatform == enemy.detection.currentTarget.entityDetection.currentPlatform)
             {
                 stateMachine.ChangeState(enemy.targetInDetectionRangeState);
             }
-            else if (GotHit())
+            else if (enemy.got[(int)GotConditions.Hit])
             {
                 stateMachine.ChangeState(enemy.lookForTargetState);
             }

@@ -187,8 +187,8 @@ public class Movement : CoreComponent
         {
             if (isOnSlope)
             {
-                entity.rigidBody.gravityScale = rigidBody.velocity.magnitude > epsilon ? 9.5f : 0.0f;
-
+                rigidBody.gravityScale = rigidBody.velocity.magnitude > epsilon ? 9.5f : 0.0f;
+                
                 if (isMovingForward)
                 {
                     if (entity.entityDetection.slopePerpNormal.y * facingDirection > 0)
@@ -225,11 +225,11 @@ public class Movement : CoreComponent
         }
         else
         {
-            if (entity.entityDetection.isOnSlopeBack())
+            if (entity.entityDetection.isOnSlopeVertical(CheckPositionHorizontal.Back))
             {
                 if (limitYVelocity)
                 {
-                    SetVelocityLimitY(0.0f);
+                    SetVelocityLimitY(0.0f); // 튀어오르는 현상 방지
                 }
             }
 
@@ -238,18 +238,21 @@ public class Movement : CoreComponent
         }
     }
 
-    public void SetVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    public void SetVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown, bool isDetectingLedge = false)
     {
         if (velocityChangeOverTimeCoroutine != null)
         {
             StopCoroutine(velocityChangeOverTimeCoroutine);
         }
-        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
+        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown, isDetectingLedge));
     }
 
     public void StopVelocityXChangeOverTime()
     {
-        StopCoroutine(velocityChangeOverTimeCoroutine);
+        if (velocityChangeOverTimeCoroutine != null)
+        {
+            StopCoroutine(velocityChangeOverTimeCoroutine);
+        }
     }
 
     private void SetWorkSpace(float x, float y)
@@ -259,7 +262,7 @@ public class Movement : CoreComponent
         workSpace *= velocityMultiplier;
     }
 
-    private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown, bool isDetectingLedge)
     {
         float coroutineElapsedTime = 0.0f;
         WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
@@ -268,15 +271,22 @@ public class Movement : CoreComponent
         {
             if (easeFunction == Ease.Unset)
             {
+                if (entity.entityDetection.isDetectingWall(CheckPositionHorizontal.Mid, CheckPositionVertical.Both, CheckLogicalOperation.OR))
+                {
+                    yield break;
+                }
                 float velocityMultiplierOverTime = 1.0f;
                 SetVelocityX(velocityMultiplierOverTime * velocity, true);
             }
             else
             {
-                float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
-                SetVelocityX(velocityMultiplierOverTime * velocity, true);
+                float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(DOVirtual.EasedValue(1.0f, 0.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
+                
+                if (!isDetectingLedge)
+                {
+                    SetVelocityX(velocityMultiplierOverTime * velocity, true);
+                }
             }
-
 
             if (coroutineElapsedTime > moveTime)
             {

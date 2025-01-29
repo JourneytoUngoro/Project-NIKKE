@@ -3,45 +3,55 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+public enum ShieldParryType { Shield, Parry };
+
 public class ShieldParryComponent : CombatAbilityComponent
 {
-    [field: SerializeField] public bool isParry { get; private set; } = true;
-    [field: SerializeField] public bool changeToShield { get; private set; } = true;
-    [field: SerializeField] public float[] parryTime { get; private set; }
-    [field: SerializeField] public float[] parryDurationTime { get; private set; }
-    [field: SerializeField] public float parryTimeDecrementReset { get; private set; }
-    
-    private float lastCalledTime;
-    private int currentIndex;
+    [field: SerializeField] public ShieldParryArea[] shieldParryAreas { get; private set; }
 
     public override void ApplyCombatAbility(params object[] variables)
     {
-        if (Time.time - lastCalledTime < parryTimeDecrementReset)
-        {
-            currentIndex += 1;
-            currentIndex = Mathf.Clamp(0, parryTime.Count() - 1, currentIndex);
-        }
-        else
-        {
-            currentIndex = 0;
-        }
-        lastCalledTime = Time.time;
-
         OverlapCollider[] overlapColliders = variables[0] as OverlapCollider[];
-
-        ShieldParryPrefab[] shieldParryPrefabs = entity.entityCombat.GetComponentsInChildren<ShieldParryPrefab>();
-        foreach (ShieldParryPrefab shieldParryPrefab in shieldParryPrefabs)
+        ShieldParry[] shieldParryPrefabs = pertainedCombatAbility.sourceEntity.entityCombat.GetComponentsInChildren<ShieldParry>();
+        foreach (ShieldParry shieldParryPrefab in shieldParryPrefabs)
         {
-            Object.Destroy(shieldParryPrefab.gameObject);
+            shieldParryPrefab.ReleaseObject();
         }
 
-        foreach (OverlapCollider overlapCollider in overlapColliders)
+        if (shieldParryAreas.Count() > overlapColliders.Count())
         {
+            Debug.LogWarning($"ShieldParryComponent of {pertainedCombatAbility.sourceEntity.name}'s {pertainedCombatAbility.name} combat ability does not match length between given overlapColliders({overlapColliders.Count()}) and shieldParryAreas({shieldParryAreas.Count()}). Oversized shieldParryAreas will be ignored.");
+        }
+
+        for (int index = 0; index < overlapColliders.Count(); index++)
+        {
+            ShieldParryArea shieldParryArea = shieldParryAreas[Mathf.Min(index, shieldParryAreas.Count() - 1)];
             GameObject shieldParryPrefabGameObject = Manager.Instance.objectPoolingManager.GetGameObject("ShieldParryPrefab");
             shieldParryPrefabGameObject.transform.SetParent(pertainedCombatAbility.sourceEntity.entityCombat.transform);
-            shieldParryPrefabGameObject.layer = isParry ? LayerMask.NameToLayer("ParryLayer") : LayerMask.NameToLayer("ShieldLayer");
-            ShieldParryPrefab shieldParryPrefab = shieldParryPrefabGameObject.GetComponent<ShieldParryPrefab>();
-            shieldParryPrefab.SetParryData(pertainedCombatAbility.sourceEntity, parryTime[currentIndex], parryDurationTime[currentIndex], changeToShield, overlapCollider);
+            ShieldParry shieldParryPrefab = shieldParryPrefabGameObject.GetComponent<ShieldParry>();
+
+            if (shieldParryArea.shieldParryType.Equals(ShieldParryType.Parry))
+            {
+                shieldParryPrefab.SetParryData(pertainedCombatAbility, shieldParryArea.parryTime[shieldParryArea.currentIndex], shieldParryArea.parryDurationTime[shieldParryArea.currentIndex], shieldParryArea.changeToShield, overlapColliders[index]);
+            }
+            else
+            {
+                shieldParryPrefab.SetShieldData(pertainedCombatAbility, overlapColliders[index]);
+            }
+
+            if (Time.time != shieldParryArea.lastCalledTime)
+            {
+                if (Time.time - shieldParryArea.lastCalledTime < shieldParryArea.parryTimeDecrementReset)
+                {
+                    shieldParryArea.currentIndex += 1;
+                    shieldParryArea.currentIndex = Mathf.Clamp(0, shieldParryArea.parryTime.Count() - 1, shieldParryArea.currentIndex);
+                }
+                else
+                {
+                    shieldParryArea.currentIndex = 0;
+                }
+                shieldParryArea.lastCalledTime = Time.time;
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 {
-    "name": "Player",
+    "name": "Controls",
     "maps": [
         {
             "name": "InGame",
@@ -60,7 +60,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "WideAttack",
+                    "name": "RangedAttack",
                     "type": "Button",
                     "id": "6083424f-59b8-47f2-9c8c-c7287c273ab8",
                     "expectedControlType": "Button",
@@ -78,7 +78,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "UpperSlash",
+                    "name": "SkillAttack",
                     "type": "Button",
                     "id": "1ab48d6a-3dcd-4f74-9a1e-19728f4ccb70",
                     "expectedControlType": "Button",
@@ -250,7 +250,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Computer",
-                    "action": "WideAttack",
+                    "action": "RangedAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -272,7 +272,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Computer",
-                    "action": "UpperSlash",
+                    "action": "SkillAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

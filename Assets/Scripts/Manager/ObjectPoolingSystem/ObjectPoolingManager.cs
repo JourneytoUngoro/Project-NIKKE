@@ -3,19 +3,19 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
 
+[System.Serializable]
+public class ObjectInfo
+{
+    [HideInInspector] public string objectName;
+    public GameObject prefab;
+    public int defaultCapacity;
+}
+
 public class ObjectPoolingManager : MonoBehaviour
 {
-    [System.Serializable]
-    private class ObjectInfo
-    {
-        public string objectName;
-        public GameObject prefab;
-        public int defaultCapacity;
-    }
-
     // public static ObjectPoolingManager Instance;
 
-    [SerializeField] private List<ObjectInfo> objectInfos;
+    [field: SerializeField] public List<ObjectInfo> objectInfos { get; private set; }
 
     private string objectName;
 
@@ -42,17 +42,17 @@ public class ObjectPoolingManager : MonoBehaviour
         {
             IObjectPool<GameObject> objectPool = new ObjectPool<GameObject>(CreatePooledObject, OnTakeFromPool, OnReturnToPool, OnDestroyPooledObject, true, objectInfos[objectIndex].defaultCapacity);
 
-            if (objectPoolDictionary.ContainsKey(objectInfos[objectIndex].objectName))
+            if (objectPoolDictionary.ContainsKey(objectInfos[objectIndex].prefab.name))
             {
-                Debug.LogWarning($"{objectInfos[objectIndex].objectName} is already pooled.");
+                Debug.LogWarning($"{objectInfos[objectIndex].prefab.name} is already pooled.");
                 continue;
             }
 
-            objectPoolDictionary.Add(objectInfos[objectIndex].objectName, objectPool);
+            objectPoolDictionary.Add(objectInfos[objectIndex].prefab.name, objectPool);
 
             for (int objectCount = 0; objectCount < objectInfos[objectIndex].defaultCapacity; objectCount++)
             {
-                objectName = objectInfos[objectIndex].objectName;
+                objectName = objectInfos[objectIndex].prefab.name;
                 CreatePooledObject().GetComponent<PooledObject>().ReleaseObject();
             }
         }
@@ -60,7 +60,7 @@ public class ObjectPoolingManager : MonoBehaviour
 
     private GameObject CreatePooledObject()
     {
-        GameObject pooledObject = Instantiate(objectInfos.FirstOrDefault(objectInfo => objectInfo.objectName.Equals(objectName)).prefab);
+        GameObject pooledObject = Instantiate(objectInfos.FirstOrDefault(objectInfo => objectInfo.prefab.name.Equals(objectName)).prefab);
         pooledObject.GetComponent<PooledObject>().objectPool = objectPoolDictionary[objectName];
         pooledObject.transform.parent = transform;
         return pooledObject;

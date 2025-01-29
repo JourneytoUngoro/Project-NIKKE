@@ -1,17 +1,14 @@
+using DG.Tweening;
+using DG.Tweening.Core.Easing;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyCombat : Combat
 {
-    public int currentMeleeAttackStroke { get; private set; }
-    public int currentRangedAttackStroke { get; private set; }
-    public int currentMidRangedAttackStroke { get; private set; }
-    [field: SerializeField] public List<CombatAbilityWithTransforms> midRangedAttacks { get; protected set; }
-
+    [SerializeField] protected LayerMask whatIsTarget;
     private Enemy enemy;
 
     protected override void Awake()
@@ -21,109 +18,99 @@ public class EnemyCombat : Combat
         enemy = entity as Enemy;
     }
 
-    public bool isTargetInMeleeAttackRange()
+    public bool IsTargetInRangeOf(CombatAbilityWithTransforms attack, bool chargeAttack = false)
     {
-        bool targetInMeleeAttackRange = false;
+        if (enemy.detection.currentTarget == null) return false;
 
-        foreach (OverlapCollider overlapCollider in meleeAttacks[enemy.meleeAttackState.currentAttackStroke].overlapColliders)
+        if (chargeAttack)
         {
-            if (overlapCollider.overlapBox)
+            ReboundComponent chargeComponent = attack.combatAbilityData.combatAbilityComponents.FirstOrDefault(combatAbilityComponent => combatAbilityComponent.GetType().Equals(typeof(ReboundComponent))) as ReboundComponent;
+
+            if (chargeComponent != null)
             {
-                targetInMeleeAttackRange |= Physics2D.OverlapBox(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable);
-            }
-            else if (overlapCollider.overlapCircle)
-            {
-                targetInMeleeAttackRange |= Physics2D.OverlapCircle(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable);
-            }
-        }
-
-        return targetInMeleeAttackRange;
-    }
-
-    public bool isTargetInMidRAttackRange()
-    {
-        bool targetInMidRangeAttackRange = false;
-
-        foreach (OverlapCollider overlapCollider in midRangedAttacks[enemy.meleeAttackState.currentAttackStroke].overlapColliders)
-        {
-            if (overlapCollider.overlapBox)
-            {
-                targetInMidRangeAttackRange |= Physics2D.OverlapBox(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable);
-            }
-            else if (overlapCollider.overlapCircle)
-            {
-                targetInMidRangeAttackRange |= Physics2D.OverlapCircle(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable);
-            }
-        }
-
-        return targetInMidRangeAttackRange;
-    }
-
-    public bool isTargetInRangedAttackRange()
-    {
-        bool targetInRangedAttackRange = false;
-
-        foreach (OverlapCollider overlapCollider in rangedAttacks[enemy.meleeAttackState.currentAttackStroke].overlapColliders)
-        {
-            if (overlapCollider.overlapBox)
-            {
-                targetInRangedAttackRange |= Physics2D.OverlapBox(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable);
-            }
-            else if (overlapCollider.overlapCircle)
-            {
-                targetInRangedAttackRange |= Physics2D.OverlapCircle(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable);
-            }
-        }
-
-        return targetInRangedAttackRange;
-    }
-
-    public void FireProjectile(string objectName, Vector2 projectileFirePosition, Vector2? targetPosition, float projectileSpeed, float projectileGravityScale)
-    {
-        GameObject projectile = Manager.Instance.objectPoolingManager.GetGameObject(objectName);
-        // projectile.GetComponent<Explosion>().SetAttackSubject(gameObject);
-        Rigidbody2D projectileRigidbody = projectile.GetComponent<Rigidbody2D>();
-
-        if (projectile == null)
-        {
-            Debug.LogError($"Can't find projectile name: {objectName}");
-            return;
-        }
-        
-        if (targetPosition.HasValue)
-        {
-            Vector2? projectileAngle = CalculateProjectileAngle(projectileFirePosition, targetPosition.Value, projectileSpeed, projectileGravityScale);
-
-            if (projectileAngle.HasValue)
-            {
-                projectileRigidbody.velocity = projectileAngle.Value * projectileSpeed;
+                if (Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) < TrapezoidalRuleIntegral(chargeComponent.onGroundReboundTime, chargeComponent.onGroundReboundVelocity, chargeComponent.onGroundReboundEaseFunction))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                Manager.Instance.objectPoolingManager.ReleaseGameObject(projectile);
+                return false;
             }
         }
         else
         {
-            projectile.transform.position = projectileFirePosition;
-            projectile.transform.rotation = enemy.movement.facingDirection == 1 ? Quaternion.Euler(0.0f, 0.0f, 0.0f) : Quaternion.Euler(0.0f, -180.0f, 0.0f);
-            if (projectileRigidbody != null)
+            bool targetInRange = false;
+
+            foreach (OverlapCollider overlapCollider in attack.overlapColliders)
             {
-                projectileRigidbody.velocity = projectile.transform.right * projectileSpeed;
-                projectileRigidbody.gravityScale = projectileGravityScale;
+                if (overlapCollider.overlapBox)
+                {
+                    targetInRange = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, whatIsDamageable).Contains(enemy.detection.currentTarget.entityCollider);
+                }
+                else if (overlapCollider.overlapCircle)
+                {
+                    targetInRange = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable).Contains(enemy.detection.currentTarget.entityCollider);
+                }
+
+                if (targetInRange) break;
             }
+
+            return targetInRange;
         }
     }
 
-    /*public override void GetHealthDamage(DamageComponent damageComponent)
+    float TrapezoidalRuleIntegral(float chargeTime, float chargeSpeed, Ease easeFunction)
     {
+        float totalArea = 0f;
+        float step = chargeTime / 100;
 
-    }*/
+        if (easeFunction != Ease.Unset)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                float value1 = DOVirtual.EasedValue(0, chargeSpeed, i * step, easeFunction);
+                float value2 = DOVirtual.EasedValue(0, chargeSpeed, (i + 1) * step, easeFunction);
 
-    public override void GetKnockback(KnockbackComponent knockbackComponent)
+                totalArea += ((value1 + value2) / 2.0f) * step;
+            }
+        }
+        else
+        {
+            totalArea = chargeTime * chargeSpeed;
+        }
+
+        return totalArea;
+    }
+
+    protected override void ChangeToKnockbackState(KnockbackComponent knockbackComponent, bool isGrounded)
     {
-        base.GetKnockback(knockbackComponent);
+        if (knockbackComponent.isKnockbackDifferentInAir)
+        {
+            if (!isGrounded)
+            {
+                enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTimeInAir);
+            }
+            else
+            {
+                enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTime);
+            }
+        }
+        else
+        {
+            enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTime);
+        }
 
+        enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
+    }
+
+    protected override void ChangeToKnockbackState(float knockbackTime)
+    {
+        enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackTime);
         enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
     }
 }

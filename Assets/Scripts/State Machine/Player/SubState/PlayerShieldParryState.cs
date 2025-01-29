@@ -1,32 +1,51 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerShieldParryState : PlayerAbilityState
 {
-    public bool isParrying { get; private set; }
-    public bool isParryAvail { get; private set; }
+    public bool isShieldParryAvail { get; private set; }
+    public bool isShieldParryInAirAvail { get; private set; }
     
-    public Timer shieldCoolDownTimer;
+    public Timer shieldParryCoolDownTimer;
+    public Timer shieldParryInAirCoolDownTimer;
 
-    private Timer parryTimer;
-
-    private bool canTransit;
+    private bool inAirParry;
+    private bool isParried;
+    private bool isShielded;
 
     public PlayerShieldParryState(Player player, string animBoolName) : base(player, animBoolName)
     {
-        isParryAvail = true;
-        shieldCoolDownTimer = new Timer(playerData.shieldParryCoolDownTime);
-        shieldCoolDownTimer.timerAction += () => { isParryAvail = true; };
-        parryTimer = new Timer(playerData.parryTime);
-        parryTimer.timerAction += () => { isParrying = false; };
+        isShieldParryAvail = true;
+        shieldParryCoolDownTimer = new Timer(playerData.shieldParryCoolDownTime);
+        shieldParryCoolDownTimer.timerAction += () => { isShieldParryAvail = true; };
+        shieldParryInAirCoolDownTimer = new Timer(playerData.shieldParryInAirCoolDownTime);
+        shieldParryInAirCoolDownTimer.timerAction += () => { isShieldParryInAirAvail = true; };
     }
 
     public override void AnimationStartTrigger(int index)
     {
         base.AnimationStartTrigger(index);
 
+        Debug.Log("Animation Played. This should be called after damage function and knockback function");
         canTransit = false;
+
+        if (index == 0)
+        {
+            isShielded = true;
+            player.animator.ResetTrigger("shieldParryButtonPressed");
+        }
+        else if (index == 1)
+        {
+            isParried = true;
+
+            if (!inAirParry)
+            {
+                shieldParryCoolDownTimer.StartSingleUseTimer();
+            }
+        }
     }
 
     public override void AnimationActionTrigger(int index)
@@ -39,86 +58,139 @@ public class PlayerShieldParryState : PlayerAbilityState
         base.AnimationFinishTrigger(index);
 
         canTransit = true;
+        isShieldParryAvail = false;
 
-        if (!shieldParryInput)
+        if (index == 0)
         {
-            isAbilityDone = true;
+            isShielded = false;
+        }
+        else if (index == 1)
+        {
+            isParried = false;
         }
     }
 
     public override void DoChecks()
     {
         base.DoChecks();
+
+        player.animator.SetBool("inAir", !isGrounded);
     }
 
     public override void Enter()
     {
         base.Enter();
 
-        shieldParryInputActive = false;
-        isParrying = true;
-        isParryAvail = false;
-        canTransit = true;
-        parryTimer.StartSingleUseTimer();
-        player.movement.SetVelocityX(0.0f);
+        player.stateMachineToAnimator.state = this;
+        player.animator.SetBool("inAir", !isGrounded);
+        inAirParry = !isGrounded;
+        canTransit = isGrounded;
+
+        isShieldParryAvail = false;
+        if (inAirParry)
+        {
+            isShieldParryInAirAvail = false;
+            player.combat.DoAttack(player.combat.inAirParryArea);
+        }
+        else
+        {
+            // player.movement.SetVelocityXChangeOverTime(0.0f, player.rigidBody.velocity.magnitude / 10.0f, Ease.OutSine, true);
+            player.movement.SetVelocityX(0.0f);
+            player.combat.DoAttack(player.combat.parryArea);
+        }
     }
 
     public override void Exit()
     {
         base.Exit();
 
-        isParrying = false;
-        shieldCoolDownTimer.StartSingleUseTimer();
+        isParried = false;
+        isShielded = false;
+        isGrounded = player.detection.isGrounded();
+        player.animator.SetBool("inAir", !isGrounded);
+
+        if (inAirParry)
+        {
+            shieldParryInAirCoolDownTimer.StartSingleUseTimer();
+        }
+        shieldParryCoolDownTimer.StartSingleUseTimer();
+
+        player.combat.ReleaseShieldParryPrefabs(player.combat.parryArea);
+        player.combat.ReleaseShieldParryPrefabs(player.combat.inAirParryArea);
     }
 
     public override void LogicUpdate()
     {
         base.LogicUpdate();
+    }
 
-        parryTimer.Tick();
+    public override void LateLogicUpdate()
+    {
+        base.LateLogicUpdate();
+
+        // player.animator.ResetTrigger("parried");
+        // player.animator.ResetTrigger("shielded");
     }
 
     public override void PhysicsUpdate()
     {
         base.PhysicsUpdate();
 
+        #region State Transition Logic
         if (!onStateExit)
         {
-            /*if (!isAbilityDone)
+            if (inAirParry)
             {
-                if (isParryAvail)
-                {
-                    if (shieldParryInputActive)
-                    {
-                        stateMachine.ChangeState(player.shieldParryState);
-                    }
-                }
-                else
-                {
-                    if (!shieldParryInput)
-                    {
-                        isAbilityDone = true;
-                    }
-                }
-            }*/
-
-            if (!shieldParryInput)
-            {
-                if (canTransit)
+                if (isGrounded || canTransit)
                 {
                     isAbilityDone = true;
                 }
             }
-        }
+            else
+            {
+                if (isParried && isGrounded && player.inputHandler.shieldParryInputPressed)
+                {
+                    player.animator.SetTrigger("shieldParryButtonPressed");
+                    player.combat.DoAttack(player.combat.parryArea);
+                }
+                else if (!shieldParryInput)
+                {
+                    if (canTransit)
+                    {
+                        isAbilityDone = true;
+                    }
+                }
 
+                player.movement.CheckIfShouldFlip(inputX);
+            }
+        }
+        #endregion
+
+        #region Physics Logic
         if (!onStateExit)
         {
+            if (isGrounded)
+            {
+                if (isParried || isShielded)
+                {
+                    if (player.detection.isDetectingLedgeBack() && player.rigidBody.velocity.x * player.transform.right.x < 0)
+                    {
+                        player.movement.SetVelocityX(0.0f);
+                    }
+                }
+                else
+                {
+                    player.movement.SetVelocityX(0.0f);
+
+                    if (isOnSlope)
+                    {
+                        player.movement.SetVelocityY(0.0f);
+                    }
+                }
+            }
+
             player.movement.RigidBodyController(false);
         }
-    }
-
-    public void GotHit()
-    {
-        player.animator.SetTrigger("gotHit");
+        #endregion
     }
 }

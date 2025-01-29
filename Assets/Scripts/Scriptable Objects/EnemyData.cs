@@ -5,28 +5,29 @@ using UnityEngine;
 
 public class EnemyData : ScriptableObject
 {
-
     [Header("Enemy Data")]
-    public float maxHealth;
-    public float maxPostureHealth;
+    public float baseHealth;
+    public float healthIncreasePerLevel;
+    public float basePostureHealth;
+    public float postureIncreasePerLevel;
     public float postureRecoveryRate;
     public bool canSleep;
     public bool canAlert;
     public bool canFallDownLedge;
     public bool canSmartPathFind;
-    public bool canMeleeAttack;
-    public bool canMidRAttack;
-    public bool canRangedAttack;
 
     [Header("Idle State")]
     public float minWaitTime = 3.0f;
     public float maxWaitTime = 5.0f;
 
-    [Header("Move State")]
-    public float moveSpeed = 6.0f;
-
-    [Header("Teleport State")]
-    public float teleportCoolDown = 10.0f;
+    [Header("Target InAggro Range State")]
+    public float keepDistanceOf = 5.0f;
+    public float haltPossibility;
+    public float approachPossibility;
+    public float retreatPossibility;
+    public float shieldCoonDownTime = 0.5f;
+    public float minMovementOptionMaintainTime = 3.0f;
+    public float maxMovementOptionMaintainTime = 5.0f;
 
     [Header("Look for Player State")]
     public int totalTurnAmount = 4;
@@ -46,11 +47,6 @@ public class EnemyData : ScriptableObject
     public float maxMovementDistance = 10.0f;
     public float jumpSpeed = 10.0f;
 
-    [Header("Attack Information")]
-    public float meleeAttackCoolDown;
-    public EnemyAttackInfo meleeAttackInfo;
-    public float midRAttackCoolDown;
-    public EnemyAttackInfo midRAttackInfo;
-    public float rangedAttackCoolDown;
-    public EnemyAttackInfo rangedAttackInfo;
+    [Header("Canvas Settings")]
+    public float canvasDisableTime = 5.0f;
 }

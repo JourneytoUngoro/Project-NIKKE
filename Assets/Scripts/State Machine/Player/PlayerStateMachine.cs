@@ -20,7 +20,7 @@ public class PlayerStateMachine
         currentState.Exit();
         prevState = currentState;
         currentState = nextState;
-        Debug.Log($"State changed to {currentState}");
+        Debug.Log($"State changed from {prevState} to {currentState}");
         currentState.Enter();
     }
 }

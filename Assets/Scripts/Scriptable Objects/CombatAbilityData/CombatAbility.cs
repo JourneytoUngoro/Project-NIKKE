@@ -6,11 +6,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "newCombatAbilityData", menuName = "Data/Combat Ability Data")]
 public class CombatAbility : ScriptableObject
 {
+    public enum ThreatLevel { øÁ, êË, ß¯ }
+
     [field: SerializeField] public Sprite combatAbilityIcon { get; private set; }
     [field: SerializeField] public string combatAbilityName { get; private set; } = "Default Combat Ability Name";
-    [field: SerializeField] public int numberOfStrokes { get; private set; } = 1;
+    [field: SerializeField] public ThreatLevel threatLevel { get; private set; } = ThreatLevel.øÁ;
     [field: SerializeField, TextArea] public string combatAbilityDescription { get; private set; } = "Default Combat Ability Description";
-    [field: SerializeField] public bool ignoreRigidity { get; private set; }
+    [field: SerializeField] public bool stance { get; private set; }
     [field: SerializeReference] public List<CombatAbilityComponent> combatAbilityComponents { get; private set; }
     public Entity sourceEntity { get; set; }
 

@@ -14,6 +14,7 @@ public class Player : Entity
     public PlayerInAirState inAirState { get; private set; }
     public PlayerDodgeState dodgeState { get; private set; }
     public PlayerMeleeAttackState meleeAttackState { get; private set; }
+    public PlayerRangedAttackState rangedAttackState { get; private set; }
     public PlayerWallSlideState wallSlideState { get; private set; }
     public PlayerWallJumpState wallJumpState { get; private set; }
     public PlayerWallGrabState wallGrabState { get; private set; }
@@ -57,10 +58,6 @@ public class Player : Entity
     {
         base.Start();
 
-        /*movement = core.GetCoreComponent<PlayerMovement>();
-        detection = core.GetCoreComponent<PlayerDetection>();
-        combat = core.GetCoreComponent<PlayerCombat>();
-        stats = core.GetCoreComponent<PlayerStats>();*/
         movement = entityMovement as PlayerMovement;
         detection = entityDetection as PlayerDetection;
         combat = entityCombat as PlayerCombat;
@@ -79,6 +76,7 @@ public class Player : Entity
         landingState = new PlayerLandingState(this, "crouch");
         escapeState = new PlayerEscapeState(this, "escape");
         meleeAttackState = new PlayerMeleeAttackState(this, "meleeAttack");
+        rangedAttackState = new PlayerRangedAttackState(this, "rangedAttack");
         dashAttackState = new PlayerJumpAttackState(this, "jumpAttack");
         crouchIdleState = new PlayerCrouchIdleState(this, "crouch");
         crouchMoveState = new PlayerCrouchMoveState(this, "crouch");
@@ -92,7 +90,7 @@ public class Player : Entity
 
     private void Update()
     {
-        if (inputHandler.menuInput)
+        if (inputHandler.menuInputPressed)
         {
             if (Manager.Instance.uiManager.savePointMenu.activeSelf)
             {
@@ -119,7 +117,7 @@ public class Player : Entity
         playerStateMachine.currentState.PhysicsUpdate();
     }
 
-    private void LateUpdate()
+    protected override void LateUpdate()
     {
         playerStateMachine.currentState.LateLogicUpdate();
     }

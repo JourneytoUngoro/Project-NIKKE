@@ -12,8 +12,8 @@ public class EnemyTeleportState : EnemyState
     public EnemyTeleportState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
         isTeleportAvail = true;
-        teleportCoolDownTimer = new Timer(enemyData.teleportCoolDown);
-        teleportCoolDownTimer.timerAction += () => { isTeleportAvail = true; };
+        // teleportCoolDownTimer = new Timer(enemyData.teleportCoolDown);
+        // teleportCoolDownTimer.timerAction += () => { isTeleportAvail = true; };
     }
 
     public override void DoChecks()

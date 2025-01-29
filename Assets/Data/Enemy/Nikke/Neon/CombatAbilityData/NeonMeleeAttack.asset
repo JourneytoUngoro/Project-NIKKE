@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <combatAbilityIcon>k__BackingField: {fileID: 0}
   <combatAbilityName>k__BackingField: Neon Melee Attack
-  <numberOfStrokes>k__BackingField: 1
+  <threatLevel>k__BackingField: 0
   <combatAbilityDescription>k__BackingField: Default Combat Ability Description
-  <ignoreRigidity>k__BackingField: 0
+  <stance>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
   - rid: 4117704567959584768
   - rid: 4117704680270725120
@@ -27,14 +27,14 @@ MonoBehaviour:
       type: {class: DamageComponent, ns: , asm: Assembly-CSharp}
       data:
         name: DamageComponent
-        <baseHealthDamage>k__BackingField: 0
-        <basePostureDamage>k__BackingField: 0
-        <healthDamageIncreaseByLevel>k__BackingField: 0
-        <postureDamageIncreaseByLevel>k__BackingField: 0
+        <baseHealthDamage>k__BackingField: 10
+        <basePostureDamage>k__BackingField: 10
+        <healthDamageIncreaseByLevel>k__BackingField: 10
+        <postureDamageIncreaseByLevel>k__BackingField: 10
         <pauseTimeWhenHit>k__BackingField: 0
         <canBeShielded>k__BackingField: 1
         <healthDamageShieldRate>k__BackingField: 1
-        <postureDamageShieldRate>k__BackingField: 0.5
+        <postureDamageShieldRate>k__BackingField: 0.2
         <pauseTimeWhenShielded>k__BackingField: 0
         <canBeParried>k__BackingField: 1
         <healthDamageParryRate>k__BackingField: 1
@@ -46,22 +46,45 @@ MonoBehaviour:
       type: {class: KnockbackComponent, ns: , asm: Assembly-CSharp}
       data:
         name: KnockbackComponent
+        <directionBase>k__BackingField: 2
         <knockbackLevel>k__BackingField: 0
-        <knockbackDirection>k__BackingField: {x: 0, y: 0}
-        <knockbackSpeed>k__BackingField: 0
-        <knockbackTime>k__BackingField: 0
-        <easeFunction>k__BackingField: 0
-        <canBeShielded>k__BackingField: 0
-        <knockbackDirectionWhenShielded>k__BackingField: {x: 0, y: 0}
-        <knockbackSpeedWhenShielded>k__BackingField: 0
-        <knockbackTimeWhenShielded>k__BackingField: 0
-        <easeFunctionWhenShielded>k__BackingField: 0
-        <canBeParried>k__BackingField: 0
-        <knockbackDirectionWhenParried>k__BackingField: {x: 0, y: 0}
-        <knockbackSpeedWhenParried>k__BackingField: 0
-        <knockbackTimeWhenParried>k__BackingField: 0
-        <easeFunctionWhenParried>k__BackingField: 0
-        <counterKnockbackDirectionWhenParried>k__BackingField: {x: 0, y: 0}
-        <counterKnockbackSpeedWhenParried>k__BackingField: 0
-        <counterKnockbackTimeWhenParried>k__BackingField: 0
-        <counterEaseFunctionWhenParried>k__BackingField: 0
+        <knockbackDirection>k__BackingField: {x: 1, y: 0}
+        <knockbackSpeed>k__BackingField: 15
+        <knockbackTime>k__BackingField: 0.5
+        <easeFunction>k__BackingField: 6
+        <isKnockbackDifferentInAir>k__BackingField: 0
+        <knockbackDirectionInAir>k__BackingField: {x: 0, y: 0}
+        <knockbackSpeedInAir>k__BackingField: 0
+        <knockbackTimeInAir>k__BackingField: 0
+        <easeFunctionInAir>k__BackingField: 0
+        <canBeShielded>k__BackingField: 1
+        <knockbackLevelWhenShielded>k__BackingField: 0
+        <knockbackDirectionWhenShielded>k__BackingField: {x: 1, y: 0}
+        <knockbackSpeedWhenShielded>k__BackingField: 10
+        <knockbackTimeWhenShielded>k__BackingField: 0.5
+        <easeFunctionWhenShielded>k__BackingField: 6
+        <isShieldedKnockbackDifferentInAir>k__BackingField: 0
+        <knockbackDirectionWhenShieldedInAir>k__BackingField: {x: 0, y: 0}
+        <knockbackSpeedWhenShieldedInAir>k__BackingField: 0
+        <knockbackTimeWhenShieldedInAir>k__BackingField: 0
+        <easeFunctionWhenShieldedInAir>k__BackingField: 0
+        <canBeParried>k__BackingField: 1
+        <knockbackLevelWhenParried>k__BackingField: 0
+        <knockbackDirectionWhenParried>k__BackingField: {x: 1, y: 0}
+        <knockbackSpeedWhenParried>k__BackingField: 5
+        <knockbackTimeWhenParried>k__BackingField: 0.5
+        <easeFunctionWhenParried>k__BackingField: 6
+        <counterKnockbackDirectionWhenParried>k__BackingField: {x: -1, y: 0}
+        <counterKnockbackSpeedWhenParried>k__BackingField: 15
+        <counterKnockbackTimeWhenParried>k__BackingField: 0.5
+        <counterEaseFunctionWhenParried>k__BackingField: 6
+        <isParriedKnockbackDifferentInAir>k__BackingField: 0
+        <knockbackDirectionWhenParriedInAir>k__BackingField: {x: 0, y: 0}
+        <knockbackSpeedWhenParriedInAir>k__BackingField: 0
+        <knockbackTimeWhenParriedInAir>k__BackingField: 0
+        <easeFunctionWhenParriedInAir>k__BackingField: 0
+        <counterKnockbackDirectionWhenParriedInAir>k__BackingField: {x: 0, y: 0}
+        <counterKnockbackSpeedWhenParriedInAir>k__BackingField: 0
+        <counterKnockbackTimeWhenParriedInAir>k__BackingField: 0
+        <counterEaseFunctionWhenParriedInAir>k__BackingField: 0
+        knockbackSourceTransform: {fileID: 0}

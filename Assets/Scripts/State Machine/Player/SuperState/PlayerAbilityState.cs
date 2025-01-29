@@ -11,7 +11,9 @@ public class PlayerAbilityState : PlayerState
     protected bool isTouchingWall;
     #endregion
 
+    #region Other Variables
     protected bool isAbilityDone;
+    #endregion
 
     public PlayerAbilityState(Player player, string animBoolName) : base(player, animBoolName)
     {
@@ -23,7 +25,7 @@ public class PlayerAbilityState : PlayerState
 
         isOnSlope = player.detection.isOnSlope();
         isGrounded = player.detection.isGrounded();
-        isTouchingWall = player.detection.isTouchingWall();
+        isTouchingWall = player.detection.isDetectingWall(CheckPositionHorizontal.Front, CheckPositionVertical.Top);
     }
 
     public override void Enter()
@@ -75,7 +77,7 @@ public class PlayerAbilityState : PlayerState
         base.PhysicsUpdate();
 
         #region State Transition Logic
-        if (escapeInput && player.escapeState.IsEscapeAvail())
+        if (escapeInputPressed && player.escapeState.IsEscapeAvail())
         {
             stateMachine.ChangeState(player.escapeState);
         }
@@ -84,6 +86,10 @@ public class PlayerAbilityState : PlayerState
             if (attackInputActive)
             {
                 stateMachine.ChangeState(player.meleeAttackState);
+            }
+            else if (rangedAttackInputPressed)
+            {
+                stateMachine.ChangeState(player.rangedAttackState);
             }
             else if (isGrounded && currentVelocity.y < epsilon)
             {

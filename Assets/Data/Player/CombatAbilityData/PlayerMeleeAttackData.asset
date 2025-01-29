@@ -14,56 +14,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <combatAbilityIcon>k__BackingField: {fileID: 0}
   <combatAbilityName>k__BackingField: Player Melee Attack
-  <numberOfStrokes>k__BackingField: 3
+  <threatLevel>k__BackingField: 0
   <combatAbilityDescription>k__BackingField: Default Player Melee Attack
-  <ignoreRigidity>k__BackingField: 0
+  <stance>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
-  - rid: 103809487534555136
-  - rid: 103809487534555139
+  - rid: 8834776670535155712
   references:
     version: 2
     RefIds:
-    - rid: 103809487534555136
+    - rid: 8834776670535155712
       type: {class: DamageComponent, ns: , asm: Assembly-CSharp}
       data:
         name: DamageComponent
-        entity: {fileID: 0}
-        baseHealthDamage: 0
-        basePostureDamage: 0
-        healthDamageIncreaseByLevel: 0
-        postureDamageIncreaseByLevel: 0
-        pauseTimeWhenHit: 0
-        canBeShielded: 1
-        healthDamageShieldRate: 1
-        postureDamageShieldRate: 0.5
-        pauseTimeWhenShielded: 0
-        canBeParried: 1
-        healthDamageParryRate: 1
-        postureDamageParryRate: 0.7
-        healthCounterDamageRate: 0
-        postureCounterDamageRate: 0.8
-        pauseTimeWhenParried: 0
-    - rid: 103809487534555139
-      type: {class: KnockbackComponent, ns: , asm: Assembly-CSharp}
-      data:
-        name: KnockbackComponent
-        entity: {fileID: 0}
-        knockbackLevel: 0
-        knockbackDirection: {x: 0, y: 0}
-        knockbackSpeed: 0
-        knockbackTime: 0
-        easeFunction: 0
-        canBeShielded: 1
-        knockbackDirectionWhenShielded: {x: 0, y: 0}
-        knockbackSpeedWhenShielded: 0
-        knockbackTimeWhenShielded: 0
-        easeFunctionWhenShielded: 0
-        canBeParried: 1
-        knockbackDirectionWhenParried: {x: 0, y: 0}
-        knockbackSpeedWhenParried: 0
-        knockbackTimeWhenParried: 0
-        easeFunctionWhenParried: 0
-        counterKnockbackDirectionWhenParried: {x: 0, y: 0}
-        counterKnockbackSpeedWhenParried: 0
-        counterKnockbackTimeWhenParried: 0
-        counterEaseFunctionWhenParried: 0
+        <baseHealthDamage>k__BackingField: 0
+        <basePostureDamage>k__BackingField: 0
+        <healthDamageIncreaseByLevel>k__BackingField: 0
+        <postureDamageIncreaseByLevel>k__BackingField: 0
+        <pauseTimeWhenHit>k__BackingField: 0
+        <canBeShielded>k__BackingField: 1
+        <healthDamageShieldRate>k__BackingField: 1
+        <postureDamageShieldRate>k__BackingField: 0.5
+        <pauseTimeWhenShielded>k__BackingField: 0
+        <canBeParried>k__BackingField: 1
+        <healthDamageParryRate>k__BackingField: 1
+        <postureDamageParryRate>k__BackingField: 0.7
+        <healthCounterDamageRate>k__BackingField: 0
+        <postureCounterDamageRate>k__BackingField: 0.8
+        <pauseTimeWhenParried>k__BackingField: 0

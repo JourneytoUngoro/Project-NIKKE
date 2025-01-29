@@ -17,9 +17,13 @@ public class EnemyState : State
 
     #region Shared Detection
     protected bool isGrounded;
-    protected bool isDetectingLedge;
+    protected bool isDetectingLedgeFront;
+    protected bool isDetectingLedgeBack;
     protected bool isDetectingWall;
     protected bool isOnSlope;
+    protected bool isTargetInAggroRange;
+    protected bool isTargetOnlyInAggroRange;
+    protected bool isTargetInDetectionRange;
     #endregion
 
     public EnemyState(Enemy enemy, string animBoolName)
@@ -40,8 +44,13 @@ public class EnemyState : State
 
         isOnSlope = enemy.detection.isOnSlope();
         isGrounded = enemy.detection.isGrounded();
-        isDetectingLedge = enemy.detection.isDetectingLedge();
-        isDetectingWall = enemy.detection.isDetectingWall();
+        isDetectingWall = enemy.detection.isDetectingWall(CheckPositionHorizontal.Front, CheckPositionVertical.Both, CheckLogicalOperation.OR);
+        isDetectingLedgeFront = enemy.detection.isDetectingLedgeFront();
+        isDetectingLedgeBack = enemy.detection.isDetectingLedgeBack();
+        
+        isTargetInAggroRange = enemy.detection.isTargetInAggroRange(false);
+        isTargetOnlyInAggroRange = enemy.detection.isTargetInAggroRange(true);
+        isTargetInDetectionRange = enemy.detection.isTargetInDetectionRange();
     }
 
     public override void Enter()
@@ -69,7 +78,7 @@ public class EnemyState : State
 
     public virtual void LateLogicUpdate()
     {
-        gotHit = false;
+        
     }
 
     public virtual void PhysicsUpdate()
@@ -85,24 +94,22 @@ public class EnemyState : State
         facingDirection = enemy.movement.facingDirection;
     }
 
-    private void TickPublicTimers()
+    protected virtual void TickPublicTimers()
     {
-        enemy.teleportState.teleportCoolDownTimer.Tick();
-        enemy.meleeAttackState.attackCoolDownTimer.Tick();
-        enemy.midRAttackState.attackCoolDownTimer.Tick();
-        enemy.rangedAttackState.attackCoolDownTimer.Tick();
-    }
+        // enemy.teleportState.teleportCoolDownTimer.Tick();
+        enemy.shieldParryState.shieldCoolDownTimer.Tick();
+        enemy.shieldParryState.parryCoolDownTimer.Tick();
 
-    protected bool GotHit()
-    {
-        if (gotHit)
+        foreach (EnemyAttackState enemyAttackState in enemy.attackStates)
         {
-            gotHit = false;
-            return true;
+            enemyAttackState.attackCoolDownTimer.Tick();
         }
-        else
+
+        if (enemy.GetType().Equals(typeof(Neon)))
         {
-            return false;
+            Neon neon = enemy as Neon;
+            NeonTargetInAggroRangeState neonTargetInAggroRangeState = neon?.targetInAggroRangeState as NeonTargetInAggroRangeState;
+            // neonTargetInAggroRangeState?.shieldCoolDownTimer.Tick();
         }
     }
 

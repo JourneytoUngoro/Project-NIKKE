@@ -6,6 +6,6 @@ public class DodgeComponent : CombatAbilityComponent
 {
     public override void ApplyCombatAbility(params object[] variables)
     {
-        throw new System.NotImplementedException();
+        pertainedCombatAbility.sourceEntity.gameObject.layer = LayerMask.NameToLayer("DodgeLayer");
     }
 }

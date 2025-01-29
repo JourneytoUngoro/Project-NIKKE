@@ -5,12 +5,10 @@ using UnityEngine;
 public class NeonMeleeAttackState : EnemyAttackState
 {
     private Neon neon;
-    private NeonData neonData;
 
     public NeonMeleeAttackState(Enemy enemy, string animBoolName, float coolDown) : base(enemy, animBoolName, coolDown)
     {
         neon = enemy as Neon;
-        neonData = enemyData as NeonData;
     }
 
     public override void Enter()
@@ -24,7 +22,7 @@ public class NeonMeleeAttackState : EnemyAttackState
     {
         base.AnimationActionTrigger(index);
 
-        neon.combat.DoAttack(neon.combat.meleeAttacks[currentAttackStroke]);
+        neon.combat.DoAttack(neon.neonCombat.meleeAttack[0]);
     }
 
     public override void PhysicsUpdate()

@@ -10,7 +10,6 @@ public class PlayerInAirState : PlayerState
     #region Check Variables
     private bool isGrounded;
     private bool isTouchingWall;
-    private bool isTouchingWallBehind;
     private bool isOnSlope;
     #endregion
 
@@ -38,8 +37,7 @@ public class PlayerInAirState : PlayerState
         {
             player.movement.SetVelocityY(0.0f);
         }
-        isTouchingWall = player.detection.isTouchingWall();
-        isTouchingWallBehind = player.detection.isTouchingWallBehind();
+        isTouchingWall = player.detection.isDetectingWall(CheckPositionHorizontal.Front, CheckPositionVertical.Top);
     }
 
     public override void Enter()
@@ -131,13 +129,17 @@ public class PlayerInAirState : PlayerState
         #region State Transition Logic
         if (!onStateExit)
         {
-            if (escapeInput && player.escapeState.IsEscapeAvail())
+            if (escapeInputPressed && player.escapeState.IsEscapeAvail())
             {
                 stateMachine.ChangeState(player.escapeState);
             }
             else if (attackInputActive)
             {
                 stateMachine.ChangeState(player.meleeAttackState);
+            }
+            else if (shieldParryInput && player.shieldParryState.isShieldParryAvail)
+            {
+                stateMachine.ChangeState(player.shieldParryState);
             }
             else if (jumpInputActive && player.wallSlideState.IsWallJumpAvail())
             {
@@ -147,11 +149,11 @@ public class PlayerInAirState : PlayerState
             {
                 stateMachine.ChangeState(player.jumpState);
             }
-            else if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
+            else if (dodgeInputPressed && player.dodgeState.IsDodgeAvail())
             {
                 stateMachine.ChangeState(player.dodgeState);
             }
-            else if (dashAttackInput && player.dashAttackState.IsDashAttackAvail())
+            else if (skillAttackInput && player.dashAttackState.IsDashAttackAvail())
             {
                 stateMachine.ChangeState(player.dashAttackState);
             }

@@ -10,11 +10,7 @@ public class ProjectileComponent : CombatAbilityComponent
 
     [field: SerializeField] public GameObject projectilePrefab { get; private set; }
     [field: SerializeField] public bool checkProjectileRoute { get; private set; }
-    [field: SerializeField] public bool rotateTransform { get; private set; }
-    [field: SerializeField] public bool rotatePrefab { get; private set; }
     [field: SerializeField] public bool autoManualDirection { get; private set; }
-    [field: SerializeField] public Vector2[] manualDirectionVector { get; private set; }
-    // TODO: Auto manual direction vector that sets the direction of the projectile to 'instantiated position - source entity position.'
 
     public override void ApplyCombatAbility(params object[] variables)
     {
@@ -25,19 +21,47 @@ public class ProjectileComponent : CombatAbilityComponent
         {
             GameObject projectileGameObject = Manager.Instance.objectPoolingManager.GetGameObject(projectilePrefab.name);
             projectileGameObject.transform.position = projectileFireTransform.position;
+            projectileGameObject.transform.rotation = pertainedCombatAbility.sourceEntity.transform.rotation;
 
             Projectile projectile = projectileGameObject.GetComponent<Projectile>();
+            Explosion explosion = projectileGameObject.GetComponent<Explosion>();
 
             if (projectile != null)
             {
-                if (projectile.GetProjectileType() == ProjectileType.Straight && projectile.GetStraightProjectileDirection() == StraightProjectileDirection.Manual)
+                if (projectile.GetProjectileType() == ProjectileType.Straight)
                 {
-                    // projectile.FireProjectile(pertainedCombatAbility.sourceEntity, null, checkProjectileRoute, manualDirectionVector);
+                    switch (projectile.GetStraightProjectileDirection())
+                    {
+                        case StraightProjectileDirection.Manual:
+                            if (autoManualDirection)
+                            {
+                                Vector2 direction = projectileFireTransform.position - pertainedCombatAbility.sourceEntity.transform.position;
+                                projectile.FireProjectile(pertainedCombatAbility.sourceEntity, null, checkProjectileRoute, direction);
+                            }
+                            else
+                            {
+                                projectile.FireProjectile(pertainedCombatAbility.sourceEntity, null, checkProjectileRoute, projectileFireTransform.right);
+                            }
+                            break;
+
+                        case StraightProjectileDirection.Toward:
+                            projectile.FireProjectile(pertainedCombatAbility.sourceEntity, targetEntities, checkProjectileRoute);
+                            break;
+
+                        case StraightProjectileDirection.Forward:
+                            projectile.FireProjectile(pertainedCombatAbility.sourceEntity, null, checkProjectileRoute);
+                            break;
+                    }
                 }
                 else
                 {
-
+                    projectile.FireProjectile(pertainedCombatAbility.sourceEntity, targetEntities, checkProjectileRoute);
                 }
+            }
+
+            if (explosion != null)
+            {
+                explosion.SetExplosion(pertainedCombatAbility.sourceEntity);
             }
         }
     }

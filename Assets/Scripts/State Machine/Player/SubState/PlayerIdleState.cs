@@ -22,7 +22,11 @@ public class PlayerIdleState : PlayerGroundedState
     {
         base.Enter();
 
-        player.movement.SetVelocityZero();
+        player.movement.SetVelocityX(0.0f);
+        if (player.rigidBody.IsTouchingLayers(player.detection.whatIsGround))
+        {
+            player.movement.SetVelocityY(0.0f);
+        }
         dashMaintainTimer.StartSingleUseTimer();
     }
 
@@ -38,29 +42,6 @@ public class PlayerIdleState : PlayerGroundedState
         base.LogicUpdate();
 
         dashMaintainTimer.Tick();
-        
-        /*if (!onStateExit)
-        {
-            if (inputY == -1)
-            {
-                if (inputX == 0)
-                {
-                    stateMachine.ChangeState(player.crouchIdleState);
-                }
-                else
-                {
-                    stateMachine.ChangeState(player.crouchMoveState);
-                }
-            }
-            else if (inputX != 0)
-            {
-                stateMachine.ChangeState(player.moveState);
-            }
-            else if (player.normalAttackState.currentAmmo < playerData.maxAmmo)
-            {
-                stateMachine.ChangeState(player.reloadState);
-            }
-        }*/
     }
 
     public override void PhysicsUpdate()
@@ -85,10 +66,6 @@ public class PlayerIdleState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.moveState);
             }
-            else if (player.meleeAttackState.currentAmmo < playerData.maxAmmo)
-            {
-                stateMachine.ChangeState(player.reloadState);
-            }
         }
         #endregion
 
@@ -99,13 +76,10 @@ public class PlayerIdleState : PlayerGroundedState
 
             if (isOnSlope)
             {
-                player.rigidBody.gravityScale = 0.0f;
                 player.movement.SetVelocityY(0.0f);
             }
-            else
-            {
-                player.rigidBody.gravityScale = 9.5f;
-            }
+
+            player.movement.RigidBodyController();
         }
         #endregion
     }

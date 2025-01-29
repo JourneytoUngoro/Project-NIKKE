@@ -7,8 +7,8 @@ using UnityEngine.UI;
 [Serializable]
 public class StatComponent
 {
-    public string name;
-    public Entity entity;
+    [HideInInspector] public string name { get; set; }
+    [HideInInspector] public Entity entity { get; set; }
     public event Action OnCurrentValueMin;
     public event Action OnCurrentValueMax;
 
@@ -18,9 +18,7 @@ public class StatComponent
     [field: SerializeField] public float minValue { get; private set; }
     [field: SerializeField] public float currentValue { get; private set; }
     [field: SerializeField] public float recoveryStartTime { get; private set; }
-    [field: SerializeField] public float recoveryDuration { get; private set; }
-    // recovery delay time of -1 means it does not recover automatically (ex. health)
-    // recovery delay time of 0 means it will recover every frame (ex. posture)
+    [field: SerializeField, Tooltip("Recovery delay time of -1 means it does not recover automatically (ex. health). Recovery delay time of 0 means it will recover every frame (ex. posture)")] public float recoveryDuration { get; private set; }
     [field: SerializeField] public float recoveryValue { get; private set; }
 
     private Timer recoveryStartTimer;

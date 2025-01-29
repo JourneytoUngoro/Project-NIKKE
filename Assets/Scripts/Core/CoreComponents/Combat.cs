@@ -4,21 +4,18 @@ using UnityEngine;
 using System.Linq;
 using System.Reflection;
 using DG.Tweening;
+using static Unity.Burst.Intrinsics.Arm;
 
 /* Incomplete */
 /* Needs to be optimized and improved */
 
 public abstract class Combat : CoreComponent
 {
-    [SerializeField] protected LayerMask whatIsGround;
-    [SerializeField] protected LayerMask whatIsDamageable;
+    [field: SerializeField] public LayerMask whatIsDamageable { get; protected set; }
+    [SerializeField] private LayerMask shieldLayer;
+    [SerializeField] private LayerMask parryLayer;
 
-    [field: SerializeField] public List<CombatAbilityWithTransforms> meleeAttacks { get; protected set; }
-    [field: SerializeField] public List<CombatAbilityWithTransforms> rangedAttacks { get; protected set; }
-    [field: SerializeField] public CombatAbilityWithTransforms parryArea { get; protected set; }
-    [field: SerializeField] public Transform parryAreaTransform { get; protected set; }
-
-    protected List<Collider2D> damagedTargets;
+    public List<Collider2D> damagedTargets { get; protected set; }
 
     protected override void Awake()
     {
@@ -26,29 +23,76 @@ public abstract class Combat : CoreComponent
 
         damagedTargets = new List<Collider2D>();
 
-        var combatAbilityFields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance).Where(field => field.FieldType == typeof(List<CombatAbilityWithTransforms>));
+        IEnumerable<PropertyInfo> combatAbilityProperties = GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => property.PropertyType.Equals(typeof(List<CombatAbilityWithTransforms>)));
 
-        foreach (var field in combatAbilityFields)
+        foreach (PropertyInfo property in combatAbilityProperties)
         {
-            var combatAbilityList = field.GetValue(this) as List<CombatAbilityWithTransforms>;
+            List<CombatAbilityWithTransforms> combatAbilityList = property.GetValue(this) as List<CombatAbilityWithTransforms>;
 
-            foreach (CombatAbilityWithTransforms combatAbilityWithTransform in combatAbilityList)
+            foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in combatAbilityList)
             {
-                combatAbilityWithTransform.combatAbilityData.sourceEntity = entity;
+                combatAbilityWithTransforms.combatAbilityData.sourceEntity = entity;
 
-                foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransform.combatAbilityData.combatAbilityComponents)
+                foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransforms.combatAbilityData.combatAbilityComponents)
                 {
                     combatAbilityComponent.entity = entity;
+                    combatAbilityComponent.pertainedCombatAbility = combatAbilityWithTransforms.combatAbilityData;
+
+                    if (combatAbilityComponent.GetType().Equals(typeof(ProjectileComponent)))
+                    {
+                        ProjectileComponent projectileComponent = combatAbilityComponent as ProjectileComponent;
+
+                        Projectile projectile = projectileComponent.projectilePrefab.GetComponent<Projectile>();
+                        Explosion explosion = projectileComponent.projectilePrefab.GetComponent<Explosion>();
+
+                        if (projectile != null)
+                        {
+                            projectile.combatAbility.sourceEntity = entity;
+                        }
+                        
+                        if (explosion != null)
+                        {
+                            foreach (CombatAbilityWithTransforms explosionArea in explosion.explosionAreas)
+                            {
+                                explosionArea.combatAbilityData.sourceEntity = entity;
+                            }
+                        }
+                    }
+                    else if (combatAbilityComponent.GetType().Equals(typeof(KnockbackComponent)))
+                    {
+                        KnockbackComponent knockbackComponent = combatAbilityComponent as KnockbackComponent;
+                        knockbackComponent.knockbackSourceTransform = entity.transform;
+                    }
                 }
+            }
+        }
+
+        combatAbilityProperties = GetType()
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(property => property.PropertyType.Equals(typeof(CombatAbilityWithTransforms)));
+
+        foreach (PropertyInfo property in combatAbilityProperties)
+        {
+            CombatAbilityWithTransforms combatAbilityWithTransforms = property.GetValue(this) as CombatAbilityWithTransforms;
+
+            combatAbilityWithTransforms.combatAbilityData.sourceEntity = entity;
+
+            foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransforms.combatAbilityData.combatAbilityComponents)
+            {
+                combatAbilityComponent.entity = entity;
+                combatAbilityComponent.pertainedCombatAbility = combatAbilityWithTransforms.combatAbilityData;
             }
         }
     }
 
     public virtual void GetDamage(DamageComponent damageComponent, OverlapCollider[] overlapColliders)
     {
+        Debug.Log("Get Damage Function Called");
         Entity sourceEntity = damageComponent.pertainedCombatAbility.sourceEntity;
-        bool isParrying = IsParrying(sourceEntity, overlapColliders);
-        bool isShielding = IsShielding(sourceEntity, overlapColliders);
+        bool isParrying = damageComponent.canBeParried ? IsParrying(sourceEntity, overlapColliders) : false;
+        bool isShielding = damageComponent.canBeShielded ? IsShielding(sourceEntity, overlapColliders) : false;
 
         GetHealthDamage(damageComponent, isParrying, isShielding);
         GetPostureDamage(damageComponent, isParrying, isShielding);
@@ -64,32 +108,51 @@ public abstract class Combat : CoreComponent
         {
             if (isParrying)
             {
+                entity.animator.SetInteger("parryType", UtilityFunctions.RandomInteger(0, 3));
+                entity.animator.SetTrigger("parried");
                 entity.entityStats.health.DecreaseCurrentValue(healthDamage * (1.0f - damageComponent.healthDamageParryRate));
                 sourceEntity.entityStats.health.DecreaseCurrentValue(healthDamage * damageComponent.healthCounterDamageRate);
-                return;
             }
             else
             {
-                entity.entityStats.health.DecreaseCurrentValue(healthDamage);
-                return;
+                if (damageComponent.canBeShielded)
+                {
+                    if (isParrying || isShielding)
+                    {
+                        entity.animator.SetTrigger("shielded");
+                        entity.entityStats.health.DecreaseCurrentValue(healthDamage * (1.0f - damageComponent.healthDamageShieldRate));
+                    }
+                    else
+                    {
+                        entity.animator.SetTrigger("gotHit");
+                        entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+                    }
+                }
+                else
+                {
+                    entity.animator.SetTrigger("gotHit");
+                    entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+                }
             }
         }
-
-        if (damageComponent.canBeShielded)
+        else if (damageComponent.canBeShielded)
         {
             if (isParrying || isShielding)
             {
+                entity.animator.SetTrigger("shielded");
                 entity.entityStats.health.DecreaseCurrentValue(healthDamage * (1.0f - damageComponent.healthDamageShieldRate));
-                return;
             }
             else
             {
+                entity.animator.SetTrigger("gotHit");
                 entity.entityStats.health.DecreaseCurrentValue(healthDamage);
-                return;
             }
         }
-
-        entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+        else
+        {
+            entity.animator.SetTrigger("gotHit");
+            entity.entityStats.health.DecreaseCurrentValue(healthDamage);
+        }
     }
 
     public virtual void GetPostureDamage(DamageComponent damageComponent, bool isParrying, bool isShielding)
@@ -104,103 +167,352 @@ public abstract class Combat : CoreComponent
             {
                 entity.entityStats.posture.IncreaseCurrentValue(postureDamage * (1.0f - damageComponent.postureDamageParryRate), false);
                 sourceEntity.entityStats.posture.IncreaseCurrentValue(postureDamage * damageComponent.postureCounterDamageRate, !sourceEntity.GetType().Equals(typeof(Player)));
-                return;
             }
             else
             {
-                entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
-                return;
+                if (damageComponent.canBeShielded)
+                {
+                    if (isParrying || isShielding)
+                    {
+                        entity.entityStats.posture.IncreaseCurrentValue(postureDamage * (1.0f - damageComponent.postureDamageShieldRate));
+                    }
+                    else
+                    {
+                        entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+                    }
+                }
+                else
+                {
+                    entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+                }
             }
         }
-
-        if (damageComponent.canBeShielded)
+        else if (damageComponent.canBeShielded)
         {
             if (isParrying || isShielding)
             {
                 entity.entityStats.posture.IncreaseCurrentValue(postureDamage * (1.0f - damageComponent.postureDamageShieldRate));
-                return;
             }
             else
             {
                 entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
-                return;
             }
         }
-
-        entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+        else
+        {
+            entity.entityStats.posture.IncreaseCurrentValue(postureDamage);
+        }
     }
 
     /// <summary>
     /// Knockback time of 0 means that the knockback will be done when the entity hits the ground.
     /// </summary>
-    public virtual void GetKnockback(KnockbackComponent knockbackComponent)
+    public virtual void GetKnockback(KnockbackComponent knockbackComponent, OverlapCollider[] overlapColliders)
     {
-        if (knockbackComponent.easeFunction == Ease.Unset)
+        Debug.Log("Get Knockback Function Called");
+        // TODO
+        // 1. 투사체일때 sourceEntity 문제를 어떻게 해결할 것인가? -> source transform을 활용한다
+        // 2. Ease.Unset일때 시간을 어떻게 할 것인가? -> 벽에 부딛힐시 코루틴 탈출
+        Entity sourceEntity = knockbackComponent.pertainedCombatAbility.sourceEntity;
+        bool isParrying = knockbackComponent.canBeParried ? IsParrying(sourceEntity, overlapColliders) : false;
+        bool isShielding = knockbackComponent.canBeShielded ? IsShielding(sourceEntity, overlapColliders) : false;
+        bool isGrounded = entity.entityDetection.isGrounded();
+
+        int direction = 0;
+
+        switch (knockbackComponent.directionBase)
         {
-            entity.entityMovement.SetVelocity(knockbackComponent.knockbackDirection.normalized * knockbackComponent.knockbackSpeed);
+            case DirectionBase.Transform:
+                direction = entity.transform.position.x - knockbackComponent.knockbackSourceTransform.position.x < 0 ? -1 : 1; break;
+            case DirectionBase.Rotation:
+                direction = Mathf.Abs(knockbackComponent.knockbackSourceTransform.rotation.y) < epsilon ? 1 : -1; break;
+            case DirectionBase.Absolute:
+                direction = 1; break;
+            default:
+                break;
+        }
+
+        if (knockbackComponent.canBeParried)
+        {
+            if (isParrying)
+            {
+                entity.animator.SetInteger("parryType", UtilityFunctions.RandomInteger(0, 3));
+                entity.animator.SetTrigger("parried");
+                
+                if (knockbackComponent.isParriedKnockbackDifferentInAir)
+                {
+                    if (!isGrounded)
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenParriedInAir.normalized.x * direction * knockbackComponent.knockbackSpeedWhenParriedInAir, knockbackComponent.knockbackTimeWhenParriedInAir, knockbackComponent.easeFunctionWhenParriedInAir, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenParriedInAir.normalized.y * knockbackComponent.knockbackSpeedWhenParriedInAir);
+                        
+                        if (!knockbackComponent.pertainedCombatAbility.stance)
+                        {
+                            sourceEntity.animator.SetTrigger("wasParried");
+                            sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenParriedInAir);
+
+                            sourceEntity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.counterKnockbackDirectionWhenParriedInAir.normalized.x * direction * knockbackComponent.counterKnockbackSpeedWhenParriedInAir, knockbackComponent.counterKnockbackTimeWhenParriedInAir, knockbackComponent.counterEaseFunctionWhenParriedInAir, true);
+                            sourceEntity.entityMovement.SetVelocityY(knockbackComponent.counterKnockbackDirectionWhenParriedInAir.normalized.y * knockbackComponent.counterKnockbackSpeedWhenParriedInAir);
+                        }
+                    }
+                    else
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenParried.normalized.x * direction * knockbackComponent.knockbackSpeedWhenParried, knockbackComponent.knockbackTimeWhenParried, knockbackComponent.easeFunctionWhenParried, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenParried.normalized.y * knockbackComponent.knockbackSpeedWhenParried);
+
+                        if (!knockbackComponent.pertainedCombatAbility.stance)
+                        {
+                            sourceEntity.animator.SetTrigger("wasParried");
+                            sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenParried);
+
+                            sourceEntity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.counterKnockbackDirectionWhenParried.normalized.x * direction * knockbackComponent.counterKnockbackSpeedWhenParried, knockbackComponent.counterKnockbackTimeWhenParried, knockbackComponent.counterEaseFunctionWhenParried, true);
+                            sourceEntity.entityMovement.SetVelocityY(knockbackComponent.counterKnockbackDirectionWhenParried.normalized.y * knockbackComponent.counterKnockbackSpeedWhenParried);
+                        }
+                    }
+                }
+                else
+                {
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenParried.normalized.x * direction * knockbackComponent.knockbackSpeedWhenParried, knockbackComponent.knockbackTimeWhenParried, knockbackComponent.easeFunctionWhenParried, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenParried.normalized.y * knockbackComponent.knockbackSpeedWhenParried);
+
+                    if (!knockbackComponent.pertainedCombatAbility.stance)
+                    {
+                        sourceEntity.animator.SetTrigger("wasParried");
+                        sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenParried);
+
+                        sourceEntity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.counterKnockbackDirectionWhenParried.normalized.x * direction * knockbackComponent.counterKnockbackSpeedWhenParried, knockbackComponent.counterKnockbackTimeWhenParried, knockbackComponent.counterEaseFunctionWhenParried, true);
+                        sourceEntity.entityMovement.SetVelocityY(knockbackComponent.counterKnockbackDirectionWhenParried.normalized.y * knockbackComponent.counterKnockbackSpeedWhenParried);
+                    }
+                }
+            }
+            else
+            {
+                if (knockbackComponent.canBeShielded)
+                {
+                    if (isParrying || isShielding)
+                    {
+                        entity.animator.SetTrigger("shielded");
+
+                        if (knockbackComponent.isShieldedKnockbackDifferentInAir)
+                        {
+                            if (!isGrounded)
+                            {
+                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShieldedInAir, knockbackComponent.knockbackTimeWhenShieldedInAir, knockbackComponent.easeFunctionWhenShieldedInAir, true);
+                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.y * knockbackComponent.knockbackSpeedWhenShieldedInAir);
+                            }
+                            else
+                            {
+                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShielded.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShielded, knockbackComponent.knockbackTimeWhenShielded, knockbackComponent.easeFunctionWhenShielded, true);
+                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShielded.normalized.y * knockbackComponent.knockbackSpeedWhenShielded);
+                            }
+                        }
+                        else
+                        {
+                            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShielded.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShielded, knockbackComponent.knockbackTimeWhenShielded, knockbackComponent.easeFunctionWhenShielded, true);
+                            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShielded.normalized.y * knockbackComponent.knockbackSpeedWhenShielded);
+                        }
+                    }
+                    else
+                    {
+                        entity.animator.SetTrigger("gotHit");
+                        ChangeToKnockbackState(knockbackComponent, isGrounded);
+
+                        if (knockbackComponent.isKnockbackDifferentInAir)
+                        {
+                            if (!isGrounded)
+                            {
+                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
+                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                            }
+                            else
+                            {
+                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                            }
+                        }
+                        else
+                        {
+                            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                        }
+                    }
+                }
+                else
+                {
+                    entity.animator.SetTrigger("gotHit");
+                    ChangeToKnockbackState(knockbackComponent, isGrounded);
+
+                    if (knockbackComponent.isKnockbackDifferentInAir)
+                    {
+                        if (!isGrounded)
+                        {
+                            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
+                            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                        }
+                        else
+                        {
+                            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                        }
+                    }
+                    else
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                    }
+                }
+            }
+        }
+        else if (knockbackComponent.canBeShielded)
+        {
+            if (isParrying || isShielding)
+            {
+                entity.animator.SetTrigger("shielded");
+
+                if (knockbackComponent.isShieldedKnockbackDifferentInAir)
+                {
+                    if (!isGrounded)
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShieldedInAir, knockbackComponent.knockbackTimeWhenShieldedInAir, knockbackComponent.easeFunctionWhenShieldedInAir, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.y * knockbackComponent.knockbackSpeedWhenShieldedInAir);
+                    }
+                    else
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShielded.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShielded, knockbackComponent.knockbackTimeWhenShielded, knockbackComponent.easeFunctionWhenShielded, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShielded.normalized.y * knockbackComponent.knockbackSpeedWhenShielded);
+                    }
+                }
+                else
+                {
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShielded.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShielded, knockbackComponent.knockbackTimeWhenShielded, knockbackComponent.easeFunctionWhenShielded, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShielded.normalized.y * knockbackComponent.knockbackSpeedWhenShielded);
+                }
+            }
+            else
+            {
+                entity.animator.SetTrigger("gotHit");
+                ChangeToKnockbackState(knockbackComponent, isGrounded);
+
+                if (knockbackComponent.isKnockbackDifferentInAir)
+                {
+                    if (!isGrounded)
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                    }
+                    else
+                    {
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                    }
+                }
+                else
+                {
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                }
+            }
         }
         else
         {
-            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
-            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+            entity.animator.SetTrigger("gotHit");
+            ChangeToKnockbackState(knockbackComponent, isGrounded);
+
+            if (knockbackComponent.isKnockbackDifferentInAir)
+            {
+                if (!isGrounded)
+                {
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                }
+                else
+                {
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                }
+            }
+            else
+            {
+                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+            }
         }
     }
 
-    private bool IsParrying(Entity sourceEntity, OverlapCollider[] overlapColliders)
+    protected abstract void ChangeToKnockbackState(float knockbackTime);
+    protected abstract void ChangeToKnockbackState(KnockbackComponent knockbackComponent, bool isGrounded);
+
+    public void GetRebound(Vector2 reboundDirection, float reboundVelocity, float reboundTime, Ease reboundFunction)
+    {
+        entity.entityMovement.SetVelocityXChangeOverTime(reboundDirection.normalized.x * reboundVelocity * entity.entityMovement.facingDirection, reboundTime, reboundFunction, true);
+        entity.entityMovement.SetVelocityY(reboundDirection.normalized.y * reboundVelocity);
+    }
+
+    protected bool IsParrying(Entity sourceEntity, OverlapCollider[] overlapColliders)
     {
         bool isParrying = false;
 
-        foreach (OverlapCollider overlapCollider in overlapColliders)
+        if (sourceEntity != null)
         {
-            if (overlapCollider.overlapBox)
+            foreach (OverlapCollider overlapCollider in overlapColliders)
             {
-                ShieldParryPrefab parryDetection = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, LayerMask.NameToLayer("ParryLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
-                if (parryDetection != null && parryDetection.overlapCollider.overlapCircle)
+                if (overlapCollider.overlapBox)
                 {
-                    isParrying = CheckWithinAngle(new Vector2(Mathf.Cos(parryDetection.overlapCollider.boxRotation + parryDetection.overlapCollider.centerRotation), Mathf.Sin(parryDetection.overlapCollider.boxRotation + parryDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, parryDetection.overlapCollider.counterClockwiseAngle, parryDetection.overlapCollider.clockwiseAngle);
-                }
-            }
-            else if (overlapCollider.overlapCircle)
-            {
-                ShieldParryPrefab parryDetection = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, LayerMask.NameToLayer("ParryLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
-                if (parryDetection != null && parryDetection.overlapCollider.overlapCircle)
-                {
-                    isParrying = CheckWithinAngle(new Vector2(Mathf.Cos(parryDetection.overlapCollider.centerRotation), Mathf.Sin(parryDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, parryDetection.overlapCollider.counterClockwiseAngle, parryDetection.overlapCollider.clockwiseAngle);
-                }
-            }
+                    ShieldParry parryDetection = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, parryLayer).Select(collider2D => collider2D.GetComponent<ShieldParry>()).Where(shieldParry => shieldParry.GetComponentInParent<Entity>().Equals(entity)).FirstOrDefault();
 
-            if (isParrying) return true;
+                    if (parryDetection != null)
+                    {
+                        isParrying = parryDetection.overlapCollider.limitAngle ? CheckWithinAngle(new Vector2(Mathf.Cos(parryDetection.overlapCollider.boxRotation + parryDetection.overlapCollider.centerRotation), Mathf.Sin(parryDetection.overlapCollider.boxRotation + parryDetection.overlapCollider.centerRotation)) * entity.entityMovement.facingDirection, sourceEntity.transform.position - entity.transform.position, parryDetection.overlapCollider.counterClockwiseAngle, parryDetection.overlapCollider.clockwiseAngle) : true;
+                    }
+                }
+                else if (overlapCollider.overlapCircle)
+                {
+                    ShieldParry parryDetection = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, parryLayer).Select(collider2D => collider2D.GetComponent<ShieldParry>()).Where(shieldParry => shieldParry.GetComponentInParent<Entity>().Equals(entity)).FirstOrDefault();
+
+                    if (parryDetection != null)
+                    {
+                        isParrying = parryDetection.overlapCollider.limitAngle ? CheckWithinAngle(new Vector2(Mathf.Cos(parryDetection.overlapCollider.centerRotation), Mathf.Sin(parryDetection.overlapCollider.centerRotation)) * entity.entityMovement.facingDirection, sourceEntity.transform.position - entity.transform.position, parryDetection.overlapCollider.counterClockwiseAngle, parryDetection.overlapCollider.clockwiseAngle) : true;
+                    }
+                }
+
+                if (isParrying) break;
+            }
         }
 
         return isParrying;
     }
 
-    private bool IsShielding(Entity sourceEntity, OverlapCollider[] overlapColliders)
+    protected bool IsShielding(Entity sourceEntity, OverlapCollider[] overlapColliders)
     {
         bool isShielding = false;
 
-        foreach (OverlapCollider overlapCollider in overlapColliders)
+        if (sourceEntity != null)
         {
-            if (overlapCollider.overlapBox)
+            foreach (OverlapCollider overlapCollider in overlapColliders)
             {
-                ShieldParryPrefab shieldDetection = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, LayerMask.NameToLayer("ShieldLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
-                if (shieldDetection != null && shieldDetection.overlapCollider.overlapCircle)
+                if (overlapCollider.overlapBox)
                 {
-                    isShielding = CheckWithinAngle(new Vector2(Mathf.Cos(shieldDetection.overlapCollider.boxRotation + shieldDetection.overlapCollider.centerRotation), Mathf.Sin(shieldDetection.overlapCollider.boxRotation + shieldDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, shieldDetection.overlapCollider.counterClockwiseAngle, shieldDetection.overlapCollider.clockwiseAngle);
-                }
-            }
-            else if (overlapCollider.overlapCircle)
-            {
-                ShieldParryPrefab shieldDetection = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, LayerMask.NameToLayer("ShieldLayer")).Where(collider2D => collider2D.GetComponent<Entity>().Equals(entity)).Select(collider2D => collider2D.GetComponent<ShieldParryPrefab>()).FirstOrDefault();
-                if (shieldDetection != null && shieldDetection.overlapCollider.overlapCircle)
-                {
-                    isShielding = CheckWithinAngle(new Vector2(Mathf.Cos(shieldDetection.overlapCollider.centerRotation), Mathf.Sin(shieldDetection.overlapCollider.centerRotation)), sourceEntity.transform.position - entity.transform.position, shieldDetection.overlapCollider.counterClockwiseAngle, shieldDetection.overlapCollider.clockwiseAngle);
-                }
-            }
+                    ShieldParry shieldDetection = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, shieldLayer).Select(collider2D => collider2D.GetComponent<ShieldParry>()).Where(shieldParry => shieldParry.GetComponentInParent<Entity>().Equals(entity)).FirstOrDefault();
 
-            if (isShielding) return true;
+                    if (shieldDetection != null)
+                    {
+                        isShielding = shieldDetection.overlapCollider.limitAngle ? CheckWithinAngle(new Vector2(Mathf.Cos(shieldDetection.overlapCollider.boxRotation + shieldDetection.overlapCollider.centerRotation), Mathf.Sin(shieldDetection.overlapCollider.boxRotation + shieldDetection.overlapCollider.centerRotation)) * entity.entityMovement.facingDirection, sourceEntity.transform.position - entity.transform.position, shieldDetection.overlapCollider.counterClockwiseAngle, shieldDetection.overlapCollider.clockwiseAngle) : true;
+                    }
+                }
+                else if (overlapCollider.overlapCircle)
+                {
+                    ShieldParry shieldDetection = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, shieldLayer).Select(collider2D => collider2D.GetComponent<ShieldParry>()).Where(shieldParry => shieldParry.GetComponentInParent<Entity>().Equals(entity)).FirstOrDefault();
+
+                    if (shieldDetection != null)
+                    {
+                        isShielding = shieldDetection.overlapCollider.limitAngle ? CheckWithinAngle(new Vector2(Mathf.Cos(shieldDetection.overlapCollider.centerRotation), Mathf.Sin(shieldDetection.overlapCollider.centerRotation)) * entity.entityMovement.facingDirection, sourceEntity.transform.position - entity.transform.position, shieldDetection.overlapCollider.counterClockwiseAngle, shieldDetection.overlapCollider.clockwiseAngle) : true;
+                    }
+                }
+
+                if (isShielding) break;
+            }
         }
-
+        
         return isShielding;
     }
 
@@ -214,11 +526,11 @@ public abstract class Combat : CoreComponent
         {
             if (overlapCollider.overlapBox)
             {
-                damageTargets.Union(Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, 0.0f, whatIsDamageable)).ToList();
+                damageTargets = damageTargets.Union(Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, whatIsDamageable)).ToList();
             }
             else if (overlapCollider.overlapCircle)
             {
-                damageTargets.Union(Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable)).ToList();
+                damageTargets = damageTargets.Union(Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable)).ToList();
             }
         }
 
@@ -241,21 +553,15 @@ public abstract class Combat : CoreComponent
                     break;
                 case ProjectileComponent projectileComponent:
                     Transform[] projectileFireTransforms = combatAbilityWithTransforms.overlapColliders.Where(overlapCollider => !overlapCollider.overlapBox && !overlapCollider.overlapCircle).Select(overlapCollider => overlapCollider.centerTransform).ToArray();
-
-                    if (projectileComponent.rotateTransform)
-                    {
-
-                    }
-                    else
-                    {
-                        projectileComponent.ApplyCombatAbility(damageTargets, projectileFireTransforms, null);
-                    }
+                    projectileComponent.ApplyCombatAbility(damageTargets, projectileFireTransforms, null);
                     break;
             }
         }
-
+        
         foreach (Collider2D damageTarget in damageTargets)
         {
+            if (damagedTargets.Contains(damageTarget)) continue;
+
             foreach (CombatAbilityComponent combatAbilityComponent in combatAbilityWithTransforms.combatAbilityData.combatAbilityComponents)
             {
                 switch (combatAbilityComponent)
@@ -271,6 +577,8 @@ public abstract class Combat : CoreComponent
                         break;
                 }
             }
+
+            damagedTargets.Add(damageTarget);
         }
 
         return foundTarget;
@@ -284,6 +592,7 @@ public abstract class Combat : CoreComponent
 
     public void ClearDamagedTargets()
     {
+        Debug.Log($"Clear damagedTargets");
         damagedTargets.Clear();
     }
 
@@ -337,7 +646,7 @@ public abstract class Combat : CoreComponent
             prevPosition = currentPosition;
             currentPosition = movementVector + projectileFirePosition;
 
-            if (Physics2D.Raycast(prevPosition, currentPosition - prevPosition, Vector2.Distance(currentPosition, prevPosition), whatIsGround))
+            if (Physics2D.Raycast(prevPosition, currentPosition - prevPosition, Vector2.Distance(currentPosition, prevPosition), entity.entityDetection.whatIsGround))
             {
                 if (Vector2.Distance(currentPosition, targetPosition) < distance * 0.2f)
                 {
@@ -350,6 +659,42 @@ public abstract class Combat : CoreComponent
             }
         }
         return true;
+    }
+
+    public void ReleaseShieldParryPrefabs(CombatAbility pertainedCombatAbility)
+    {
+        foreach (ShieldParry shieldParryPrefab in entity.entityCombat.GetComponentsInChildren<ShieldParry>())
+        {
+            if (pertainedCombatAbility != null)
+            {
+                if (shieldParryPrefab.pertainedCombatAbility.Equals(pertainedCombatAbility))
+                {
+                    shieldParryPrefab.ReleaseObject();
+                }
+            }
+            else
+            {
+                shieldParryPrefab.ReleaseObject();
+            }
+        }
+    }
+
+    public void ReleaseShieldParryPrefabs(CombatAbilityWithTransforms pertainedCombatAbilityWithTransforms)
+    {
+        foreach (ShieldParry shieldParryPrefab in entity.entityCombat.GetComponentsInChildren<ShieldParry>())
+        {
+            if (pertainedCombatAbilityWithTransforms != null && pertainedCombatAbilityWithTransforms.combatAbilityData != null)
+            {
+                if (shieldParryPrefab.pertainedCombatAbility.Equals(pertainedCombatAbilityWithTransforms.combatAbilityData))
+                {
+                    shieldParryPrefab.ReleaseObject();
+                }
+            }
+            else
+            {
+                shieldParryPrefab.ReleaseObject();
+            }
+        }
     }
 
     protected virtual void OnDrawGizmos()

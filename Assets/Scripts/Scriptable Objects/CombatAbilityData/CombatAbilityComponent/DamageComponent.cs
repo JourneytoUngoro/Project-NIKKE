@@ -26,7 +26,7 @@ public class DamageComponent : CombatAbilityComponent
     {
         Entity target = (variables[0] as Collider2D).GetComponentInParent<Entity>();
         OverlapCollider[] overlapColliders = (variables[1] as OverlapCollider[]);
-
+        
         target.entityCombat.GetDamage(this, overlapColliders);
     }
 }

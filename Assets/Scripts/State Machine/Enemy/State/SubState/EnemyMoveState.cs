@@ -1,13 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Windows;
-using static Unity.Burst.Intrinsics.Arm;
 
 public class EnemyMoveState : EnemyState
 {
-    protected bool isPlayerInDetectionRange;
-
     public EnemyMoveState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
     }
@@ -22,8 +18,6 @@ public class EnemyMoveState : EnemyState
     public override void DoChecks()
     {
         base.DoChecks();
-
-        isPlayerInDetectionRange = enemy.detection.isTargetInDetectionRange();
     }
 
     public override void Enter()
@@ -46,15 +40,15 @@ public class EnemyMoveState : EnemyState
 
         if (!onStateExit)
         {
-            if (GotHit())
+            if (enemy.got[(int)GotConditions.Hit])
             {
                 stateMachine.ChangeState(enemy.lookForTargetState);
             }
-            else if (isPlayerInDetectionRange)
+            else if (isTargetInDetectionRange)
             {
                 stateMachine.ChangeState(enemy.targetInDetectionRangeState);
             }
-            else if (isDetectingLedge)
+            else if (isDetectingLedgeFront)
             {
                 stateMachine.ChangeState(enemy.idleState);
             }
@@ -71,19 +65,7 @@ public class EnemyMoveState : EnemyState
 
         if (!onStateExit)
         {
-            RigidBodyController(true);
+            RigidBodyController();
         }
-        /*if (!onStateExit)
-        {
-            if (isOnSlope)
-            {
-                workSpace.Set(enemy.detection.slopePerpNormal.x * facingDirection, enemy.detection.slopePerpNormal.y * facingDirection);
-                enemy.movement.SetVelocity(workSpace * enemyData.moveSpeed);
-            }
-            else
-            {
-                enemy.movement.SetVelocityX(enemyData.moveSpeed * facingDirection);
-            }
-        }*/
     }
 }

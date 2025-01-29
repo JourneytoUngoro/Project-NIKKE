@@ -21,14 +21,14 @@ public abstract class TriggerInteractBase : MonoBehaviour, IInteractable
                     break;
 
                 case InteractionType.Door:
-                    if (Manager.Instance.gameManager.player.inputHandler.doorInteractionInput)
+                    if (Manager.Instance.gameManager.player.inputHandler.doorInteractionInputPressed)
                     {
                         Interact();
                     }
                     break;
 
                 case InteractionType.Object:
-                    if (Manager.Instance.gameManager.player.inputHandler.objectInteractionInput)
+                    if (Manager.Instance.gameManager.player.inputHandler.objectInteractionInputPressed)
                     {
                         Interact();
                     }

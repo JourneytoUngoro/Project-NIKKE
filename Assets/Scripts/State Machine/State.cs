@@ -25,8 +25,6 @@ public class State
     protected Vector2 workSpace;
 
     protected float epsilon = 0.001f;
-
-    public bool gotHit;
     #endregion
 
     public float startTime {  get; protected set; }
@@ -44,7 +42,7 @@ public class State
 
     public virtual void AnimationActionTrigger(int index)
     {
-
+        isAnimationActionTriggered = true;
     }
 
     public virtual void DoChecks()

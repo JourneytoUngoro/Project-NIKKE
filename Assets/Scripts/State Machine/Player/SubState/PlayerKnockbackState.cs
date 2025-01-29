@@ -6,18 +6,14 @@ public class PlayerKnockbackState : PlayerState
 {
     private bool shouldTransitToStunnedState;
 
-    private bool canTransit;
-
     private bool isGrounded;
 
-    private Vector2 knockbackVelocity;
-
-    private Timer allowTransitTimer;
+    public Timer knockbackTimer { get; private set; }
 
     public PlayerKnockbackState(Player player, string animBoolName) : base(player, animBoolName)
     {
-        allowTransitTimer = new Timer(0.0f);
-        allowTransitTimer.timerAction += () => { canTransit = true; };
+        knockbackTimer = new Timer(0.0f);
+        knockbackTimer.timerAction += () => { canTransit = true; };
         // player.stats.posture.OnCurrentValueMax += () => { shouldTransitToStunnedState = true; };
     }
 
@@ -33,22 +29,24 @@ public class PlayerKnockbackState : PlayerState
         base.Enter();
 
         canTransit = false;
-        allowTransitTimer.StartSingleUseTimer();
+        knockbackTimer.StartSingleUseTimer();
         player.rigidBody.gravityScale = 9.5f;
         player.movement.SetVelocityMultiplier(Vector2.one);
-        // player.movement.SetVelocity(knockbackVelocity);
+        player.stateMachineToAnimator.state = this;
     }
 
     public override void Exit()
     {
         base.Exit();
+
+        shouldTransitToStunnedState = false;
     }
 
     public override void LogicUpdate()
     {
         base.LogicUpdate();
 
-        allowTransitTimer.Tick();
+        knockbackTimer.Tick();
     }
 
     public override void PhysicsUpdate()
@@ -66,11 +64,11 @@ public class PlayerKnockbackState : PlayerState
                 }
                 else
                 {
-                    if (escapeInput && player.escapeState.IsEscapeAvail())
+                    if (escapeInputPressed && player.escapeState.IsEscapeAvail())
                     {
                         stateMachine.ChangeState(player.escapeState);
                     }
-                    else if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
+                    else if (dodgeInputPressed && player.dodgeState.IsDodgeAvail())
                     {
                         stateMachine.ChangeState(player.dodgeState);
                     }
@@ -97,12 +95,9 @@ public class PlayerKnockbackState : PlayerState
 
     public void SetKnockback(float duration)//, Vector2 knockbackVelocity)
     {
-        allowTransitTimer.ChangeDuration(duration);
+        knockbackTimer.ChangeDuration(duration);
         // this.knockbackVelocity = knockbackVelocity;
     }
 
-    public void ShouldTransitToStunnedState()
-    {
-        shouldTransitToStunnedState = true;
-    }
+    public void ShouldTransitToStunnedState() => shouldTransitToStunnedState = true;
 }

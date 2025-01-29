@@ -44,8 +44,6 @@ public class PlayerMoveState : PlayerGroundedState
     {
         base.Exit();
 
-        player.movement.SetVelocityMultiplier(Vector2.one);
-        
         if (stateMachine.nextState != player.idleState)
         {
             prevInputX = 0;
@@ -94,6 +92,7 @@ public class PlayerMoveState : PlayerGroundedState
             if (isDashing)
             {
                 player.movement.SetVelocityX(playerData.dashSpeed * inputX, true);
+                // 얕은 경사면에서 평면으로 올라갈때 걸리는 현상
             }
             else
             {
