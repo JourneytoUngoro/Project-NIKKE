@@ -25,7 +25,7 @@ public class PlayerMeleeAttackState : PlayerAttackState
         base.AnimationStartTrigger(index);
 
         player.inputHandler.InactiveAttackInput();
-        player.combat.DoMeleeAttack();
+        player.combat.DoAttack(player.combat.meleeAttacks[currentAttackStroke]);
         attackComboResetTimer.StartSingleUseTimer();
         // player.animator.SetBool("connectToNextAttackStroke", false);
     }
@@ -106,10 +106,7 @@ public class PlayerMeleeAttackState : PlayerAttackState
 
     private void RangedAttack()
     {
-        if (currentAmmo > 0)
-        {
-            player.combat.DoRangedAttack();
-        }
+        
     }
 
     public void DecreaseAmmo() => currentAmmo -= 1;

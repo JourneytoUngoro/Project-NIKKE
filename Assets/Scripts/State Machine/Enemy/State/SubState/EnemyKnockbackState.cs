@@ -11,10 +11,12 @@ public class EnemyKnockbackState : EnemyState
 
     protected Vector2 knockbackVelocity;
 
-    protected float elapsedTime;
+    public Timer knockbackTimer { get; private set; }
 
     public EnemyKnockbackState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
+        knockbackTimer = new Timer(0.0f);
+        knockbackTimer.timerAction += () => { canTransit = true; };
     }
 
     public override void AnimationFinishTrigger(int index)
@@ -28,10 +30,11 @@ public class EnemyKnockbackState : EnemyState
     {
         base.Enter();
 
-        elapsedTime = 0.0f;
         canTransit = false;
+        enemy.rigidBody.gravityScale = 9.5f;
+        enemy.movement.SetVelocityMultiplier(Vector2.one);
+        knockbackTimer.StartSingleUseTimer();
         enemy.stateMachineToAnimator.state = this;
-        enemy.movement.SetVelocityXChangeOverTime(knockbackVelocity.x, 0.3f, Ease.InCubic, true);
     }
 
     public override void Exit()
@@ -53,11 +56,17 @@ public class EnemyKnockbackState : EnemyState
                 {
                     stateMachine.ChangeState(enemy.stunnedState);
                 }
-                else
+                else if (isTargetInAggroRange)
                 {
                     stateMachine.ChangeState(enemy.targetInAggroRangeState);
                 }
+                else
+                {
+                    stateMachine.ChangeState(enemy.lookForTargetState);
+                }
             }
+
+            knockbackTimer.Tick();
         }
     }
 

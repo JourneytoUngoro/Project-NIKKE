@@ -72,7 +72,7 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
             }
             else
             {
-                loadingBarText.text = "Game Tips | " + RandomFunction.GetRandom<List<string>, string>(loadingText);
+                loadingBarText.text = "Game Tips | " + loadingText.GetRandom();
                 isFadingOut = false;
                 elapsedTime = 0.0f;
             }
@@ -112,7 +112,6 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         loadingBar.gameObject.SetActive(false);
         fadeInOutImage.color = currentColor;
         isFadingIn = true;
-        Debug.Log("isFadingIn: " + isFadingIn);
     }
 
     // called on scene transition
@@ -252,10 +251,9 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     // below function loads the scene that is adjacent to target scene
     private void LoadScene()
     {
-        Debug.Log($"Adjacent Scene of {currentActiveScene.SceneName}");
+        Debug.Log($"Adjacent Scenes of {currentActiveScene.SceneName} are as below:");
         foreach (SceneField sceneField in adjacentScene[currentActiveScene])
         {
-            Debug.Log(sceneField.SceneName);
             if (!IsLoadingScene(sceneField.SceneName))
             {
                 Debug.Log($"Load scene: {sceneField.SceneName}");
@@ -328,16 +326,13 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
     private void ChangePosition(SceneConnectorInteraction.Direction direction)
     {
         if (direction.Equals(SceneConnectorInteraction.Direction.None)) return;
-        Debug.Log("Target direction: " + direction);
         Vector2 targetPosition = Manager.Instance.gameManager.player.transform.position;
 
         switch (direction)
         {
             case SceneConnectorInteraction.Direction.Up:
-                Debug.Log("Target correction: " + Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.up);
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.up; break;
             case SceneConnectorInteraction.Direction.Down:
-                Debug.Log("Target correction: " + Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.down);
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.y * Vector2.down; break;
             case SceneConnectorInteraction.Direction.Left:
                 targetPosition += Manager.Instance.gameManager.player.entityCollider.bounds.size.x * Vector2.left; break;
@@ -379,6 +374,11 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
         {
             SceneManager.SetActiveScene(SceneManager.GetSceneByName(currentActiveScene.SceneName));
         }
+    }
+
+    public bool IsSceneLoading()
+    {
+        return isFadingIn || isFadingOut;
     }
 
     public async void LoadingBar(string loadingScene)

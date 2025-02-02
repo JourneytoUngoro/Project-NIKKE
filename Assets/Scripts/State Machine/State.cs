@@ -42,7 +42,7 @@ public class State
 
     public virtual void AnimationActionTrigger(int index)
     {
-
+        isAnimationActionTriggered = true;
     }
 
     public virtual void DoChecks()

@@ -1,148 +1,116 @@
+using DG.Tweening;
+using DG.Tweening.Core.Easing;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyCombat : Combat
 {
-    [field: SerializeField] public Transform midRAttackTransform { get; private set; }
-    [SerializeField] private float midRAttackRadius;
-    [SerializeField] private Vector2 midRAttackSize;
+    [SerializeField] protected LayerMask whatIsTarget;
+    private Enemy enemy;
 
-    public bool isTargetInMeleeAttackRange()
+    protected override void Awake()
     {
-        if (meleeAttackRadius > epsilon)
-        {
-            return Physics2D.OverlapCircle(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
-        }
-        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
-        {
-            return Physics2D.OverlapBox(meleeAttackTransform.position, meleeAttackSize, 0.0f, whatIsDamageable);
-        }
-        else return false;
+        base.Awake();
+
+        enemy = entity as Enemy;
     }
 
-    public bool isTargetInMidRAttackRange()
+    public bool IsTargetInRangeOf(CombatAbilityWithTransforms attack, bool chargeAttack = false)
     {
-        if (midRAttackRadius > epsilon)
-        {
-            return Physics2D.OverlapCircle(midRAttackTransform.position, midRAttackRadius, whatIsDamageable);
-        }
-        else if (midRAttackSize.x > epsilon && midRAttackSize.y > epsilon)
-        {
-            return Physics2D.OverlapBox(midRAttackTransform.position, midRAttackSize, 0.0f, whatIsDamageable);
-        }
-        else return false;
-    }
+        if (enemy.detection.currentTarget == null) return false;
 
-    public bool isTargetInRangedAttackRange()
-    {
-        if (rangedAttackRadius > epsilon)
+        if (chargeAttack)
         {
-            return Physics2D.OverlapCircle(rangedAttackTransform.position, rangedAttackRadius, whatIsDamageable);
-        }
-        else if (rangedAttackSize.x > epsilon && rangedAttackSize.y > epsilon)
-        {
-            return Physics2D.OverlapBox(rangedAttackTransform.position, rangedAttackSize, 0.0f, whatIsDamageable);
-        }
-        else return false;
-    }
+            ReboundComponent chargeComponent = attack.combatAbilityData.combatAbilityComponents.FirstOrDefault(combatAbilityComponent => combatAbilityComponent.GetType().Equals(typeof(ReboundComponent))) as ReboundComponent;
 
-    public override void DoMeleeAttack()
-    {
-        Collider2D[] damageTargets = { };
-
-        if (meleeAttackRadius > epsilon)
-        {
-            damageTargets = Physics2D.OverlapCircleAll(meleeAttackTransform.position, meleeAttackRadius, whatIsDamageable);
-        }
-        else if (meleeAttackSize.x > epsilon && meleeAttackSize.y > epsilon)
-        {
-            damageTargets = Physics2D.OverlapBoxAll(meleeAttackTransform.position, meleeAttackSize, 0.0f, whatIsDamageable);
-        }
-
-        foreach(Collider2D damageTarget in damageTargets)
-        {
-            if (!damagedTargets.Contains(damageTarget))
+            if (chargeComponent != null)
             {
-                enemy.enemyData.meleeAttackInfo.attackSubject = enemy.gameObject;
-                Debug.Log("Do damage to: " + damageTarget.gameObject.name);
-                damageTarget.gameObject.GetComponentInChildren<Combat>().GetDamage(enemy.enemyData.meleeAttackInfo);
-                damagedTargets.Add(damageTarget);
-            }
-        }
-    }
-
-    public override void GetDamage(AttackInfo attackInfo)
-    {
-        base.GetDamage(attackInfo);
-
-        PlayerAttackInfo playerAttackInfo = attackInfo as PlayerAttackInfo;
-
-        enemy.enemyStateMachine.currentState.gotHit = true;
-        enemy.stats.health.DecreaseCurrentValue(playerAttackInfo.healthDamage);
-        enemy.stats.posture.IncreaseCurrentValue(playerAttackInfo.postureDamage);
-    }
-
-    public override void GetPostureDamage(float postureDamage)
-    {
-        base.GetPostureDamage(postureDamage);
-
-        enemy.enemyStateMachine.currentState.gotHit = true;
-    }
-
-    public void FireProjectile(string objectName, Vector2 projectileFirePosition, Vector2? targetPosition, float projectileSpeed, float projectileGravityScale)
-    {
-        GameObject projectile = Manager.Instance.objectPoolingManager.GetGameObject(objectName);
-        projectile.GetComponent<Explosion>().SetAttackSubject(gameObject);
-        Rigidbody2D projectileRigidbody = projectile.GetComponent<Rigidbody2D>();
-
-        if (projectile == null)
-        {
-            Debug.LogError($"Can't find projectile name: {objectName}");
-            return;
-        }
-        
-        if (targetPosition.HasValue)
-        {
-            Vector2? projectileAngle = CalculateProjectileAngle(projectileFirePosition, targetPosition.Value, projectileSpeed, projectileGravityScale);
-
-            if (projectileAngle.HasValue)
-            {
-                projectileRigidbody.velocity = projectileAngle.Value * projectileSpeed;
+                if (Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) < TrapezoidalRuleIntegral(chargeComponent.onGroundReboundTime, chargeComponent.onGroundReboundVelocity, chargeComponent.onGroundReboundEaseFunction))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                Manager.Instance.objectPoolingManager.ReleaseGameObject(projectile);
+                return false;
             }
         }
         else
         {
-            projectile.transform.position = projectileFirePosition;
-            projectile.transform.rotation = enemy.movement.facingDirection == 1 ? Quaternion.Euler(0.0f, 0.0f, 0.0f) : Quaternion.Euler(0.0f, -180.0f, 0.0f);
-            if (projectileRigidbody != null)
+            bool targetInRange = false;
+
+            foreach (OverlapCollider overlapCollider in attack.overlapColliders)
             {
-                projectileRigidbody.velocity = projectile.transform.right * projectileSpeed;
-                projectileRigidbody.gravityScale = projectileGravityScale;
+                if (overlapCollider.overlapBox)
+                {
+                    targetInRange = Physics2D.OverlapBoxAll(overlapCollider.centerTransform.position, overlapCollider.boxSize, overlapCollider.boxRotation, whatIsDamageable).Contains(enemy.detection.currentTarget.entityCollider);
+                }
+                else if (overlapCollider.overlapCircle)
+                {
+                    targetInRange = Physics2D.OverlapCircleAll(overlapCollider.centerTransform.position, overlapCollider.circleRadius, whatIsDamageable).Contains(enemy.detection.currentTarget.entityCollider);
+                }
+
+                if (targetInRange) break;
             }
+
+            return targetInRange;
         }
     }
 
-    protected override void OnDrawGizmos()
+    float TrapezoidalRuleIntegral(float chargeTime, float chargeSpeed, Ease easeFunction)
     {
-        base.OnDrawGizmos();
+        float totalArea = 0f;
+        float step = chargeTime / 100;
 
-        Gizmos.color = Color.red;
+        if (easeFunction != Ease.Unset)
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                float value1 = DOVirtual.EasedValue(0, chargeSpeed, i * step, easeFunction);
+                float value2 = DOVirtual.EasedValue(0, chargeSpeed, (i + 1) * step, easeFunction);
 
-        if (midRAttackRadius > epsilon)
-        {
-            Gizmos.DrawWireSphere(midRAttackTransform.position, midRAttackRadius);
+                totalArea += ((value1 + value2) / 2.0f) * step;
+            }
         }
-        else if (midRAttackSize.x > epsilon && midRAttackSize.y > epsilon)
+        else
         {
-            Gizmos.DrawWireCube(midRAttackTransform.position, midRAttackSize);
+            totalArea = chargeTime * chargeSpeed;
         }
+
+        return totalArea;
+    }
+
+    protected override void ChangeToKnockbackState(KnockbackComponent knockbackComponent, bool isGrounded)
+    {
+        if (knockbackComponent.isKnockbackDifferentWhenAerial)
+        {
+            if (!isGrounded)
+            {
+                enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTimeWhenAerial);
+            }
+            else
+            {
+                enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTime);
+            }
+        }
+        else
+        {
+            enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTime);
+        }
+
+        enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
+    }
+
+    protected override void ChangeToKnockbackState(float knockbackTime)
+    {
+        enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackTime);
+        enemy.enemyStateMachine.ChangeState(enemy.knockbackState);
     }
 }

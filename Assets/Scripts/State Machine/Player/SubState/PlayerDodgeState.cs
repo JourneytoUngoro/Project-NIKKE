@@ -70,7 +70,7 @@ public class PlayerDodgeState : PlayerAbilityState
         dodgeAvail = false;
         player.inputHandler.InactiveDodgeInput();
         player.stateMachineToAnimator.state = this;
-        player.gameObject.layer = LayerMask.NameToLayer("PlayerDodge");
+        player.gameObject.layer = LayerMask.NameToLayer("DodgeLayer");
         doBackstep = inputX == 0;
         player.animator.SetBool("backstep", doBackstep);
         
@@ -90,7 +90,6 @@ public class PlayerDodgeState : PlayerAbilityState
 
         dodgeCoolDownTimer.StartSingleUseTimer();
         player.gameObject.layer = LayerMask.NameToLayer("Player");
-        player.movement.SetVelocityMultiplier(Vector2.one);
         player.animator.SetBool("backstep", false);
     }
 

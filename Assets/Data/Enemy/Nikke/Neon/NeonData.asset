@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b35458bed393b4aacaeadf4e8c5903, type: 3}
+  m_Name: NeonData
+  m_EditorClassIdentifier: 
+  baseHealth: 100
+  healthIncreasePerLevel: 50
+  basePostureHealth: 100
+  postureIncreasePerLevel: 50
+  postureRecoveryRate: 10
+  canSleep: 0
+  canAlert: 0
+  canFallDownLedge: 0
+  canSmartPathFind: 0
+  minWaitTime: 3
+  maxWaitTime: 5
+  adequateDistance: 15
+  haltPossibility: 0
+  approachPossibility: 0.5
+  retreatPossibility: 0.5
+  shieldCoonDownTime: 0.5
+  minMovementOptionMaintainTime: 3
+  maxMovementOptionMaintainTime: 5
+  totalTurnAmount: 4
+  timeDelayforEachTurn: 1.5
+  dazedTime: 2
+  stunnedTime: 4
+  stunnedKnockbackSpeed: 5
+  nextWaypointDistance: 2
+  pathUpdatePeriods: 0.5
+  jumpHeightRequirement: 1
+  maxMovementDistance: 100
+  jumpSpeed: 85
+  canvasDisableTime: 5
+  moveSpeed: 25
+  moveTime: 0.5
+  moveEaseFunction: 6
+  meleeAttackCoolDown: 2
+  rangedAttackCoolDown: 1000
+  chargeAttackCoolDown: 1000

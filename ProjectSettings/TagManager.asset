@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - SavePoint
+  - OneWayPlatform
   layers:
   - Default
   - TransparentFX
@@ -14,9 +15,14 @@ TagManager:
   - Water
   - UI
   - Ground
-  - PlayerDodge
-  - Damageable
-  - PlayerParry
+  - DodgeLayer
+  - Nikke
+  - ParryLayer
+  - ShieldLayer
+  - Rapture
+  - InvincibleLayer
+  - ImmediateProjectile
+  - DelayedProjectile
   - 
   - 
   - 
@@ -33,12 +39,7 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Effect
   m_SortingLayers:
   - name: Default
     uniqueID: 0
@@ -57,6 +58,9 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 806041217
+    locked: 0
+  - name: Projectile
+    uniqueID: 3278790417
     locked: 0
   - name: AttackEffect
     uniqueID: 269034865

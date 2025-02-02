@@ -11,7 +11,7 @@ public class Timer
 {
     public event Action timerAction;
 
-    private float duration;
+    public float duration { get; private set; }
     private float startTime;
     private float timeOffset;
 
@@ -30,7 +30,11 @@ public class Timer
         resetStartTime = true;
     }
 
-    public void Tick(bool condition = true)
+    /// <summary>
+    /// A Default Timer that is affected by Time.timeScale. Only active when condition is fit. If resetTime parameter is true, it will continuously reset startTime until the condition is fit.
+    /// </summary>
+    /// <param name="condition"></param>
+    public void Tick(bool condition = true, bool resetTime = false)
     {
         startTime += Time.deltaTime * (1.0f - Time.timeScale);
 
@@ -69,17 +73,15 @@ public class Timer
                     }
                 }
             }
+        }
+        else if (resetTime)
+        {
+            startTime = Time.time;
         }
     }
 
-    /// <summary>
-    /// Used when you need to renew the startTime every time the condition is fit
-    /// </summary>
-    /// <param name="condition"></param>
-    public void TickResetTime(bool condition)
+    public void TickUnscaled(bool condition, bool resetTime)
     {
-        startTime += Time.deltaTime * (1.0f - Time.timeScale);
-
         if (condition)
         {
             if (timerActive)
@@ -87,7 +89,7 @@ public class Timer
                 if (Time.time + timeOffset > startTime + duration)
                 {
                     timerAction?.Invoke();
-                    
+
                     if (isSingleUse)
                     {
                         StopTimer();
@@ -116,7 +118,7 @@ public class Timer
                 }
             }
         }
-        else
+        else if (resetTime)
         {
             startTime = Time.time;
         }

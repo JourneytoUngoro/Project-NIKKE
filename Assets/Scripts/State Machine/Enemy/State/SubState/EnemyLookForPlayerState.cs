@@ -27,10 +27,11 @@ public class EnemyLookForPlayerState : EnemyState
     {
         base.Enter();
 
-        if ((enemy.detection.target != null && enemy.detection.target.transform.rotation.y != enemy.transform.rotation.y))
+        /*if ((enemy.detection.currentTarget != null && enemy.detection.currentTarget.transform.rotation.y != enemy.transform.rotation.y))
         {
             enemy.movement.Flip();
-        }
+        }*/
+        TurnBack();
         turnTimer.StartMultiUseTimer(enemyData.totalTurnAmount);
     }
 

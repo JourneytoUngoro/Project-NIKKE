@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
+
+public enum GotConditions { Hit, HealthDamage, PostureDamage, Knockback, Parried, Shielded, wasParried }
 
 public class Entity : MonoBehaviour
 {
@@ -21,6 +23,12 @@ public class Entity : MonoBehaviour
     public Stats entityStats { get; protected set; }
     #endregion
 
+    #region Other Variables
+    public int entityLevel { get; protected set; }
+    public bool isDead { get; protected set; }
+    public bool[] got { get; protected set; }
+    #endregion
+
     protected virtual void Awake()
     {
         animator = GetComponent<Animator>();
@@ -30,6 +38,7 @@ public class Entity : MonoBehaviour
         stateMachineToAnimator = GetComponent<StateMachineToAnimator>();
 
         core = GetComponentInChildren<Core>();
+        got = new bool[Enum.GetValues(typeof(GotConditions)).Length];
     }
 
     protected virtual void Start()
@@ -38,6 +47,11 @@ public class Entity : MonoBehaviour
         entityMovement = core.GetCoreComponent<Movement>();
         entityCombat = core.GetCoreComponent<Combat>();
         entityStats = core.GetCoreComponent<Stats>();
+    }
+
+    protected virtual void LateUpdate()
+    {
+        Array.Fill(got, false);
     }
 
     public void UseAfterImage(Color color)

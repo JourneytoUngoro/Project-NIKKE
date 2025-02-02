@@ -11,16 +11,15 @@ public class Enemy : Entity
     public EnemyIdleState idleState { get; protected set; }
     public EnemyMoveState moveState { get; protected set; }
     public EnemySleepState sleepState { get; protected set; }
+    public EnemyTeleportState teleportState { get; protected set; }
     public EnemyTargetInDetectionRangeState targetInDetectionRangeState { get; protected set; }
     public EnemyTargetInAggroRangeState targetInAggroRangeState { get; protected set; }
     public EnemyLookForPlayerState lookForTargetState { get; protected set; }
-    public EnemyAttackState meleeAttackState { get; protected set; }
-    public EnemyAttackState midRAttackState { get; protected set; }
-    public EnemyAttackState rangedAttackState { get; protected set; }
-    public EnemyTeleportState teleportState { get; protected set; }
+    public EnemyShieldParryState shieldParryState { get; protected set; }
     public EnemyStunnedState stunnedState { get; protected set; }
     public EnemyDazedState dazedState { get; protected set; }
     public EnemyKnockbackState knockbackState { get; protected set; }
+    public List<EnemyAttackState> attackStates { get; protected set; }
     [field: SerializeField] public EnemyData enemyData { get; private set; }
     #endregion
 
@@ -33,9 +32,7 @@ public class Enemy : Entity
     #endregion
 
     #region Other Variables
-    [field: SerializeField] public Transform[] projectileGeneratePosition;
-
-    protected bool isDead;
+    
     #endregion
 
     protected override void Awake()
@@ -57,10 +54,11 @@ public class Enemy : Entity
         idleState = new EnemyIdleState(this, "idle");
         sleepState = new EnemySleepState(this, "sleep");
         moveState = new EnemyMoveState(this, "move");
+        teleportState = new EnemyTeleportState(this, "teleport");
         targetInDetectionRangeState = new EnemyTargetInDetectionRangeState(this, "alert");
         targetInAggroRangeState = new EnemyTargetInAggroRangeState(this, "move");
         lookForTargetState = new EnemyLookForPlayerState(this, "idle");
-        teleportState = new EnemyTeleportState(this, "teleport");
+        shieldParryState = new EnemyShieldParryState(this, "shield");
         stunnedState = new EnemyStunnedState(this, "stunned");
         dazedState = new EnemyDazedState(this, "idle");
         knockbackState = new EnemyKnockbackState(this, "knockback");

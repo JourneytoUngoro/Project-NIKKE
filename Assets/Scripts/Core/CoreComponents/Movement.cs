@@ -28,7 +28,7 @@ public class Movement : CoreComponent
 
     private void Start()
     {
-        facingDirection = transform.rotation.y == 0 ? 1 : -1;
+        facingDirection = entity.transform.rotation.y == 0 ? 1 : -1;
     }
 
     private void FixedUpdate()
@@ -94,11 +94,18 @@ public class Movement : CoreComponent
     public void AddVelocityX(float velocity)
     {
         rigidBody.velocity = new Vector2(rigidBody.velocity.x + velocity, rigidBody.velocity.y);
+        synchronizeValues?.Invoke();
+    }
+
+    public void AddVelocityXChangeByTime(float velocity, float moveTime, Ease easeFunction)
+    {
+
     }
 
     public void MultiplyVelocity(float multiplier)
     {
         rigidBody.velocity = multiplier * rigidBody.velocity;
+        synchronizeValues?.Invoke();
     }
 
     public void SetVelocityWithDirection(Vector2 angleVector, int direction, float speed)
@@ -113,24 +120,23 @@ public class Movement : CoreComponent
         workSpace = Vector2.zero;
         rigidBody.velocity = workSpace;
         synchronizeValues?.Invoke();
-        // player.playerStateMachine.currentState.SetMovementVariables();
     }
 
     public void SetPositionX(float xPos)
     {
         workSpace.Set(xPos, transform.position.y);
-        transform.parent.position = workSpace;
+        entity.transform.position = workSpace;
     }
 
     public void SetPositionY(float yPos)
     {
         workSpace.Set(transform.position.x, yPos);
-        transform.parent.position = workSpace;
+        entity.transform.position = workSpace;
     }
 
     public void SetPosition(Vector2 position)
     {
-        transform.parent.position = position;
+        entity.transform.position = position;
     }
 
     public void MovePosition(Vector2 angleVector, float direction, float distance)
@@ -150,7 +156,7 @@ public class Movement : CoreComponent
     public void Flip()
     {
         facingDirection *= -1;
-        transform.parent.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
+        entity.transform.Rotate(new Vector3(0.0f, 180.0f, 0.0f));
         synchronizeValues?.Invoke();
     }
 
@@ -181,8 +187,8 @@ public class Movement : CoreComponent
         {
             if (isOnSlope)
             {
-                entity.rigidBody.gravityScale = rigidBody.velocity.magnitude > epsilon ? 9.5f : 0.0f;
-
+                rigidBody.gravityScale = rigidBody.velocity.magnitude > epsilon ? 9.5f : 0.0f;
+                
                 if (isMovingForward)
                 {
                     if (entity.entityDetection.slopePerpNormal.y * facingDirection > 0)
@@ -209,7 +215,7 @@ public class Movement : CoreComponent
             else
             {
                 SetVelocityMultiplier(Vector2.one);
-                player.rigidBody.gravityScale = 9.5f;
+                entity.rigidBody.gravityScale = 9.5f;
 
                 if (limitYVelocity)
                 {
@@ -219,11 +225,11 @@ public class Movement : CoreComponent
         }
         else
         {
-            if (entity.entityDetection.isOnSlopeBack())
+            if (entity.entityDetection.isOnSlopeVertical(CheckPositionHorizontal.Back))
             {
                 if (limitYVelocity)
                 {
-                    SetVelocityLimitY(0.0f);
+                    SetVelocityLimitY(0.0f); // 튀어오르는 현상 방지
                 }
             }
 
@@ -232,18 +238,28 @@ public class Movement : CoreComponent
         }
     }
 
-    public void SetVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    public void SetVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown, bool isDetectingLedge = false)
+    {
+        if (moveTime == 0.0f)
+        {
+            SetVelocityX(velocity, true);
+        }
+        else
+        {
+            if (velocityChangeOverTimeCoroutine != null)
+            {
+                StopCoroutine(velocityChangeOverTimeCoroutine);
+            }
+            velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown, isDetectingLedge));
+        }
+    }
+
+    public void StopVelocityXChangeOverTime()
     {
         if (velocityChangeOverTimeCoroutine != null)
         {
             StopCoroutine(velocityChangeOverTimeCoroutine);
         }
-        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown));
-    }
-
-    public void StopVelocityXChangeOverTime()
-    {
-        StopCoroutine(velocityChangeOverTimeCoroutine);
     }
 
     private void SetWorkSpace(float x, float y)
@@ -253,17 +269,23 @@ public class Movement : CoreComponent
         workSpace *= velocityMultiplier;
     }
 
-    private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown)
+    private IEnumerator VelocityChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown, bool isDetectingLedge)
     {
         float coroutineElapsedTime = 0.0f;
         WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
 
         while (true)
         {
-            float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(1.0f - DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
+            float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(DOVirtual.EasedValue(1.0f, 0.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
 
-            SetVelocityX(velocityMultiplierOverTime * velocity, true);
-
+            if (isGrounded && isDetectingLedge)
+            {
+                SetVelocityX(0.0f);
+            }
+            else
+            {
+                SetVelocityX(velocityMultiplierOverTime * velocity, true);
+            }
 
             if (coroutineElapsedTime > moveTime)
             {

@@ -46,7 +46,7 @@ public class EnemySleepState : EnemyState
         {
             if (isSleeping)
             {
-                if (isPlayerInDetectionRange || GotHit())
+                if (isPlayerInDetectionRange || enemy.got[(int)GotConditions.Hit])
                 {
                     WakeUp();
                 }

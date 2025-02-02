@@ -15,23 +15,28 @@ public class PlayerState : State
     protected int inputX;
     protected int inputY;
 
-    protected bool jumpInput;
-    protected bool jumpInputActive;
+    protected bool jumpInput { get; set; }
+    protected bool jumpInputActive { get; set; }
 
     protected bool dodgeInput;
-    protected bool dodgeInputActive;
+    protected bool dodgeInputPressed;
 
     protected bool attackInput;
     protected bool attackInputActive;
+    protected bool rangedAttackInputPressed;
+    protected bool rangedAttackInputActive;
 
-    protected bool escapeInput;
+    protected bool escapeInputPressed;
 
-    protected bool dashAttackInput;
+    protected bool skillAttackInput;
 
     protected bool shieldParryInput;
-    protected bool shieldParryInputActive;
 
-    protected bool cureInput;
+    protected bool cureInputPressed;
+    #endregion
+
+    #region Other Variables
+    protected bool canTransit;
     #endregion
 
     public PlayerState(Player player, string animBoolName)
@@ -66,6 +71,7 @@ public class PlayerState : State
     {
         player.animator.SetBool(animBoolName, false);
         onStateExit = true;
+        player.movement.SetVelocityMultiplier(Vector2.one);
 
         if (stateMachine.nextState != player.moveState && stateMachine.nextState != player.idleState && stateMachine.nextState != player.jumpState && stateMachine.nextState != player.inAirState)
         {
@@ -85,21 +91,26 @@ public class PlayerState : State
         SetMovementVariables();
     }
 
+    public virtual void LateLogicUpdate()
+    {
+        
+    }
+
     protected void SetInputVariables()
     {
         inputX = player.inputHandler.normInputX;
         inputY = player.inputHandler.normInputY;
         jumpInput = player.inputHandler.jumpInput;
         jumpInputActive = player.inputHandler.jumpInputActive;
-        dodgeInput = player.inputHandler.dodgeInput;
-        dodgeInputActive = player.inputHandler.dodgeInputActive;
+        dodgeInputPressed = player.inputHandler.dodgeInputPressed;
         attackInput = player.inputHandler.attackInput;
         attackInputActive = player.inputHandler.attackInputActive;
-        escapeInput = player.inputHandler.escapeInput;
-        dashAttackInput = player.inputHandler.dashAttackInput;
+        rangedAttackInputPressed = player.inputHandler.rangedAttackInputPressed;
+        rangedAttackInputActive = player.inputHandler.rangedAttackInputActive;
+        escapeInputPressed = player.inputHandler.escapeInputPressed;
+        skillAttackInput = player.inputHandler.skillAttackInput;
         shieldParryInput = player.inputHandler.shieldParryInput;
-        shieldParryInputActive = player.inputHandler.shieldParryInputActive;
-        cureInput = player.inputHandler.cureInput;
+        cureInputPressed = player.inputHandler.cureInputPressed;
     }
 
     protected void SetMovementVariables()
@@ -111,12 +122,13 @@ public class PlayerState : State
 
     private void TickPublicTimers()
     {
-        afterImageTimer.Tick(player.moveState.isDashing);
+        afterImageTimer.Tick(player.moveState.isDashing, true);
         player.dodgeState.dodgeCoolDownTimer.Tick(player.detection.isGrounded());
         player.wallJumpState.preventInputXTimer.Tick();
         player.escapeState.escapeCoolDownTimer.Tick();
         player.dashAttackState.dashCoolDownTimer.Tick();
-        player.shieldParryState.shieldCoolDownTimer.Tick();
+        player.shieldParryState.shieldParryCoolDownTimer.Tick();
+        player.shieldParryState.shieldParryInAirCoolDownTimer.Tick();
         player.moveState.dashInputTimer.Tick();
         player.meleeAttackState.attackComboResetTimer.Tick();
         player.wallSlideState.wallJumpAvailTimer.Tick();

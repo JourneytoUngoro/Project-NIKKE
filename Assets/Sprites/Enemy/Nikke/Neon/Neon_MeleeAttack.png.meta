@@ -67,7 +67,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 4096
+    maxTextureSize: 8192
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -119,8 +119,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 53797082fb732ad44b42f603feb174c3
-      internalID: -5693323
+      spriteID: c3a082cd3101d5d4dbb45c2d52c24d49
+      internalID: 1478298099
       vertices: []
       indices: 
       edges: []
@@ -140,8 +140,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6ffd681458ca3204ba70a96d48adb793
-      internalID: -710043392
+      spriteID: faf0ce53fc0862145b1a46f8ed3ec72d
+      internalID: 607681835
       vertices: []
       indices: 
       edges: []
@@ -161,8 +161,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ec6cbb8d8afe81a4e97ff54d52bb0d07
-      internalID: 1875989725
+      spriteID: 5dabb4ec2babf1f41a854c5ccaf49450
+      internalID: -291884862
       vertices: []
       indices: 
       edges: []
@@ -182,8 +182,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4a7f1485433b06843a9c277827223692
-      internalID: 1520060565
+      spriteID: 8bba5892a4b7d884590d1a11511733de
+      internalID: 2126935014
       vertices: []
       indices: 
       edges: []
@@ -203,8 +203,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c2aaeb69b0c59f047a6613a54a59d9c3
-      internalID: -1236168872
+      spriteID: b2103f148f23dcc4ab0181bdbca5cce7
+      internalID: 537057878
       vertices: []
       indices: 
       edges: []
@@ -224,8 +224,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 020d80b4ebb6dd743ab512571e835972
-      internalID: -1191448448
+      spriteID: bc3b61408d18748419cf43a48d80b57b
+      internalID: -1658366934
       vertices: []
       indices: 
       edges: []
@@ -245,8 +245,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b80aa6638f7fd5e46929f7dac62bb21e
-      internalID: -2051081067
+      spriteID: 29e57187e3fb02345a398cac66ba7f9e
+      internalID: -997283445
       vertices: []
       indices: 
       edges: []
@@ -266,8 +266,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4efb9222b5e78c2438ba4ce9c83c5a7e
-      internalID: -1559466740
+      spriteID: 9256c09be3a0cb944bbfc2f303e28098
+      internalID: -1170674065
       vertices: []
       indices: 
       edges: []
@@ -287,50 +287,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: fb4c03daf5b756e4c99ab41580dd8225
-      internalID: -2144864408
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Neon_MeleeAttack_9
-      rect:
-        serializedVersion: 2
-        x: 2304
-        y: 0
-        width: 256
-        height: 256
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a51de40885650134693100724cf8ab48
-      internalID: -1998165248
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Neon_MeleeAttack_10
-      rect:
-        serializedVersion: 2
-        x: 2560
-        y: 0
-        width: 256
-        height: 256
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 5573a5269023dfc4f9274641a5456a22
-      internalID: 1273082849
+      spriteID: 8c20369353e673c4c965d3ac92a2858c
+      internalID: -1216611704
       vertices: []
       indices: 
       edges: []
@@ -346,17 +304,15 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Neon_MeleeAttack_0: -5693323
-      Neon_MeleeAttack_1: -710043392
-      Neon_MeleeAttack_10: 1273082849
-      Neon_MeleeAttack_2: 1875989725
-      Neon_MeleeAttack_3: 1520060565
-      Neon_MeleeAttack_4: -1236168872
-      Neon_MeleeAttack_5: -1191448448
-      Neon_MeleeAttack_6: -2051081067
-      Neon_MeleeAttack_7: -1559466740
-      Neon_MeleeAttack_8: -2144864408
-      Neon_MeleeAttack_9: -1998165248
+      Neon_MeleeAttack_0: 1478298099
+      Neon_MeleeAttack_1: 607681835
+      Neon_MeleeAttack_2: -291884862
+      Neon_MeleeAttack_3: 2126935014
+      Neon_MeleeAttack_4: 537057878
+      Neon_MeleeAttack_5: -1658366934
+      Neon_MeleeAttack_6: -997283445
+      Neon_MeleeAttack_7: -1170674065
+      Neon_MeleeAttack_8: -1216611704
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

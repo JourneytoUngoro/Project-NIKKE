@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerAttackState : PlayerAbilityState
 {
+    public int currentAttackStroke { get; protected set; }
+
     public PlayerAttackState(Player player, string animBoolName) : base(player, animBoolName)
     {
     }
@@ -49,7 +51,7 @@ public class PlayerAttackState : PlayerAbilityState
     {
         base.PhysicsUpdate();
 
-        if (dodgeInputActive && player.dodgeState.IsDodgeAvail())
+        if (dodgeInputPressed && player.dodgeState.IsDodgeAvail())
         {
             stateMachine.ChangeState(player.dodgeState);
         }

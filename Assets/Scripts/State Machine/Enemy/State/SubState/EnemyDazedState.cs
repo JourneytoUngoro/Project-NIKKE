@@ -9,19 +9,10 @@ public class EnemyDazedState : EnemyState
 
     private bool canTransit;
 
-    protected bool isTargetInDetectionRange;
-
     public EnemyDazedState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
         dazedTimer = new Timer(enemyData.dazedTime);
         dazedTimer.timerAction += () => { canTransit = false; };
-    }
-
-    public override void DoChecks()
-    {
-        base.DoChecks();
-
-        isTargetInDetectionRange = enemy.detection.isTargetInDetectionRange();
     }
 
     public override void Enter()
@@ -46,13 +37,16 @@ public class EnemyDazedState : EnemyState
         {
             dazedTimer.Tick();
 
-            if (isTargetInDetectionRange)
+            if (canTransit)
             {
-                stateMachine.ChangeState(enemy.targetInAggroRangeState);
-            }
-            else if (GotHit() || canTransit)
-            {
-                stateMachine.ChangeState(enemy.lookForTargetState);
+                if (isTargetInDetectionRange)
+                {
+                    stateMachine.ChangeState(enemy.targetInAggroRangeState);
+                }
+                else if (enemy.got[(int)GotConditions.Hit] || canTransit)
+                {
+                    stateMachine.ChangeState(enemy.lookForTargetState);
+                }
             }
         }
     }

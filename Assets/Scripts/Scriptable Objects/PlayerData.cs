@@ -66,7 +66,7 @@ public class PlayerData : ScriptableObject
 
     [Header("ShieldParry State")]
     public float shieldParryCoolDownTime = 1.0f;
-    public float parryTime = 0.5f;
+    public float shieldParryInAirCoolDownTime = 0.5f;
 
     [Header("Landing State")]
     public float landingTime = 1.0f;
@@ -74,10 +74,6 @@ public class PlayerData : ScriptableObject
     [Header("Attack State")]
     public int maxAmmo = 40;
     public float rangedAttackPeriod = 0.1f;
-    public AttackInfo playerMeleeAttackInfo;
-    public AttackInfo playerRangedAttackInfo;
-    public AttackInfo playerJumpAttackInfo;
-    public AttackInfo playerUltimateAttackInfo;
-    public AttackInfo playerEscapeAttackInfo;
+    public CombatAbility meleeAttackData;
     public float attackStrokeResetTime = 1.5f;
 }

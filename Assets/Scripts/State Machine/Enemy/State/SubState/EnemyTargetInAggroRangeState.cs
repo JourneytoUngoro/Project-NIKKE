@@ -6,10 +6,6 @@ using UnityEngine;
 public class EnemyTargetInAggroRangeState : EnemyState
 {
     protected Timer pathUpdateTimer;
-    protected bool isPlayerInAggroRange;
-    protected bool isPlayerInMeleeAttackRange;
-    protected bool isPlayerInMidRAttackRange;
-    protected bool isPlayerInRangedAttackRange;
     protected bool shouldJump;
 
     protected int currentWaypoint;
@@ -21,7 +17,7 @@ public class EnemyTargetInAggroRangeState : EnemyState
     public EnemyTargetInAggroRangeState(Enemy enemy, string animBoolName) : base(enemy, animBoolName)
     {
         pathUpdateTimer = new Timer(enemyData.pathUpdatePeriods);
-        pathUpdateTimer.timerAction += UpdatePath;
+        // pathUpdateTimer.timerAction += UpdatePath;
     }
 
     public override void DoChecks()
@@ -29,10 +25,6 @@ public class EnemyTargetInAggroRangeState : EnemyState
         base.DoChecks();
 
         shouldJump = enemy.detection.ShouldJump();
-        isPlayerInAggroRange = enemy.detection.isPlayerInAggroRange();
-        isPlayerInMeleeAttackRange = enemy.combat.isTargetInMeleeAttackRange();
-        isPlayerInMidRAttackRange = enemy.combat.isTargetInMidRAttackRange();
-        isPlayerInRangedAttackRange = enemy.combat.isTargetInRangedAttackRange();
     }
 
     public override void Enter()
@@ -65,43 +57,31 @@ public class EnemyTargetInAggroRangeState : EnemyState
 
             if (isGrounded)
             {
-                if (!isPlayerInAggroRange)
+                if (!isTargetInAggroRange)
                 {
-                    stateMachine.ChangeState(enemy.lookForTargetState);
+                    if (enemy.movement.facingDirection * enemy.detection.currentTargetLastVelocity.x < 0)
+                    {
+                        stateMachine.ChangeState(enemy.lookForTargetState);
+                    }
+                    else
+                    {
+                        stateMachine.ChangeState(enemy.idleState);
+                    }
                 }
-                else if (enemyData.canMeleeAttack && isPlayerInMeleeAttackRange && enemy.meleeAttackState.canAttack)
+                else
                 {
-                    stateMachine.ChangeState(enemy.meleeAttackState);
-                }
-                else if (enemyData.canMidRAttack && isPlayerInMidRAttackRange && enemy.midRAttackState.canAttack)
-                {
-                    stateMachine.ChangeState(enemy.midRAttackState);
-                }
-                else if (enemyData.canRangedAttack && isPlayerInRangedAttackRange && enemy.rangedAttackState.canAttack)
-                {
-                    stateMachine.ChangeState(enemy.rangedAttackState);
-                }
-                else if (isDetectingLedge && !enemyData.canFallDownLedge)
-                {
-                    stateMachine.ChangeState(enemy.idleState);
+                    if (isDetectingLedgeFront && !enemyData.canFallDownLedge)
+                    {
+                        stateMachine.ChangeState(enemy.idleState);
+                    }
                 }
             }
         }
     }
 
-    public override void PhysicsUpdate()
+    /*protected void AStartPathFollow()
     {
-        base.PhysicsUpdate();
-
-        if (!onStateExit)
-        {
-            RigidBodyController(true);
-        }
-    }
-
-    protected void AStartPathFollow()
-    {
-        if (((Vector2)enemy.detection.target.transform.position - enemy.rigidBody.position).magnitude > Mathf.Abs(enemy.detection.target.GetComponent<Collider2D>().bounds.size.y - enemy.entityCollider.bounds.size.y) / 2.0f * 1.2f)
+        if (((Vector2)enemy.detection.currentTarget.transform.position - enemy.rigidBody.position).magnitude > Mathf.Abs(enemy.detection.currentTarget.GetComponent<Collider2D>().bounds.size.y - enemy.entityCollider.bounds.size.y) / 2.0f * 1.2f)
         {
             enemy.rigidBody.gravityScale = 9.5f;
 
@@ -121,7 +101,7 @@ public class EnemyTargetInAggroRangeState : EnemyState
             {
                 Vector2 direction = ((Vector2)path.vectorPath[currentWaypoint] - enemy.rigidBody.position).normalized;
 
-                if (direction.x * (enemy.detection.target.transform.position.x - enemy.rigidBody.position.x) < 0)
+                if (direction.x * (enemy.detection.currentTarget.transform.position.x - enemy.rigidBody.position.x) < 0)
                 {
                     direction = prevDirection;
                 }
@@ -141,7 +121,7 @@ public class EnemyTargetInAggroRangeState : EnemyState
                     workSpace.Set(enemy.detection.slopePerpNormal.x * facingDirection, enemy.detection.slopePerpNormal.y * facingDirection);
                     enemy.movement.SetVelocity(workSpace * enemyData.moveSpeed);
                 }
-                else if ((!isOnSlope && shouldJump && path.vectorPath[currentWaypoint].y - enemy.rigidBody.position.y > enemyData.jumpHeightRequirement) || isDetectingLedge)
+                else if ((!isOnSlope && shouldJump && path.vectorPath[currentWaypoint].y - enemy.rigidBody.position.y > enemyData.jumpHeightRequirement) || isDetectingLedgeFront)
                 {
                     if (enemy.detection.InStepbackDistance() && !didJump)
                     {
@@ -158,7 +138,7 @@ public class EnemyTargetInAggroRangeState : EnemyState
                             // direction = enemy.combat.CalculateProjectileAngle(enemy.rigidBody.position, path.vectorPath[index], enemyData.jumpSpeed, 9.5f) ?? direction;
                         }
 
-                        if (direction.x * (enemy.detection.target.transform.position.x - enemy.rigidBody.position.x) >= 0)
+                        if (direction.x * (enemy.detection.currentTarget.transform.position.x - enemy.rigidBody.position.x) >= 0)
                         {
                             enemy.movement.SetVelocity(direction * enemyData.jumpSpeed);
                         }
@@ -203,17 +183,17 @@ public class EnemyTargetInAggroRangeState : EnemyState
 
     public void UpdatePath()
     {
-        if (isPlayerInAggroRange && enemy.seeker.IsDone())
+        if (isTargetInAggroRange && enemy.seeker.IsDone())
         {
-            enemy.seeker.StartPath(enemy.rigidBody.position, enemy.detection.target.transform.position, OnPathComplete);
+            enemy.seeker.StartPath(enemy.rigidBody.position, enemy.detection.currentTarget.transform.position, OnPathComplete);
         }
     }
 
     protected virtual void NoAStarPathFollow()
     {
-        if (Mathf.Abs(enemy.detection.target.transform.position.x - enemy.rigidBody.position.x) > 1.0f)
+        if (Mathf.Abs(enemy.detection.currentTarget.transform.position.x - enemy.rigidBody.position.x) > 1.0f)
         {
-            if ((enemy.detection.target.transform.position.x - enemy.rigidBody.position.x) * facingDirection < 0)
+            if ((enemy.detection.currentTarget.transform.position.x - enemy.rigidBody.position.x) * facingDirection < 0)
             {
                 enemy.movement.Flip();
             }
@@ -260,7 +240,7 @@ public class EnemyTargetInAggroRangeState : EnemyState
 
     protected void IgnoreGroundPathFollow()
     {
-        Vector2 directionVector = ((Vector2)enemy.detection.target.transform.position - enemy.rigidBody.position).normalized;
+        Vector2 directionVector = ((Vector2)enemy.detection.currentTarget.transform.position - enemy.rigidBody.position).normalized;
         
         if (directionVector.x * facingDirection < 0)
         {
@@ -268,5 +248,5 @@ public class EnemyTargetInAggroRangeState : EnemyState
         }
         
         enemy.movement.SetVelocity(directionVector * enemyData.moveSpeed);
-    }
+    }*/
 }

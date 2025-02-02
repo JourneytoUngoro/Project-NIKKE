@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3758a63aa4635af4bb2a641071625861, type: 3}
+  m_Name: AnisData
+  m_EditorClassIdentifier: 
+  baseHealth: 0
+  healthIncreasePerLevel: 0
+  basePostureHealth: 0
+  postureIncreasePerLevel: 0
+  postureRecoveryRate: 0
+  canSleep: 0
+  canAlert: 0
+  canFallDownLedge: 0
+  canSmartPathFind: 0
+  minWaitTime: 3
+  maxWaitTime: 5
+  adequateDistance: 80
+  haltPossibility: 0.3
+  approachPossibility: 0.3
+  retreatPossibility: 0.7
+  shieldCoonDownTime: 0.5
+  minMovementOptionMaintainTime: 1
+  maxMovementOptionMaintainTime: 1.5
+  totalTurnAmount: 4
+  timeDelayforEachTurn: 1.5
+  dazedTime: 2
+  stunnedTime: 4
+  stunnedKnockbackSpeed: 5
+  nextWaypointDistance: 3
+  pathUpdatePeriods: 0.5
+  jumpHeightRequirement: 0.8
+  maxMovementDistance: 10
+  jumpSpeed: 10
+  canvasDisableTime: 5
+  moveSpeed: 6
+  moveTime: 0
+  moveEaseFunction: 0
+  minDistance: 60
+  meleeAttack0CoolDown: 1000
+  meleeAttack1CoolDown: 1000
+  meleeAttack2CoolDown: 1000
+  meleeAttack3CoolDown: 1000
+  rangedAttackCoolDown: 1000
+  rangedAttackHaltTime: 3
+  rangedAttackAfterShockTime: 2
+  rangedAttackTrajectoryLineSegmentCount: 0
+  closeRangedAttackCoolDown: 1000

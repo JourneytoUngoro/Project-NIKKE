@@ -11,8 +11,8 @@ public class PlayerInputHandler : MonoBehaviour
     private Player player;
 
     private Timer jumpInputBufferTimer;
-
     private Timer attackInputBufferTimer;
+    private Timer rangedAttackInputBufferTimer;
 
     [HideInInspector] public Controls controls;
 
@@ -22,23 +22,25 @@ public class PlayerInputHandler : MonoBehaviour
     public int actualInputX { get; private set; }
     public int fixedInputX { get; private set; }
     public bool preventInputX { get; private set; }
-    public bool jumpInput { get; private set; }
+    public bool jumpInput { get; private set; } // 꾹 누르기
     public bool jumpInputActive { get; private set; } // input을 저장해야하거나, 버튼을 꾹 누를 경우 연속해서 사용되기를 원하지 않을때 그러나 누르는 즉시 실행될 수 있어야한다.
-    public bool dodgeInput { get; private set; }
-    public bool dodgeInputActive { get; private set; }
+    public bool dodgeInputPressed { get; private set; }
     public bool attackInput { get; private set; }
     public bool attackInputActive { get; private set; }
-    public bool escapeInput { get; private set; }
-    public bool dashAttackInput { get; private set; }
-    public bool wideAttackInput { get; private set; }
-    public bool ultimateInput { get; private set; }
+    public bool rangedAttackInput { get; private set; }
+    public bool rangedAttackInputActive { get; private set; }
+    public bool rangedAttackInputPressed { get; private set; }
+    public bool escapeInputPressed { get; private set; }
+    public bool skillAttackInput { get; private set; }
+    public bool skillAttackInputPressed { get; private set; }
+    public bool ultimateInputPressed { get; private set; }
     public bool shieldParryInput { get; private set; }
-    public bool shieldParryInputActive { get; private set; }
-    public bool objectInteractionInput { get; private set; }
-    public bool doorInteractionInput { get; private set; }
-    public bool menuInput { get; private set; }
-    public bool cureInput { get; private set; }
-    public bool mapInput { get; private set; }
+    public bool shieldParryInputPressed { get; private set; }
+    public bool objectInteractionInputPressed { get; private set; }
+    public bool doorInteractionInputPressed { get; private set; }
+    public bool menuInputPressed { get; private set; }
+    public bool cureInputPressed { get; private set; }
+    public bool mapInputPressed { get; private set; }
 
     private void Awake()
     {
@@ -51,6 +53,8 @@ public class PlayerInputHandler : MonoBehaviour
         jumpInputBufferTimer.timerAction += InactiveJumpInput;
         attackInputBufferTimer = new Timer(0.1f);
         attackInputBufferTimer.timerAction += InactiveAttackInput;
+        rangedAttackInputBufferTimer = new Timer(0.1f);
+        rangedAttackInputBufferTimer.timerAction += InactiveRangedAttackInput;
     }
 
     private void Update()
@@ -58,13 +62,17 @@ public class PlayerInputHandler : MonoBehaviour
         jumpInputBufferTimer.Tick();
         attackInputBufferTimer.Tick();
         
-        cureInput = controls.InGame.Cure.WasPressedThisFrame();
-        objectInteractionInput = controls.InGame.ObjectInteraction.WasPressedThisFrame();
-        doorInteractionInput = controls.InGame.DoorInteraction.WasPressedThisFrame();
-        dodgeInputActive = controls.InGame.Dodge.WasPressedThisFrame();
-        shieldParryInputActive = controls.InGame.ShieldParry.WasPressedThisFrame();
-        menuInput = controls.InGame.Menu.WasPressedThisFrame();
-        mapInput = controls.InGame.Map.WasPressedThisFrame();
+        cureInputPressed = controls.InGame.Cure.WasPressedThisFrame();
+        objectInteractionInputPressed = controls.InGame.ObjectInteraction.WasPressedThisFrame();
+        doorInteractionInputPressed = controls.InGame.DoorInteraction.WasPressedThisFrame();
+        dodgeInputPressed = controls.InGame.Dodge.WasPressedThisFrame();
+        skillAttackInputPressed = controls.InGame.SkillAttack.WasPressedThisFrame();
+        escapeInputPressed = controls.InGame.Escape.WasPressedThisFrame();
+        ultimateInputPressed = controls.InGame.Ultimate.WasPressedThisFrame();
+        rangedAttackInputPressed = controls.InGame.RangedAttack.WasPressedThisFrame();
+        shieldParryInputPressed = controls.InGame.ShieldParry.WasPressedThisFrame();
+        menuInputPressed = controls.InGame.Menu.WasPressedThisFrame();
+        mapInputPressed = controls.InGame.Map.WasPressedThisFrame();
     }
 
     public void OnMoveInput(InputAction.CallbackContext context)
@@ -87,19 +95,6 @@ public class PlayerInputHandler : MonoBehaviour
         if (context.canceled)
         {
             jumpInput = false;
-        }
-    }
-
-    public void OnDodgeInput(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            dodgeInput = true;
-        }
-
-        if (context.canceled)
-        {
-            dodgeInput = false;
         }
     }
 
@@ -131,63 +126,41 @@ public class PlayerInputHandler : MonoBehaviour
         }
     }
 
-    public void OnUpperSlashAttackInput(InputAction.CallbackContext context)
+    public void OnRangedAttackInput(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            dashAttackInput = true;
+            rangedAttackInput = true;
+            rangedAttackInputActive = true;
+            rangedAttackInputBufferTimer.StartSingleUseTimer();
         }
 
         if (context.canceled)
         {
-            dashAttackInput = false;
+            rangedAttackInput = false;
         }
     }
 
-    public void OnWideAttackInput(InputAction.CallbackContext context)
+    public void OnSkillAttackInput(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            wideAttackInput = true;
+            skillAttackInput = true;
         }
 
         if (context.canceled)
         {
-            wideAttackInput = false;
-        }
-    }
-
-    public void OnEscapeInput(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            escapeInput = true;
-        }
-
-        if (context.canceled)
-        {
-            escapeInput = false;
-        }
-    }
-
-    public void OnUltimateInput(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            ultimateInput = true;
-        }
-
-        if (context.canceled)
-        {
-            ultimateInput = false;
+            skillAttackInput = false;
         }
     }
 
     public void InactiveJumpInput() => jumpInputActive = false;
 
-    public void InactiveDodgeInput() => dodgeInputActive = false;
+    public void InactiveDodgeInput() => dodgeInputPressed = false;
 
     public void InactiveAttackInput() => attackInputActive = false;
+
+    public void InactiveRangedAttackInput() => rangedAttackInputActive = false;
 
     public void PreventInputX(int fixedInputX)
     {
