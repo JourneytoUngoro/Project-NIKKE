@@ -48,10 +48,6 @@ public class PlayerCrouchIdleState : PlayerGroundedState
             {
                 stateMachine.ChangeState(player.idleState);
             }
-            /*else if (player.normalAttackState.currentAmmo < playerData.maxAmmo)
-            {
-                stateMachine.ChangeState(player.crouchReloadState);
-            }*/
         }
         #endregion
 
@@ -62,13 +58,10 @@ public class PlayerCrouchIdleState : PlayerGroundedState
 
             if (isOnSlope)
             {
-                player.rigidBody.gravityScale = 0.0f;
                 player.movement.SetVelocityY(0.0f);
             }
-            else
-            {
-                player.rigidBody.gravityScale = 9.5f;
-            }
+
+            player.movement.RigidBodyController();
         }
         #endregion
     }

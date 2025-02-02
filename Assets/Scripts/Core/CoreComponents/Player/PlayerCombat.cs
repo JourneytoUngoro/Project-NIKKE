@@ -12,15 +12,6 @@ public class PlayerCombat : Combat
     [field: SerializeField] public CombatAbilityWithTransforms parryArea { get; protected set; }
     [field: SerializeField] public CombatAbilityWithTransforms inAirParryArea { get; private set; }
 
-    /*[SerializeField] private Transform jumpAttackTransform;
-    [SerializeField] private Vector2 jumpAttackSize;
-    [SerializeField] private Transform jumpFinishAttackTransform;
-    [SerializeField] private float jumpFinishAttackRadius;
-    [SerializeField] [Range(0, 180)] private float jumpFinishAttackClockwiseAngle;
-    [SerializeField] [Range(0, 180)] private float jumpFinishAttackCounterClockwiseAngle;
-    [SerializeField] [Range(0, 180)] private float shieldParryAreaClockwiseAngle;
-    [SerializeField] [Range(0, 180)] private float shieldParryAreaCounterClockwiseAngle;*/
-
     private Player player;
 
     protected override void Awake()
@@ -32,11 +23,11 @@ public class PlayerCombat : Combat
 
     protected override void ChangeToKnockbackState(KnockbackComponent knockbackComponent, bool isGrounded)
     {
-        if (knockbackComponent.isKnockbackDifferentInAir)
+        if (knockbackComponent.isKnockbackDifferentWhenAerial)
         {
             if (!isGrounded)
             {
-                player.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTimeInAir);
+                player.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTimeWhenAerial);
             }
             else
             {

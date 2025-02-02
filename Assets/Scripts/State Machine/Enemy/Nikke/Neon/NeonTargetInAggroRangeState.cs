@@ -22,7 +22,7 @@ public class NeonTargetInAggroRangeState : EnemyTargetInAggroRangeState
     {
         neon = enemy as Neon;
         movementOptionTimer = new Timer(UtilityFunctions.RandomFloat(neon.neonData.minMovementOptionMaintainTime, neon.neonData.maxMovementOptionMaintainTime));
-        movementOptionTimer.timerAction += ChooseMovementOption;
+        movementOptionTimer.timerAction += ChangeMovementOption;
     }
 
     public override void AnimationStartTrigger(int index)
@@ -60,7 +60,7 @@ public class NeonTargetInAggroRangeState : EnemyTargetInAggroRangeState
             enemy.movement.Flip();
         }
 
-        if ((firstInDistance && Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) < enemy.enemyData.keepDistanceOf) || inDistance)
+        if ((firstInDistance && Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) < enemy.enemyData.adequateDistance) || inDistance)
         {
             firstInDistance = false;
             neon.animator.SetBool("move", false);
@@ -142,7 +142,7 @@ public class NeonTargetInAggroRangeState : EnemyTargetInAggroRangeState
                     }
                 }
                 
-                if (!firstInDistance && neon.detection.currentTarget.rigidBody.velocity.x * (neon.detection.currentTarget.transform.position.x - neon.transform.position.x) > 0 && Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) >= enemy.enemyData.keepDistanceOf)
+                if (!firstInDistance && neon.detection.currentTarget.rigidBody.velocity.x * (neon.detection.currentTarget.transform.position.x - neon.transform.position.x) > 0 && Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) >= enemy.enemyData.adequateDistance)
                 {
                     inDistance = false;
                     firstInDistance = true;
@@ -164,9 +164,9 @@ public class NeonTargetInAggroRangeState : EnemyTargetInAggroRangeState
         }
     }
 
-    private void ChooseMovementOption()
+    private void ChangeMovementOption()
     {
-        if (Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) < enemy.enemyData.keepDistanceOf)
+        if (Vector2.Distance(enemy.detection.currentTarget.transform.position, enemy.transform.position) < enemy.enemyData.adequateDistance)
         {
             inDistance = true;
 

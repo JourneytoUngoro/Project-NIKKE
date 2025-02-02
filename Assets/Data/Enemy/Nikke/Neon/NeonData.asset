@@ -23,7 +23,7 @@ MonoBehaviour:
   canSmartPathFind: 0
   minWaitTime: 3
   maxWaitTime: 5
-  keepDistanceOf: 20
+  adequateDistance: 15
   haltPossibility: 0
   approachPossibility: 0.5
   retreatPossibility: 0.5

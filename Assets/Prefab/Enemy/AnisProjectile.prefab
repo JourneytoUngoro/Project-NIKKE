@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 8291610024586170451}
   - component: {fileID: 7732980391109172085}
   - component: {fileID: 3299885991590548849}
-  - component: {fileID: 845995415598162536}
   - component: {fileID: 7617273000057905477}
-  m_Layer: 0
+  - component: {fileID: 845995415598162536}
+  m_Layer: 13
   m_Name: AnisProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 269034865
-  m_SortingLayer: 6
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 02a2e583d0b0c8247baef1c7163ccb6e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -108,6 +108,32 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
+--- !u!61 &7617273000057905477
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 36883682827735118}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 51.2, y: 51.2}
+    newSize: {x: 51.2, y: 51.2}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 4.4, y: 1.6}
+  m_EdgeRadius: 0
 --- !u!114 &845995415598162536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,20 +150,20 @@ MonoBehaviour:
     <centerTransform>k__BackingField: {fileID: 8291610024586170451}
     <overlapBox>k__BackingField: 1
     <overlapCircle>k__BackingField: 0
-    <boxSize>k__BackingField: {x: 8, y: 5}
+    <boxSize>k__BackingField: {x: 4.4, y: 1.6}
     <boxRotation>k__BackingField: 0
     <circleRadius>k__BackingField: 0
     <limitAngle>k__BackingField: 0
     <centerRotation>k__BackingField: 0
     <clockwiseAngle>k__BackingField: 0
     <counterClockwiseAngle>k__BackingField: 0
-  projectileType: 0
-  projectileTypeWhenParried: 0
+  projectileType: 2
+  projectileTypeWhenParried: 2
   whatIsGround:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   piercingProjectile: 0
-  projectileSpeed: 0
+  projectileSpeed: 200
   explosionDurationTime: 0
   maximumDeflection: 1
   autoDestroyTime: 30
@@ -154,34 +180,9 @@ MonoBehaviour:
   timeToMaxStep: 0
   straightProjectileDirection: 0
   loseSpeedTime: 0
-  timeStepValue: 0.1
+  minSpeedValue: 100
   speedStepValue: 5
+  timeStepValue: 0.1
   targetingSuccessDistance: 5
   knockbackSourceTransform: {fileID: 0}
   <combatAbility>k__BackingField: {fileID: 0}
---- !u!61 &7617273000057905477
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 36883682827735118}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 51.2, y: 51.2}
-    newSize: {x: 51.2, y: 51.2}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 51.2, y: 51.2}
-  m_EdgeRadius: 0

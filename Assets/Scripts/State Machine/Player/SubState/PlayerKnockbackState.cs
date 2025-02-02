@@ -29,7 +29,11 @@ public class PlayerKnockbackState : PlayerState
         base.Enter();
 
         canTransit = false;
-        knockbackTimer.StartSingleUseTimer();
+
+        if (knockbackTimer.duration != 0.0f)
+        {
+            knockbackTimer.StartSingleUseTimer();
+        }
         player.rigidBody.gravityScale = 9.5f;
         player.movement.SetVelocityMultiplier(Vector2.one);
         player.stateMachineToAnimator.state = this;
@@ -85,18 +89,18 @@ public class PlayerKnockbackState : PlayerState
         }
         #endregion
 
+        // TODO: Fix first parameter of RigidBodyController
         #region Physics Logic
         if (!onStateExit)
         {
+            if (knockbackTimer.duration == 0.0f)
+            {
+                canTransit = player.rigidBody.velocity.y < epsilon && isGrounded;
+            }
+
             player.movement.RigidBodyController(false, false);
         }
         #endregion
-    }
-
-    public void SetKnockback(float duration)//, Vector2 knockbackVelocity)
-    {
-        knockbackTimer.ChangeDuration(duration);
-        // this.knockbackVelocity = knockbackVelocity;
     }
 
     public void ShouldTransitToStunnedState() => shouldTransitToStunnedState = true;

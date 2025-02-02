@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using GD.MinMaxSlider;
 
-public enum ProjectileType { None, Straight, Throw, Bazier, Targeting }
+public enum ProjectileType { None, Straight, Throw, Bazier, Follow }
 public enum StraightProjectileDirection { Forward, Toward, Manual };
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -52,13 +52,14 @@ public class Projectile : PooledObject
     [SerializeField, Tooltip("Lose Speed Time of zero means that the projectile won't lose its speed forever.")] private float loseSpeedTime;
 
     [Header("Throw Projectile")]
-    [SerializeField] private float timeStepValue = 0.1f;
+    [SerializeField] private float minSpeedValue;
     [SerializeField] private float speedStepValue = 5.0f;
-    [SerializeField, Range(0.0f, 1.0f)] private float targetingSuccessDistance = 5.0f;
+    [SerializeField] private float timeStepValue = 0.1f;
+    [SerializeField] private float targetingSuccessDistance = 5.0f;
 
     #region Shared Variables
     [SerializeField] private Transform knockbackSourceTransform;
-    [field: SerializeField] public CombatAbility combatAbility { get; private set; }
+    [field: SerializeField, Tooltip("Null CombatAbility means it will explode.")] public CombatAbility combatAbility { get; private set; }
     private List<Collider2D> damagedTargets = new List<Collider2D>();
 
     protected Rigidbody2D rigidBody;
@@ -88,14 +89,17 @@ public class Projectile : PooledObject
         initialProjectileSpeed = projectileSpeed;
         initialTarget = whatIsDamageable;
 
-        foreach (CombatAbilityComponent combatAbilityComponent in combatAbility.combatAbilityComponents)
+        if (combatAbility != null)
         {
-            combatAbilityComponent.pertainedCombatAbility = combatAbility;
-
-            if (combatAbilityComponent.GetType().Equals(typeof(KnockbackComponent)))
+            foreach (CombatAbilityComponent combatAbilityComponent in combatAbility.combatAbilityComponents)
             {
-                KnockbackComponent knockbackComponent = combatAbilityComponent as KnockbackComponent;
-                knockbackComponent.knockbackSourceTransform = knockbackSourceTransform ? knockbackSourceTransform : transform;
+                combatAbilityComponent.pertainedCombatAbility = combatAbility;
+
+                if (combatAbilityComponent.GetType().Equals(typeof(KnockbackComponent)))
+                {
+                    KnockbackComponent knockbackComponent = combatAbilityComponent as KnockbackComponent;
+                    knockbackComponent.knockbackSourceTransform = knockbackSourceTransform ? knockbackSourceTransform : transform;
+                }
             }
         }
     }
@@ -139,7 +143,7 @@ public class Projectile : PooledObject
                     Rotate();
                     break;
 
-                case ProjectileType.Targeting:
+                case ProjectileType.Follow:
                     rigidBody.velocity = transform.right * projectileSpeed;
                     Rotate();
                     break;
@@ -160,6 +164,10 @@ public class Projectile : PooledObject
                     {
                         rigidBody.velocity = (currentPosition - prevPosition).normalized * projectileSpeed;
                     }
+                    break;
+
+                case ProjectileType.Throw:
+                    Rotate();
                     break;
 
                 default:
@@ -185,7 +193,7 @@ public class Projectile : PooledObject
                 transform.rotation = Quaternion.Euler(0.0f, 0.0f, bazierAngle);
                 break;
 
-            case ProjectileType.Targeting:
+            case ProjectileType.Follow:
                 float currentStep = Mathf.Lerp(minStep, maxStep, elapsedTime / timeToMaxStep);
                 Vector2 targetDirection = targetEntity.transform.position - transform.position;
                 float targetingAngle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
@@ -229,28 +237,19 @@ public class Projectile : PooledObject
         }
     }
 
-    protected virtual void OnTriggerEnter2D(Collider2D collision)
+    protected virtual void OnTriggerEnter2D(Collider2D collider)
     {
-        isTouchedGround = UtilityFunctions.IsInLayerMask(collision.gameObject.layer, whatIsGround);
-        isTouchedTarget = UtilityFunctions.IsInLayerMask(collision.gameObject.layer, whatIsDamageable);
+        isTouchedGround = UtilityFunctions.IsInLayerMask(collider.gameObject.layer, whatIsGround);
+        isTouchedTarget = UtilityFunctions.IsInLayerMask(collider.gameObject.layer, whatIsDamageable);
 
-        if (isTouchedTarget)
+        if (projectileCoroutine != null)
         {
-            if (projectileCoroutine != null)
-            {
-                StopCoroutine(projectileCoroutine);
-            }
-            rigidBody.velocity *= 0.8f;
-            OnCollision(collision);
+            StopCoroutine(projectileCoroutine);
         }
-
-        if (isTouchedGround)
-        {
-            ReleaseObject();
-        }
+        OnCollision(collider);
     }
 
-    public void FireProjectile(Entity sourceEntity, Entity[] targetEntities, bool checkProjectileRoute, Vector2? manualDirectionVector = null)
+    public void FireProjectile(Entity sourceEntity, Entity targetEntity, bool checkProjectileRoute, Vector2? manualDirectionVector = null)
     {
         if (projectileCoroutine != null)
         {
@@ -263,13 +262,12 @@ public class Projectile : PooledObject
             ReleaseObject();
         }
 
-        if ((projectileType == ProjectileType.Bazier || projectileType == ProjectileType.Throw || (projectileType == ProjectileType.Straight && straightProjectileDirection == StraightProjectileDirection.Toward)) && (targetEntities == null || targetEntities.Count() == 0))
+        if ((projectileType == ProjectileType.Bazier || projectileType == ProjectileType.Throw || (projectileType == ProjectileType.Straight && straightProjectileDirection == StraightProjectileDirection.Toward)) && targetEntity == null)
         {
             Debug.LogError($"{gameObject.name}: Projectile type of {projectileType} needs target entity which is null or does not exist.");
             ReleaseObject();
         }
 
-        bool fireProjectile = true;
         this.sourceEntity = sourceEntity;
         this.whatIsDamageable = sourceEntity.entityCombat.whatIsDamageable;
         initialPosition = transform.position;
@@ -294,97 +292,74 @@ public class Projectile : PooledObject
         }
         else
         {
-            foreach (Entity entity in targetEntities)
+            this.targetEntity = targetEntity;
+            destinationPosition = this.targetEntity.transform.position;
+
+            switch (projectileType)
             {
-                this.targetEntity = entity;
-                destinationPosition = targetEntity.transform.position;
+                case ProjectileType.Bazier:
+                    float distance = Vector2.Distance(transform.position, destinationPosition);
+                    float xDifference = destinationPosition.x - transform.position.x;
 
-                switch (projectileType)
-                {
-                    case ProjectileType.Bazier:
-                        float distance = Vector2.Distance(transform.position, destinationPosition);
-                        float xDifference = destinationPosition.x - transform.position.x;
+                    if (xDifference < 0)
+                    {
+                        transform.rotation = Quaternion.Euler(0.0f, 0.0f, -180.0f);
+                    }
 
-                        if (xDifference < 0)
-                        {
-                            transform.rotation = Quaternion.Euler(0.0f, 0.0f, -180.0f);
-                        }
+                    float pointAXOffset = (UtilityFunctions.RandomFloat(pointAXOffsetDeviation.x, pointAXOffsetDeviation.y) + pointAXOffsetBase) * xDifference;
+                    float pointAYOffset = (UtilityFunctions.RandomFloat(pointAYOffsetDeviation.x, pointAYOffsetDeviation.y) + pointAYOffsetBase) * distance;
+                    pointA = new Vector2(pointAXOffset + transform.position.x, pointAYOffset + Mathf.Max(transform.position.y, destinationPosition.y));
 
-                        float pointAXOffset = (UtilityFunctions.RandomFloat(pointAXOffsetDeviation.x, pointAXOffsetDeviation.y) + pointAXOffsetBase) * xDifference;
-                        float pointAYOffset = (UtilityFunctions.RandomFloat(pointAYOffsetDeviation.x, pointAYOffsetDeviation.y) + pointAYOffsetBase) * distance;
-                        pointA = new Vector2(pointAXOffset + transform.position.x, pointAYOffset + Mathf.Max(transform.position.y, destinationPosition.y));
+                    float pointBXOffset = (UtilityFunctions.RandomFloat(pointBXOffsetDeviation.x, pointBXOffsetDeviation.y) + pointBXOffsetBase) * xDifference;
+                    float pointBYOffset = (UtilityFunctions.RandomFloat(pointBYOffsetDeviation.x, pointBYOffsetDeviation.y) + pointBYOffsetBase) * distance;
+                    pointB = new Vector2(pointBXOffset + pointA.x, pointBYOffset + pointA.y);
 
-                        float pointBXOffset = (UtilityFunctions.RandomFloat(pointBXOffsetDeviation.x, pointBXOffsetDeviation.y) + pointBXOffsetBase) * xDifference;
-                        float pointBYOffset = (UtilityFunctions.RandomFloat(pointBYOffsetDeviation.x, pointBYOffsetDeviation.y) + pointBYOffsetBase) * distance;
-                        pointB = new Vector2(pointBXOffset + pointA.x, pointBYOffset + pointA.y);
+                    transferTime = distance / projectileSpeed;
+                    currentPosition = transform.position;
+                    break;
 
-                        transferTime = distance / projectileSpeed;
-                        currentPosition = transform.position;
-                        break;
+                case ProjectileType.Straight:
+                    switch (straightProjectileDirection)
+                    {
+                        case StraightProjectileDirection.Toward:
+                            Quaternion? rotation = CheckProjectileRoute(transform.position, this.targetEntity.transform.position, checkProjectileRoute);
 
-                    case ProjectileType.Straight:
-                        switch (straightProjectileDirection)
-                        {
-                            case StraightProjectileDirection.Toward:
-                                Quaternion? rotation = CheckProjectileRoute(transform.position, targetEntity.transform.position, checkProjectileRoute);
+                            if (rotation.HasValue)
+                            {
+                                transform.rotation = rotation.Value;
+                            }
+                            break;
 
-                                if (rotation.HasValue)
-                                {
-                                    transform.rotation = rotation.Value;
-                                }
-                                else
-                                {
-                                    fireProjectile = false;
-                                }
-                                break;
+                        default:
+                            break;
+                    }
+                    break;
 
-                            default:
-                                break;
-                        }
-                        break;
+                case ProjectileType.Throw:
+                    Vector2? projectileVelocity = CalculateProjectileVelocity(transform.position, destinationPosition, checkProjectileRoute);
 
-                    case ProjectileType.Throw:
-                        Vector2? projectileVelocity = CalculateProjectileVelocity(transform.position, destinationPosition, checkProjectileRoute);
+                    if (projectileVelocity.HasValue)
+                    {
+                        rigidBody.velocity = projectileVelocity.Value;
+                    }
+                    break;
 
-                        if (projectileVelocity.HasValue)
-                        {
-                            rigidBody.velocity = projectileVelocity.Value;
-                        }
-                        else
-                        {
-                            fireProjectile = false;
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-
-                if (fireProjectile) break;
+                default:
+                    break;
             }
         }
 
-        if (fireProjectile)
-        {
-            projectileCoroutine = StartCoroutine(FireProjectileCoroutine());
-        }
+        projectileCoroutine = StartCoroutine(FireProjectileCoroutine());
     }
 
-    protected virtual void OnCollision(Collider2D collision)
+    protected virtual void OnCollision(Collider2D collider)
     {
-        isTouchedGround = UtilityFunctions.IsInLayerMask(collision.gameObject.layer, whatIsGround);
-        isTouchedTarget = UtilityFunctions.IsInLayerMask(collision.gameObject.layer, whatIsDamageable);
+        isTouchedGround = UtilityFunctions.IsInLayerMask(collider.gameObject.layer, whatIsGround);
+        isTouchedTarget = UtilityFunctions.IsInLayerMask(collider.gameObject.layer, whatIsDamageable);
 
         if (combatAbility == null)
         {
-            if (explosionDurationTime == 0.0f)
-            {
-                Explode();
-            }
-            else
-            {
-                Invoke("Explode", explosionDurationTime);
-            }
+            StartCoroutine(Explode(collider.ClosestPoint(transform.position)));
         }
         else if (isTouchedTarget)
         {
@@ -393,25 +368,27 @@ public class Projectile : PooledObject
                 switch (combatAbilityComponent)
                 {
                     case DamageComponent damageComponent:
-                        damageComponent.ApplyCombatAbility(collision, new OverlapCollider[1] { overlapCollider });
+                        damageComponent.ApplyCombatAbility(collider, new OverlapCollider[1] { overlapCollider });
                         break;
                     case KnockbackComponent knockbackComponent:
-                        knockbackComponent.ApplyCombatAbility(collision, new OverlapCollider[1] { overlapCollider });
+                        knockbackComponent.ApplyCombatAbility(collider, new OverlapCollider[1] { overlapCollider });
                         break;
                     case StatusEffectComponent statusEffectComponent:
-                        statusEffectComponent.ApplyCombatAbility(collision, new OverlapCollider[1] { overlapCollider });
+                        statusEffectComponent.ApplyCombatAbility(collider, new OverlapCollider[1] { overlapCollider });
                         break;
                 }
             }
-
             ReleaseObject();
         }
     }
 
-    protected void Explode()
+    protected IEnumerator Explode(Vector2 position)
     {
-        GameObject projectileExplosion = Manager.Instance.objectPoolingManager.GetGameObject(gameObject.name + "Explosion");
-        projectileExplosion.transform.position = transform.position;
+        yield return new WaitForSeconds(explosionDurationTime);
+        GameObject projectileExplosion = Manager.Instance.objectPoolingManager.GetGameObject(gameObject.name.Replace("(Clone)", "") + "Explosion");
+        Explosion explosion = projectileExplosion.GetComponent<Explosion>();
+        projectileExplosion.transform.position = position;
+        explosion.SetExplosion(this);
 
         ReleaseObject();
     }
@@ -430,18 +407,19 @@ public class Projectile : PooledObject
             projectileType = projectileTypeWhenParried;
             straightProjectileDirection = StraightProjectileDirection.Toward;
 
-            FireProjectile(targetEntity, new Entity[1] { sourceEntity }, false, null);
+            FireProjectile(targetEntity, sourceEntity, false, null);
         }
     }
 
     public Vector2? CalculateProjectileVelocity(Vector2 projectileFirePosition, Vector2 targetPosition, bool checkProjectileRoute)
     {
+        if (rigidBody == null) rigidBody = GetComponent<Rigidbody2D>();
         float distance = Vector2.Distance(projectileFirePosition, targetPosition);
         List<Tuple<Vector2, bool>> availableVelocities = new List<Tuple<Vector2, bool>>();
         float gravityAccelaration = Mathf.Abs(Physics2D.gravity.y * rigidBody.gravityScale);
         float xDifference = targetPosition.x - projectileFirePosition.x;
         float yDifference = targetPosition.y - projectileFirePosition.y;
-        float currentSpeed = speedStepValue;
+        float currentSpeed = minSpeedValue;
 
         while (currentSpeed <= projectileSpeed)
         {

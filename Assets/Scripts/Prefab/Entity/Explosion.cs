@@ -7,7 +7,7 @@ public class Explosion : PooledObject
 {
     [SerializeField] private Transform knockbackSourceTransform;
     [SerializeField] private LayerMask whatIsDamageable;
-    [field: SerializeField] public List<CombatAbilityWithTransforms> explosionAreas { get; private set; }
+    [field: SerializeField] public List<CombatAbilityWithTransforms> combatAbilityWithTransformsList { get; private set; }
 
     private List<Collider2D> damagedTargets = new List<Collider2D>();
 
@@ -18,7 +18,7 @@ public class Explosion : PooledObject
 
     private void Awake()
     {
-        foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in explosionAreas)
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in combatAbilityWithTransformsList)
         {
             CombatAbility combatAbility = combatAbilityWithTransforms.combatAbilityData;
 
@@ -47,18 +47,30 @@ public class Explosion : PooledObject
     public void SetExplosion(Entity sourceEntity)
     {
         this.sourceEntity = sourceEntity;
+
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in combatAbilityWithTransformsList)
+        {
+            CombatAbility combatAbility = combatAbilityWithTransforms.combatAbilityData;
+            combatAbility.sourceEntity = sourceEntity;
+        }
     }
 
     public void SetExplosion(Projectile sourceProjectile)
     {
         this.sourceProjectile = sourceProjectile;
+
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in combatAbilityWithTransformsList)
+        {
+            CombatAbility combatAbility = combatAbilityWithTransforms.combatAbilityData;
+            combatAbility.sourceEntity = sourceProjectile.sourceEntity;
+        }
     }
 
     public void Explode(int index)
     {
         Collider2D[] damageTargets = new Collider2D[0];
 
-        CombatAbilityWithTransforms combatAbilityWithTransforms = explosionAreas[index];
+        CombatAbilityWithTransforms combatAbilityWithTransforms = combatAbilityWithTransformsList[index];
 
         foreach (OverlapCollider overlapCollider in combatAbilityWithTransforms.overlapColliders)
         {
@@ -100,7 +112,7 @@ public class Explosion : PooledObject
     {
         Gizmos.color = Color.red;
 
-        foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in explosionAreas)
+        foreach (CombatAbilityWithTransforms combatAbilityWithTransforms in combatAbilityWithTransformsList)
         {
             if (combatAbilityWithTransforms.visualize)
             {

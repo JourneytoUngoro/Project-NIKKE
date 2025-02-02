@@ -16,7 +16,9 @@ MonoBehaviour:
   <combatAbilityName>k__BackingField: Default Combat Ability Name
   <threatLevel>k__BackingField: 0
   <combatAbilityDescription>k__BackingField: Default Combat Ability Description
-  <stance>k__BackingField: 0
+  <stanceWhenHit>k__BackingField: 0
+  <stanceWhenParried>k__BackingField: 0
+  <getDazed>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
   - rid: 8834776593642815489
   - rid: 8834776593642815490
@@ -46,45 +48,45 @@ MonoBehaviour:
       type: {class: KnockbackComponent, ns: , asm: Assembly-CSharp}
       data:
         name: KnockbackComponent
-        <directionBasePoint>k__BackingField: 2
-        <knockbackLevel>k__BackingField: 0
+        <entityProtruded>k__BackingField: 0
+        <directionBase>k__BackingField: 0
         <knockbackDirection>k__BackingField: {x: 1, y: 0}
         <knockbackSpeed>k__BackingField: 10
         <knockbackTime>k__BackingField: 0.1
         <easeFunction>k__BackingField: 0
-        <isKnockbackDifferentInAir>k__BackingField: 0
-        <knockbackDirectionInAir>k__BackingField: {x: 0, y: 0}
-        <knockbackSpeedInAir>k__BackingField: 0
-        <knockbackTimeInAir>k__BackingField: 0
-        <easeFunctionInAir>k__BackingField: 0
+        <isKnockbackDifferentWhenAerial>k__BackingField: 0
+        <knockbackDirectionWhenAerial>k__BackingField: {x: 0, y: 0}
+        <knockbackSpeedWhenAerial>k__BackingField: 0
+        <knockbackTimeWhenAerial>k__BackingField: 0
+        <easeFunctionWhenAerial>k__BackingField: 0
         <canBeShielded>k__BackingField: 1
-        <knockbackLevelWhenShielded>k__BackingField: 0
         <knockbackDirectionWhenShielded>k__BackingField: {x: 0, y: 0}
         <knockbackSpeedWhenShielded>k__BackingField: 0
         <knockbackTimeWhenShielded>k__BackingField: 0
         <easeFunctionWhenShielded>k__BackingField: 0
-        <isShieldedKnockbackDifferentInAir>k__BackingField: 0
-        <knockbackDirectionWhenShieldedInAir>k__BackingField: {x: 0, y: 0}
-        <knockbackSpeedWhenShieldedInAir>k__BackingField: 0
-        <knockbackTimeWhenShieldedInAir>k__BackingField: 0
-        <easeFunctionWhenShieldedInAir>k__BackingField: 0
+        <isKnockbackDifferentWhenAerialShielded>k__BackingField: 0
+        <knockbackDirectionWhenAerialShielded>k__BackingField: {x: 0, y: 0}
+        <knockbackSpeedWhenAerialShielded>k__BackingField: 0
+        <knockbackTimeWhenAerialShielded>k__BackingField: 0
+        <easeFunctionWhenAerialShielded>k__BackingField: 0
         <canBeParried>k__BackingField: 1
-        <knockbackLevelWhenParried>k__BackingField: 0
         <knockbackDirectionWhenParried>k__BackingField: {x: 0, y: 0}
         <knockbackSpeedWhenParried>k__BackingField: 0
         <knockbackTimeWhenParried>k__BackingField: 0
         <easeFunctionWhenParried>k__BackingField: 0
+        <counterProtrudedWhenParried>k__BackingField: 0
         <counterKnockbackDirectionWhenParried>k__BackingField: {x: 0, y: 0}
         <counterKnockbackSpeedWhenParried>k__BackingField: 0
         <counterKnockbackTimeWhenParried>k__BackingField: 0
         <counterEaseFunctionWhenParried>k__BackingField: 0
-        <isParriedKnockbackDifferentInAir>k__BackingField: 0
-        <knockbackDirectionWhenParriedInAir>k__BackingField: {x: 0, y: 0}
-        <knockbackSpeedWhenParriedInAir>k__BackingField: 0
-        <knockbackTimeWhenParriedInAir>k__BackingField: 0
-        <easeFunctionWhenParriedInAir>k__BackingField: 0
-        <counterKnockbackDirectionWhenParriedInAir>k__BackingField: {x: 0, y: 0}
-        <counterKnockbackSpeedWhenParriedInAir>k__BackingField: 0
-        <counterKnockbackTimeWhenParriedInAir>k__BackingField: 0
-        <counterEaseFunctionWhenParriedInAir>k__BackingField: 0
+        <isKnockbackDifferentWhenAerialParried>k__BackingField: 0
+        <knockbackDirectionWhenAerialParried>k__BackingField: {x: 0, y: 0}
+        <knockbackSpeedWhenAerialParried>k__BackingField: 0
+        <knockbackTimeWhenAerialParried>k__BackingField: 0
+        <easeFunctionWhenAerialParried>k__BackingField: 0
+        <counterProtrudedWhenAerialParried>k__BackingField: 0
+        <counterKnockbackDirectionWhenAerialParried>k__BackingField: {x: 0, y: 0}
+        <counterKnockbackSpeedWhenAerialParried>k__BackingField: 0
+        <counterKnockbackTimeWhenAerialParried>k__BackingField: 0
+        <counterEaseFunctionWhenAerialParried>k__BackingField: 0
         knockbackSourceTransform: {fileID: 0}

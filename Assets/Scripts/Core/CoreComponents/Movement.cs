@@ -240,11 +240,18 @@ public class Movement : CoreComponent
 
     public void SetVelocityXChangeOverTime(float velocity, float moveTime, Ease easeFunction, bool slowDown, bool isDetectingLedge = false)
     {
-        if (velocityChangeOverTimeCoroutine != null)
+        if (moveTime == 0.0f)
         {
-            StopCoroutine(velocityChangeOverTimeCoroutine);
+            SetVelocityX(velocity, true);
         }
-        velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown, isDetectingLedge));
+        else
+        {
+            if (velocityChangeOverTimeCoroutine != null)
+            {
+                StopCoroutine(velocityChangeOverTimeCoroutine);
+            }
+            velocityChangeOverTimeCoroutine = StartCoroutine(VelocityChangeOverTime(velocity, moveTime, easeFunction, slowDown, isDetectingLedge));
+        }
     }
 
     public void StopVelocityXChangeOverTime()
@@ -269,31 +276,19 @@ public class Movement : CoreComponent
 
         while (true)
         {
-            if (easeFunction == Ease.Unset)
+            float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(DOVirtual.EasedValue(1.0f, 0.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
+
+            if (isGrounded && isDetectingLedge)
             {
-                if (entity.entityDetection.isDetectingWall(CheckPositionHorizontal.Mid, CheckPositionVertical.Both, CheckLogicalOperation.OR))
-                {
-                    yield break;
-                }
-                float velocityMultiplierOverTime = 1.0f;
-                SetVelocityX(velocityMultiplierOverTime * velocity, true);
+                SetVelocityX(0.0f);
             }
             else
             {
-                float velocityMultiplierOverTime = slowDown ? Mathf.Clamp(DOVirtual.EasedValue(1.0f, 0.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f) : Mathf.Clamp(DOVirtual.EasedValue(0.0f, 1.0f, coroutineElapsedTime / moveTime, easeFunction), 0.0f, 1.0f);
-                
-                if (!isDetectingLedge)
-                {
-                    SetVelocityX(velocityMultiplierOverTime * velocity, true);
-                }
+                SetVelocityX(velocityMultiplierOverTime * velocity, true);
             }
 
             if (coroutineElapsedTime > moveTime)
             {
-                if (easeFunction == Ease.Unset)
-                {
-                    SetVelocityX(0.0f, true);
-                }
                 yield break;
             }
             else

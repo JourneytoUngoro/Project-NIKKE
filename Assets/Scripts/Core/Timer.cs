@@ -11,7 +11,7 @@ public class Timer
 {
     public event Action timerAction;
 
-    private float duration;
+    public float duration { get; private set; }
     private float startTime;
     private float timeOffset;
 

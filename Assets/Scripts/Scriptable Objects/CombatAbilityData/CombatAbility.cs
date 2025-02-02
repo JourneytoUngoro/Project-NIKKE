@@ -12,7 +12,11 @@ public class CombatAbility : ScriptableObject
     [field: SerializeField] public string combatAbilityName { get; private set; } = "Default Combat Ability Name";
     [field: SerializeField] public ThreatLevel threatLevel { get; private set; } = ThreatLevel.øÁ;
     [field: SerializeField, TextArea] public string combatAbilityDescription { get; private set; } = "Default Combat Ability Description";
-    [field: SerializeField] public bool stance { get; private set; }
+    // TODO: Add stance logic
+    [field: SerializeField] public bool stanceWhenHit { get; private set; }
+    [field: SerializeField] public bool stanceWhenParried { get; private set; }
+    // TODO: Add dazed logic
+    [field: SerializeField] public bool getDazed { get; private set; }
     [field: SerializeReference] public List<CombatAbilityComponent> combatAbilityComponents { get; private set; }
     public Entity sourceEntity { get; set; }
 

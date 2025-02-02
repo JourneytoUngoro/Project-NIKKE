@@ -5,12 +5,12 @@ using UnityEngine;
 
 public class ReboundComponent : CombatAbilityComponent
 {
+    // TODO: Add Timer logic when rebounded
     [field: SerializeField] public Vector2 onGroundReboundDirection { get; private set; }
     [field: SerializeField] public float onGroundReboundVelocity { get; private set; }
     [field: SerializeField] public float onGroundReboundTime { get; private set; }
     [field: SerializeField] public Ease onGroundReboundEaseFunction { get; private set; }
-
-    [field: Header("")]
+    [field: Space(15f)]
     [field: SerializeField] public Vector2 inAirReboundDirection { get; private set; }
     [field: SerializeField] public float inAirReboundVelocity { get; private set; }
     [field: SerializeField] public float inAirReboundTime { get; private set; }

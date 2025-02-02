@@ -20,8 +20,8 @@ public class EnemyData : ScriptableObject
     public float minWaitTime = 3.0f;
     public float maxWaitTime = 5.0f;
 
-    [Header("Target InAggro Range State")]
-    public float keepDistanceOf = 5.0f;
+    [Header("Target In Aggro Range State")]
+    public float adequateDistance = 5.0f;
     public float haltPossibility;
     public float approachPossibility;
     public float retreatPossibility;

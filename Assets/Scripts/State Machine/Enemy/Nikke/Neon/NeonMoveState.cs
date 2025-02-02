@@ -21,11 +21,6 @@ public class NeonMoveState : EnemyMoveState
     public override void LogicUpdate()
     {
         base.LogicUpdate();
-
-        if (neon.rigidBody.velocity.y > epsilon)
-        {
-            Debug.Log("Cat");
-        }
     }
 
     public override void Enter()

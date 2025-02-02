@@ -35,6 +35,7 @@ public class ProjectileEditor : Editor
 
     private SerializedProperty timeStepValue;
     private SerializedProperty speedStepValue;
+    private SerializedProperty minSpeedValue;
     private SerializedProperty targetingSuccessDistance;
 
     private SerializedProperty combatAbility;
@@ -69,8 +70,9 @@ public class ProjectileEditor : Editor
         straightProjectileDirection = serializedObject.FindProperty("straightProjectileDirection");
         loseSpeedTime = serializedObject.FindProperty("loseSpeedTime");
 
-        timeStepValue = serializedObject.FindProperty("timeStepValue");
+        minSpeedValue = serializedObject.FindProperty("minSpeedValue");
         speedStepValue = serializedObject.FindProperty("speedStepValue");
+        timeStepValue = serializedObject.FindProperty("timeStepValue");
         targetingSuccessDistance = serializedObject.FindProperty("targetingSuccessDistance");
     }
 
@@ -92,7 +94,6 @@ public class ProjectileEditor : Editor
         switch (projectile.GetProjectileType())
         {
             case ProjectileType.Bazier:
-                EditorGUILayout.LabelField("Bazier Projectile Variables", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(pointAXOffsetBase, new GUIContent("Point A X Offset Base"));
                 EditorGUILayout.PropertyField(pointAXOffsetDeviation, new GUIContent("Point A X Offset Deviation"));
                 EditorGUILayout.PropertyField(pointAYOffsetBase, new GUIContent("Point A Y Offset Base"));
@@ -103,22 +104,20 @@ public class ProjectileEditor : Editor
                 EditorGUILayout.PropertyField(pointBYOffsetDeviation, new GUIContent("Point B Y Offset Deviation"));
                 break;
 
-            case ProjectileType.Targeting:
-                EditorGUILayout.LabelField("Targeting Projectile Variables", EditorStyles.boldLabel);
+            case ProjectileType.Follow:
                 EditorGUILayout.PropertyField(minStep, new GUIContent("Min Step"));
                 EditorGUILayout.PropertyField(maxStep, new GUIContent("Max Step"));
                 EditorGUILayout.PropertyField(timeToMaxStep, new GUIContent("Time To Max Step"));
                 break;
 
             case ProjectileType.Throw:
-                EditorGUILayout.LabelField("Throwing Projectile Variables", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(timeStepValue, new GUIContent("Time Step Value"));
+                EditorGUILayout.PropertyField(minSpeedValue, new GUIContent("Min Speed Value"));
                 EditorGUILayout.PropertyField(speedStepValue, new GUIContent("Speed Step Value"));
+                EditorGUILayout.PropertyField(timeStepValue, new GUIContent("Time Step Value"));
                 EditorGUILayout.PropertyField(targetingSuccessDistance, new GUIContent("Targeting Success Distance"));
                 break;
 
             case ProjectileType.Straight:
-                EditorGUILayout.LabelField("Straight Projectile Variables", EditorStyles.boldLabel);
                 EditorGUILayout.PropertyField(straightProjectileDirection, new GUIContent("Straight Projectile Direction"));
                 EditorGUILayout.PropertyField(loseSpeedTime, new GUIContent("Lose Speed Time"));
                 break;
@@ -128,12 +127,9 @@ public class ProjectileEditor : Editor
 
         if (projectile.overlapCollider.overlapBox)
         {
-            if (projectile.gameObject.GetComponent<BoxCollider2D>() == null)
-            {
-                BoxCollider2D boxCollider = projectile.gameObject.AddComponent<BoxCollider2D>();
-                boxCollider.size = projectile.overlapCollider.boxSize;
-                boxCollider.offset = projectile.overlapCollider.centerTransform.localPosition;
-            }
+            BoxCollider2D boxCollider = projectile.gameObject.GetComponent<BoxCollider2D>() != null ? projectile.gameObject.GetComponent<BoxCollider2D>() : projectile.gameObject.AddComponent<BoxCollider2D>();
+            boxCollider.size = projectile.overlapCollider.boxSize;
+            boxCollider.offset = projectile.overlapCollider.centerTransform.localPosition;
 
             if (projectile.gameObject.layer.Equals(LayerMask.NameToLayer("ImmediateProjectile")))
             {
@@ -151,12 +147,9 @@ public class ProjectileEditor : Editor
 
         if (projectile.overlapCollider.overlapCircle)
         {
-            if (projectile.gameObject.GetComponent<CircleCollider2D>() == null)
-            {
-                CircleCollider2D circleCollider = projectile.gameObject.AddComponent<CircleCollider2D>();
-                circleCollider.radius = projectile.overlapCollider.circleRadius;
-                circleCollider.offset = projectile.overlapCollider.centerTransform.localPosition;
-            }
+            CircleCollider2D boxCollider = projectile.gameObject.GetComponent<CircleCollider2D>() != null ? projectile.gameObject.GetComponent<CircleCollider2D>() : projectile.gameObject.AddComponent<CircleCollider2D>();
+            boxCollider.radius = projectile.overlapCollider.circleRadius;
+            boxCollider.offset = projectile.overlapCollider.centerTransform.localPosition;
 
             if (projectile.gameObject.layer.Equals(LayerMask.NameToLayer("ImmediateProjectile")))
             {

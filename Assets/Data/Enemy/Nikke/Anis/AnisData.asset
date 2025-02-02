@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48b35458bed393b4aacaeadf4e8c5903, type: 3}
+  m_Script: {fileID: 11500000, guid: 3758a63aa4635af4bb2a641071625861, type: 3}
   m_Name: AnisData
   m_EditorClassIdentifier: 
   baseHealth: 0
@@ -23,27 +23,34 @@ MonoBehaviour:
   canSmartPathFind: 0
   minWaitTime: 3
   maxWaitTime: 5
-  moveSpeed: 6
+  adequateDistance: 80
+  haltPossibility: 0.3
+  approachPossibility: 0.3
+  retreatPossibility: 0.7
+  shieldCoonDownTime: 0.5
+  minMovementOptionMaintainTime: 1
+  maxMovementOptionMaintainTime: 1.5
   totalTurnAmount: 4
   timeDelayforEachTurn: 1.5
   dazedTime: 2
   stunnedTime: 4
   stunnedKnockbackSpeed: 5
-  keepDistanceOf: 5
   nextWaypointDistance: 3
   pathUpdatePeriods: 0.5
   jumpHeightRequirement: 0.8
   maxMovementDistance: 10
   jumpSpeed: 10
   canvasDisableTime: 5
-  haltPossibility: 0
-  approachPossibility: 0
-  retreatPossibility: 0
-  shieldCoonDownTime: 0.5
-  minMovementOptionMaintainTime: 3
-  maxMovementOptionMaintainTime: 5
+  moveSpeed: 6
   moveTime: 0
   moveEaseFunction: 0
-  meleeAttackCoolDown: 0
-  rangedAttackCoolDown: 0
-  chargeAttackCoolDown: 0
+  minDistance: 60
+  meleeAttack0CoolDown: 1000
+  meleeAttack1CoolDown: 1000
+  meleeAttack2CoolDown: 1000
+  meleeAttack3CoolDown: 1000
+  rangedAttackCoolDown: 1000
+  rangedAttackHaltTime: 3
+  rangedAttackAfterShockTime: 2
+  rangedAttackTrajectoryLineSegmentCount: 0
+  closeRangedAttackCoolDown: 1000

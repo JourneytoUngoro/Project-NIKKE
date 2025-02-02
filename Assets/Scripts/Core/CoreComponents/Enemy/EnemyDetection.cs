@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class EnemyDetection : Detection
 {
-    [SerializeField] private LayerMask whatIsChaseTarget;
-    [SerializeField] private LayerMask whatIsAlertTarget;
+    [field: SerializeField] public LayerMask whatIsChaseTarget { get; private set; }
+    [field: SerializeField] public LayerMask whatIsAlertTarget { get; private set; }
 
     #region Check Transform
     [SerializeField] protected OverlapCollider detectionRange;
@@ -20,7 +20,6 @@ public class EnemyDetection : Detection
     #endregion
 
     #region Other Variables
-    public Entity currentTarget { get; private set; }
     public Vector2 currentTargetLastVelocity { get; private set; }
     public Vector2 currentTargetLastPosition { get; private set; }
     private Enemy enemy;
@@ -49,6 +48,7 @@ public class EnemyDetection : Detection
         return Physics2D.Raycast(jumpCheckTransform.position, transform.right, jumpCheckDistance - 1, whatIsGround);
     }
 
+    // TODO: 시야 장애물 정보
     public bool isTargetInDetectionRange()
     {
         Collider2D[] detectionRangeColliders = new Collider2D[0];
@@ -64,6 +64,13 @@ public class EnemyDetection : Detection
 
         Entity[] detectionRangeEntities = detectionRangeColliders.Select(collider => collider.GetComponent<Entity>()).ToArray();
 
+        if (detectionRange.limitAngle)
+        {
+            int multiplier = enemy.transform.rotation.y == 0 ? 1 : -1;
+            Vector2 baseVector = enemy.transform.right.Rotate(multiplier * detectionRange.centerRotation * Mathf.Deg2Rad);
+            detectionRangeEntities = detectionRangeEntities.Where(collider => enemy.combat.CheckWithinAngle(baseVector, collider.transform.position - enemy.transform.position, detectionRange.counterClockwiseAngle, detectionRange.clockwiseAngle)).ToArray();
+        }
+
         if (currentTarget == null)
         {
             currentTarget = detectionRangeEntities.OrderBy(entity => Vector3.SqrMagnitude(entity.transform.position - enemy.transform.position)).FirstOrDefault();
@@ -76,6 +83,7 @@ public class EnemyDetection : Detection
         }
     }
 
+    // TODO: 시야 장애물 정보
     public bool isTargetInAggroRange(bool exclusive)
     {
         if (currentTarget != null)
@@ -92,6 +100,14 @@ public class EnemyDetection : Detection
             }
 
             Entity[] aggroRangeEntities = aggroRangeColliders.Select(collider => collider.GetComponent<Entity>()).ToArray();
+
+            if (aggroRange.limitAngle)
+            {
+                int multiplier = enemy.transform.rotation.y == 0 ? 1 : -1;
+                Vector2 baseVector = enemy.transform.right.Rotate(multiplier * aggroRange.centerRotation * Mathf.Deg2Rad);
+                Debug.Log("BaseVector: " + baseVector);
+                aggroRangeEntities = aggroRangeEntities.Where(collider => enemy.combat.CheckWithinAngle(baseVector, collider.transform.position - enemy.transform.position, aggroRange.counterClockwiseAngle, aggroRange.clockwiseAngle)).ToArray();
+            }
 
             if (exclusive)
             {

@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: AnisCloseRangedAttack
   m_EditorClassIdentifier: 
   <combatAbilityIcon>k__BackingField: {fileID: 0}
-  <combatAbilityName>k__BackingField: Default Combat Ability Name
+  <combatAbilityName>k__BackingField: AnisCloseRangedAttack
   <threatLevel>k__BackingField: 0
   <combatAbilityDescription>k__BackingField: Default Combat Ability Description
-  <stance>k__BackingField: 0
+  <stanceWhenHit>k__BackingField: 0
+  <stanceWhenParried>k__BackingField: 0
+  <getDazed>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
-  - rid: 8834776407601053704
   - rid: 8834776407601053705
+  - rid: 8834776407601053704
   references:
     version: 2
     RefIds:
@@ -27,10 +29,10 @@ MonoBehaviour:
       type: {class: ReboundComponent, ns: , asm: Assembly-CSharp}
       data:
         name: ReboundComponent
-        <onGroundReboundDirection>k__BackingField: {x: 0, y: 0}
-        <onGroundReboundVelocity>k__BackingField: 0
-        <onGroundReboundTime>k__BackingField: 0
-        <onGroundReboundEaseFunction>k__BackingField: 0
+        <onGroundReboundDirection>k__BackingField: {x: -1, y: 0}
+        <onGroundReboundVelocity>k__BackingField: 30
+        <onGroundReboundTime>k__BackingField: 0.5
+        <onGroundReboundEaseFunction>k__BackingField: 6
         <inAirReboundDirection>k__BackingField: {x: 0, y: 0}
         <inAirReboundVelocity>k__BackingField: 0
         <inAirReboundTime>k__BackingField: 0
@@ -40,5 +42,10 @@ MonoBehaviour:
       data:
         name: ProjectileComponent
         <projectilePrefab>k__BackingField: {fileID: 36883682827735118, guid: 42659073cc02eaa4ca634e71dadee599, type: 3}
-        <checkProjectileRoute>k__BackingField: 1
+        <singleTarget>k__BackingField: 1
+        <multipleTarget>k__BackingField: 0
+        <identicalTargetHit>k__BackingField: 0
+        <targetTypePriority>k__BackingField: 0
+        <targetTypePriorities>k__BackingField: 
+        <checkProjectileRoute>k__BackingField: 0
         <autoManualDirection>k__BackingField: 0

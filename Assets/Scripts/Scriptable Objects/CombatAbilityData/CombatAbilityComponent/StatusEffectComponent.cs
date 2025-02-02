@@ -22,7 +22,7 @@ public class StatusEffectComponent : CombatAbilityComponent
         {
             if (statusEffects.HasFlag(statusEffect))
             {
-                // target.entityStats.statusEffects[currentStatusEffect].IncreaseCurrentValue(statusEffectValues[currentStatusEffect]);
+                target.entityStats.statusEffects[currentStatusEffect].IncreaseCurrentValue(statusEffectValues[currentStatusEffect]);
             }
             currentStatusEffect += 1;
         }

@@ -72,7 +72,7 @@ public class SceneTransitionManager : MonoBehaviour, IDataPersistance
             }
             else
             {
-                loadingBarText.text = "Game Tips | " + UtilityFunctions.GetRandom<List<string>, string>(loadingText);
+                loadingBarText.text = "Game Tips | " + loadingText.GetRandom();
                 isFadingOut = false;
                 elapsedTime = 0.0f;
             }

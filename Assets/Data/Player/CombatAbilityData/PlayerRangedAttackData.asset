@@ -16,7 +16,9 @@ MonoBehaviour:
   <combatAbilityName>k__BackingField: Player Ranged Attack
   <threatLevel>k__BackingField: 0
   <combatAbilityDescription>k__BackingField: Default Combat Ability Description
-  <stance>k__BackingField: 0
+  <stanceWhenHit>k__BackingField: 0
+  <stanceWhenParried>k__BackingField: 0
+  <getDazed>k__BackingField: 0
   <combatAbilityComponents>k__BackingField:
   - rid: 4117704226213724160
   references:
@@ -27,5 +29,10 @@ MonoBehaviour:
       data:
         name: ProjectileComponent
         <projectilePrefab>k__BackingField: {fileID: 4157372511663418700, guid: 62489159888706045ba30789b07b0ab9, type: 3}
+        <singleTarget>k__BackingField: 0
+        <multipleTarget>k__BackingField: 0
+        <identicalTargetHit>k__BackingField: 1
+        <targetTypePriority>k__BackingField: 0
+        <targetTypePriorities>k__BackingField: 
         <checkProjectileRoute>k__BackingField: 0
         <autoManualDirection>k__BackingField: 0

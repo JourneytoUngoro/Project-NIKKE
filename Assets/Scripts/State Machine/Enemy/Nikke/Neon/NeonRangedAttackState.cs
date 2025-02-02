@@ -23,11 +23,6 @@ public class NeonRangedAttackState : EnemyAttackState
 
         if (!onStateExit)
         {
-            if (isDetectingLedgeFront)
-            {
-                isAbilityDone = true;
-            }
-
             RigidBodyController(false);
         }
     }

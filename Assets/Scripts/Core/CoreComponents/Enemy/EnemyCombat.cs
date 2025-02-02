@@ -89,11 +89,11 @@ public class EnemyCombat : Combat
 
     protected override void ChangeToKnockbackState(KnockbackComponent knockbackComponent, bool isGrounded)
     {
-        if (knockbackComponent.isKnockbackDifferentInAir)
+        if (knockbackComponent.isKnockbackDifferentWhenAerial)
         {
             if (!isGrounded)
             {
-                enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTimeInAir);
+                enemy.knockbackState.knockbackTimer.ChangeDuration(knockbackComponent.knockbackTimeWhenAerial);
             }
             else
             {

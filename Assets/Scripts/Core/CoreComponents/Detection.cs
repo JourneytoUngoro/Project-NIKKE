@@ -28,11 +28,12 @@ public class Detection : CoreComponent
     #endregion
 
     #region Other Variables
+    public Entity currentTarget { get; protected set; }
     public Collider2D currentPlatform { get; private set; }
     public Collider2D lastPlatform { get; private set; }
     public Collider2D detectedPlatform { get; private set; }
+    public List<Collider2D> groundedExceptions { get; private set; } = new List<Collider2D>();
     public Vector2 slopePerpNormal { get; protected set; } // Above Vector2 always represents the slope's angle to where player is facing.
-    public List<Collider2D> groundedExceptions { get; protected set; } = new List<Collider2D>();
     protected float slopeDownAngle; // 해당 Vector2는 시계 반대 방향으로 언덕의 각을 표시한다. 즉, 항상 왼쪽을 바라보고 있다는 말이다.
     #endregion
 
@@ -47,8 +48,15 @@ public class Detection : CoreComponent
 
             if (currentPlatform != null && currentPlatform.CompareTag("OneWayPlatform"))
             {
-                Debug.Log("OneWayPlatform Y Position: " + currentPlatform.transform.position.y + currentPlatform.bounds.extents.y + ", entityCollider Min Y Position: " + entity.entityCollider.bounds.min.y);
-                return entity.entityCollider.bounds.min.y >= currentPlatform.transform.position.y + currentPlatform.offset.y;
+                if (entity.entityCollider.bounds.min.y > currentPlatform.transform.position.y)
+                {
+                    Physics2D.IgnoreCollision(currentPlatform, entity.entityCollider, false);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -62,7 +70,15 @@ public class Detection : CoreComponent
 
             if (currentPlatform != null && currentPlatform.CompareTag("OneWayPlatform"))
             {
-                return entity.transform.position.y > currentPlatform.transform.position.y + currentPlatform.offset.y;
+                if (entity.entityCollider.bounds.min.y > currentPlatform.transform.position.y + currentPlatform.bounds.extents.y)
+                {
+                    Physics2D.IgnoreCollision(currentPlatform, entity.entityCollider, false);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {

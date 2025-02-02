@@ -73,6 +73,11 @@ public class NeonChargeAttackState : EnemyAttackState
         {
             if (isGrounded)
             {
+                if (isDetectingLedgeFront)
+                {
+                    isAbilityDone = true;
+                }
+
                 if (isOnSlope)
                 {
                     enemy.rigidBody.gravityScale = 0.0f;

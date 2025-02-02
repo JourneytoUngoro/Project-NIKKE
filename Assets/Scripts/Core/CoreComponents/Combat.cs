@@ -4,10 +4,6 @@ using UnityEngine;
 using System.Linq;
 using System.Reflection;
 using DG.Tweening;
-using static Unity.Burst.Intrinsics.Arm;
-
-/* Incomplete */
-/* Needs to be optimized and improved */
 
 public abstract class Combat : CoreComponent
 {
@@ -47,14 +43,14 @@ public abstract class Combat : CoreComponent
                         Projectile projectile = projectileComponent.projectilePrefab.GetComponent<Projectile>();
                         Explosion explosion = projectileComponent.projectilePrefab.GetComponent<Explosion>();
 
-                        if (projectile != null)
+                        if (projectile != null && projectile.combatAbility != null)
                         {
                             projectile.combatAbility.sourceEntity = entity;
                         }
                         
                         if (explosion != null)
                         {
-                            foreach (CombatAbilityWithTransforms explosionArea in explosion.explosionAreas)
+                            foreach (CombatAbilityWithTransforms explosionArea in explosion.combatAbilityWithTransformsList)
                             {
                                 explosionArea.combatAbilityData.sourceEntity = entity;
                             }
@@ -239,20 +235,20 @@ public abstract class Combat : CoreComponent
                 entity.animator.SetInteger("parryType", UtilityFunctions.RandomInteger(0, 3));
                 entity.animator.SetTrigger("parried");
                 
-                if (knockbackComponent.isParriedKnockbackDifferentInAir)
+                if (knockbackComponent.isKnockbackDifferentWhenAerialParried)
                 {
                     if (!isGrounded)
                     {
-                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenParriedInAir.normalized.x * direction * knockbackComponent.knockbackSpeedWhenParriedInAir, knockbackComponent.knockbackTimeWhenParriedInAir, knockbackComponent.easeFunctionWhenParriedInAir, true);
-                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenParriedInAir.normalized.y * knockbackComponent.knockbackSpeedWhenParriedInAir);
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerialParried.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerialParried, knockbackComponent.knockbackTimeWhenAerialParried, knockbackComponent.easeFunctionWhenAerialParried, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerialParried.normalized.y * knockbackComponent.knockbackSpeedWhenAerialParried);
                         
-                        if (!knockbackComponent.pertainedCombatAbility.stance)
+                        if (!knockbackComponent.pertainedCombatAbility.stanceWhenParried)
                         {
                             sourceEntity.animator.SetTrigger("wasParried");
-                            sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenParriedInAir);
+                            sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenAerialParried);
 
-                            sourceEntity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.counterKnockbackDirectionWhenParriedInAir.normalized.x * direction * knockbackComponent.counterKnockbackSpeedWhenParriedInAir, knockbackComponent.counterKnockbackTimeWhenParriedInAir, knockbackComponent.counterEaseFunctionWhenParriedInAir, true);
-                            sourceEntity.entityMovement.SetVelocityY(knockbackComponent.counterKnockbackDirectionWhenParriedInAir.normalized.y * knockbackComponent.counterKnockbackSpeedWhenParriedInAir);
+                            sourceEntity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.counterKnockbackDirectionWhenAerialParried.normalized.x * direction * knockbackComponent.counterKnockbackSpeedWhenAerialParried, knockbackComponent.counterKnockbackTimeWhenAerialParried, knockbackComponent.counterEaseFunctionWhenAerialParried, true);
+                            sourceEntity.entityMovement.SetVelocityY(knockbackComponent.counterKnockbackDirectionWhenAerialParried.normalized.y * knockbackComponent.counterKnockbackSpeedWhenAerialParried);
                         }
                     }
                     else
@@ -260,7 +256,7 @@ public abstract class Combat : CoreComponent
                         entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenParried.normalized.x * direction * knockbackComponent.knockbackSpeedWhenParried, knockbackComponent.knockbackTimeWhenParried, knockbackComponent.easeFunctionWhenParried, true);
                         entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenParried.normalized.y * knockbackComponent.knockbackSpeedWhenParried);
 
-                        if (!knockbackComponent.pertainedCombatAbility.stance)
+                        if (!knockbackComponent.pertainedCombatAbility.stanceWhenParried)
                         {
                             sourceEntity.animator.SetTrigger("wasParried");
                             sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenParried);
@@ -275,7 +271,7 @@ public abstract class Combat : CoreComponent
                     entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenParried.normalized.x * direction * knockbackComponent.knockbackSpeedWhenParried, knockbackComponent.knockbackTimeWhenParried, knockbackComponent.easeFunctionWhenParried, true);
                     entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenParried.normalized.y * knockbackComponent.knockbackSpeedWhenParried);
 
-                    if (!knockbackComponent.pertainedCombatAbility.stance)
+                    if (!knockbackComponent.pertainedCombatAbility.stanceWhenParried)
                     {
                         sourceEntity.animator.SetTrigger("wasParried");
                         sourceEntity.entityCombat.ChangeToKnockbackState(knockbackComponent.knockbackTimeWhenParried);
@@ -293,12 +289,12 @@ public abstract class Combat : CoreComponent
                     {
                         entity.animator.SetTrigger("shielded");
 
-                        if (knockbackComponent.isShieldedKnockbackDifferentInAir)
+                        if (knockbackComponent.isKnockbackDifferentWhenAerialShielded)
                         {
                             if (!isGrounded)
                             {
-                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShieldedInAir, knockbackComponent.knockbackTimeWhenShieldedInAir, knockbackComponent.easeFunctionWhenShieldedInAir, true);
-                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.y * knockbackComponent.knockbackSpeedWhenShieldedInAir);
+                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerialShielded.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerialShielded, knockbackComponent.knockbackTimeWhenAerialShielded, knockbackComponent.easeFunctionWhenAerialShielded, true);
+                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerialShielded.normalized.y * knockbackComponent.knockbackSpeedWhenAerialShielded);
                             }
                             else
                             {
@@ -317,12 +313,12 @@ public abstract class Combat : CoreComponent
                         entity.animator.SetTrigger("gotHit");
                         ChangeToKnockbackState(knockbackComponent, isGrounded);
 
-                        if (knockbackComponent.isKnockbackDifferentInAir)
+                        if (knockbackComponent.isKnockbackDifferentWhenAerial)
                         {
                             if (!isGrounded)
                             {
-                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
-                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerial.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerial, knockbackComponent.knockbackTimeWhenAerial, knockbackComponent.easeFunctionWhenAerial, true);
+                                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerial.normalized.y * knockbackComponent.knockbackSpeedWhenAerial);
                             }
                             else
                             {
@@ -342,12 +338,12 @@ public abstract class Combat : CoreComponent
                     entity.animator.SetTrigger("gotHit");
                     ChangeToKnockbackState(knockbackComponent, isGrounded);
 
-                    if (knockbackComponent.isKnockbackDifferentInAir)
+                    if (knockbackComponent.isKnockbackDifferentWhenAerial)
                     {
                         if (!isGrounded)
                         {
-                            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
-                            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                            entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerial.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerial, knockbackComponent.knockbackTimeWhenAerial, knockbackComponent.easeFunctionWhenAerial, true);
+                            entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerial.normalized.y * knockbackComponent.knockbackSpeedWhenAerial);
                         }
                         else
                         {
@@ -369,12 +365,12 @@ public abstract class Combat : CoreComponent
             {
                 entity.animator.SetTrigger("shielded");
 
-                if (knockbackComponent.isShieldedKnockbackDifferentInAir)
+                if (knockbackComponent.isKnockbackDifferentWhenAerialShielded)
                 {
                     if (!isGrounded)
                     {
-                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.x * direction * knockbackComponent.knockbackSpeedWhenShieldedInAir, knockbackComponent.knockbackTimeWhenShieldedInAir, knockbackComponent.easeFunctionWhenShieldedInAir, true);
-                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenShieldedInAir.normalized.y * knockbackComponent.knockbackSpeedWhenShieldedInAir);
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerialShielded.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerialShielded, knockbackComponent.knockbackTimeWhenAerialShielded, knockbackComponent.easeFunctionWhenAerialShielded, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerialShielded.normalized.y * knockbackComponent.knockbackSpeedWhenAerialShielded);
                     }
                     else
                     {
@@ -393,12 +389,12 @@ public abstract class Combat : CoreComponent
                 entity.animator.SetTrigger("gotHit");
                 ChangeToKnockbackState(knockbackComponent, isGrounded);
 
-                if (knockbackComponent.isKnockbackDifferentInAir)
+                if (knockbackComponent.isKnockbackDifferentWhenAerial)
                 {
                     if (!isGrounded)
                     {
-                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
-                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                        entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerial.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerial, knockbackComponent.knockbackTimeWhenAerial, knockbackComponent.easeFunctionWhenAerial, true);
+                        entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerial.normalized.y * knockbackComponent.knockbackSpeedWhenAerial);
                     }
                     else
                     {
@@ -418,12 +414,12 @@ public abstract class Combat : CoreComponent
             entity.animator.SetTrigger("gotHit");
             ChangeToKnockbackState(knockbackComponent, isGrounded);
 
-            if (knockbackComponent.isKnockbackDifferentInAir)
+            if (knockbackComponent.isKnockbackDifferentWhenAerial)
             {
                 if (!isGrounded)
                 {
-                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionInAir.normalized.x * direction * knockbackComponent.knockbackSpeedInAir, knockbackComponent.knockbackTimeInAir, knockbackComponent.easeFunctionInAir, true);
-                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionInAir.normalized.y * knockbackComponent.knockbackSpeedInAir);
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirectionWhenAerial.normalized.x * direction * knockbackComponent.knockbackSpeedWhenAerial, knockbackComponent.knockbackTimeWhenAerial, knockbackComponent.easeFunctionWhenAerial, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirectionWhenAerial.normalized.y * knockbackComponent.knockbackSpeedWhenAerial);
                 }
                 else
                 {
@@ -433,8 +429,17 @@ public abstract class Combat : CoreComponent
             }
             else
             {
-                entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
-                entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                if (knockbackComponent.directionBase == DirectionBase.Relative)
+                {
+                    Vector2 knockbackDirection = entity.transform.position - knockbackComponent.knockbackSourceTransform.position;
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackDirection.normalized.x * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                    entity.entityMovement.SetVelocityY(knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                }
+                else
+                {
+                    entity.entityMovement.SetVelocityXChangeOverTime(knockbackComponent.knockbackDirection.normalized.x * direction * knockbackComponent.knockbackSpeed, knockbackComponent.knockbackTime, knockbackComponent.easeFunction, true);
+                    entity.entityMovement.SetVelocityY(knockbackComponent.knockbackDirection.normalized.y * knockbackComponent.knockbackSpeed);
+                }
             }
         }
     }
@@ -448,6 +453,7 @@ public abstract class Combat : CoreComponent
         entity.entityMovement.SetVelocityY(reboundDirection.normalized.y * reboundVelocity);
     }
 
+    // TODO: 진짜로 각도 제대로 적용되고 있는거 맞나?
     protected bool IsParrying(Entity sourceEntity, OverlapCollider[] overlapColliders)
     {
         bool isParrying = false;
@@ -594,71 +600,6 @@ public abstract class Combat : CoreComponent
     {
         Debug.Log($"Clear damagedTargets");
         damagedTargets.Clear();
-    }
-
-    public Vector2? CalculateProjectileAngle(Vector2 projectileFirePosition, Vector2 targetPosition, float projectileSpeed, float projectileGravityScale)
-    {
-        float distance = Vector2.Distance(projectileFirePosition, targetPosition);
-        float gravityAccelaration = Mathf.Abs(Physics2D.gravity.y * projectileGravityScale);
-        float xDifference = targetPosition.x - projectileFirePosition.x;
-        float yDifference = targetPosition.y - projectileFirePosition.y;
-        float speedSquare = Mathf.Pow(projectileSpeed, 2);
-        float rootUnderValue = Mathf.Pow(speedSquare, 2) - gravityAccelaration * (gravityAccelaration * Mathf.Pow(xDifference, 2) + 2 * yDifference * speedSquare);
-        if (rootUnderValue >= 0.0f)
-        {
-            float lowAngle = Mathf.Atan2(speedSquare - Mathf.Sqrt(rootUnderValue), gravityAccelaration * xDifference);
-            float highAngle = Mathf.Atan2(speedSquare + Mathf.Sqrt(rootUnderValue), gravityAccelaration * xDifference);
-            Vector2 highAngleVector = new Vector2(Mathf.Cos(highAngle), Mathf.Sin(highAngle));
-            Vector2 lowAngleVector = new Vector2(Mathf.Cos(lowAngle), Mathf.Sin(lowAngle));
-
-            if (CheckProjectileRoute(projectileFirePosition, targetPosition, projectileSpeed * lowAngleVector))
-            {
-                return lowAngleVector;
-            }
-            else
-            {
-                if (CheckProjectileRoute(projectileFirePosition, targetPosition, projectileSpeed * highAngleVector))
-                {
-                    return highAngleVector;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-        else return null;
-    }
-
-    private bool CheckProjectileRoute(Vector2 projectileFirePosition, Vector2 targetPosition, Vector2 projectileVelocity)
-    {
-        float distance = Vector2.Distance(projectileFirePosition, targetPosition);
-        float xDifference = targetPosition.x - projectileFirePosition.x;
-        float expectedTravelDuration = xDifference / projectileVelocity.x;
-        float timeStep = expectedTravelDuration / 20.0f;
-
-        Vector2 prevPosition;
-        Vector2 currentPosition = projectileFirePosition;
-        for (int i = 0; i < 20; i++)
-        {
-            float timeElapsed = timeStep * i;
-            Vector2 movementVector = new Vector2(projectileVelocity.x * timeElapsed, projectileVelocity.y * timeElapsed + 0.5f * Physics2D.gravity.y * Mathf.Pow(timeElapsed, 2));
-            prevPosition = currentPosition;
-            currentPosition = movementVector + projectileFirePosition;
-
-            if (Physics2D.Raycast(prevPosition, currentPosition - prevPosition, Vector2.Distance(currentPosition, prevPosition), entity.entityDetection.whatIsGround))
-            {
-                if (Vector2.Distance(currentPosition, targetPosition) < distance * 0.2f)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     public void ReleaseShieldParryPrefabs(CombatAbility pertainedCombatAbility)

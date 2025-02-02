@@ -75,7 +75,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 269034865
-  m_SortingLayer: 6
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_Sprite: {fileID: 1692882706, guid: f5451398241fd6243845613070af5b17, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -121,10 +121,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fa16182d109446439f126e6249855aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  knockbackSourceTransform: {fileID: 0}
   whatIsDamageable:
     serializedVersion: 2
     m_Bits: 2056
-  <explosionAreas>k__BackingField:
+  <combatAbilityWithTransformsList>k__BackingField:
   - <visualize>k__BackingField: 1
     <overlapColliders>k__BackingField:
     - <centerTransform>k__BackingField: {fileID: 7009283391028733580}
@@ -143,7 +144,7 @@ MonoBehaviour:
     - <centerTransform>k__BackingField: {fileID: 6001410161227149259}
       <overlapBox>k__BackingField: 1
       <overlapCircle>k__BackingField: 0
-      <boxSize>k__BackingField: {x: 14, y: 6}
+      <boxSize>k__BackingField: {x: 15, y: 6}
       <boxRotation>k__BackingField: 0
       <circleRadius>k__BackingField: 0
       <limitAngle>k__BackingField: 0
